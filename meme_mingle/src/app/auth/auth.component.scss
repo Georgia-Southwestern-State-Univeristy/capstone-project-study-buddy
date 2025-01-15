@@ -1,0 +1,10 @@
+.circle-container {
+    position: relative;
+    height: 100vh;
+    overflow: hidden; /* Ensures no overflow from the circles */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #121212; /* Background similar to your example */
+  }
+  
