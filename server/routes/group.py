@@ -124,3 +124,71 @@ def join_group():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+
+@groups_routes.route("/groups/retrieve", methods=["GET"])
+def retrieve_groups():
+    """
+    Retrieve a list of study groups with optional pagination and filtering.
+    
+    Query Parameters:
+      - page: (int) Page number (default is 1)
+      - limit: (int) Number of groups per page (default is 10)
+      - privacy: (str) Filter by privacy setting (e.g., 'public' or 'private')
+      - name: (str) Partial name to search (case-insensitive)
+      - topic: (str) Filter groups that include a specific topic
+    """
+    try:
+        # 1. Connect to the database
+        client = MongoDBClient.get_client()
+        db = client[MongoDBClient.get_db_name()]
+        
+        # 2. Build the query filter from URL query parameters
+        query = {}
+        privacy = request.args.get("privacy")
+        if privacy:
+            query["privacy"] = privacy
+
+        name = request.args.get("name")
+        if name:
+            # Use a case-insensitive regex for partial name matching
+            query["name"] = {"$regex": name, "$options": "i"}
+        
+        topic = request.args.get("topic")
+        if topic:
+            # Find groups where the topics array contains the provided topic
+            query["topics"] = {"$in": [topic]}
+        
+        # 3. Handle pagination: page & limit (default values provided)
+        page = int(request.args.get("page", 1))
+        limit = int(request.args.get("limit", 10))
+        skip = (page - 1) * limit
+        
+        # 4. Query the database for groups matching the filter
+        groups_cursor = db["study_groups"].find(query).skip(skip).limit(limit)
+        groups_list = list(groups_cursor)
+        
+        # 5. Optionally count total matching documents (for pagination metadata)
+        total = db["study_groups"].count_documents(query)
+        
+        # 6. Convert each group document to a dict using the StudyGroup model 
+        #    (this applies any json_encoders, e.g., ObjectId to str)
+        groups = []
+        for group_doc in groups_list:
+            group = StudyGroup.parse_obj(group_doc)
+            groups.append(group.dict())
+        
+        # 7. Return the list along with pagination metadata
+        return jsonify({
+            "message": "Groups retrieved successfully",
+            "data": groups,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
