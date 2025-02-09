@@ -1,0 +1,46 @@
+/* src/app/main/study-group/join-group/join-group.component.scss */
+
+// GSW College theme variables (adjust these colors to match the official palette)
+$gsw-primary: #003366;   // Deep blue (primary color)
+$gsw-border: #e0e0e0;     // Light border color
+
+// Container styling for centering and width
+.container {
+  max-width: 600px;
+  margin: 2rem auto;
+}
+
+// Card styling to create a modern, collegiate look
+.gsw-card {
+  border: 1px solid $gsw-border;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+// Card header with the GSW primary color and white text
+.gsw-card-header {
+  background: $gsw-primary;
+  color: #fff;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+
+  h2 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+}
+
+// Card body padding for content
+.card-body {
+  padding: 1rem;
+}
+
+// Alert styling for messages
+.alert {
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}

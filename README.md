@@ -1,5 +1,5 @@
 
-**Study-Buddy** is an innovative, voice-activated conversational AI mentor designed to make studying engaging, interactive, and effective for users aged 5 to 20. Leveraging the power of **GitHub Copilot** and **Microsoft Azure**, Study-Buddy integrates advanced AI functionalities to provide personalized learning experiences, fostering a love for learning through humor and interactive assistance.
+**Study-Buddy** is an innovative, voice-activated conversational AI mentor designed to make studying engaging, interactive, and effective for users aged 15 to 25. Leveraging the power of **GitHub Copilot** and **Microsoft Azure**, Study-Buddy integrates advanced AI functionalities to provide personalized learning experiences, fostering a love for learning through humor and interactive assistance.
 
 ---
 
