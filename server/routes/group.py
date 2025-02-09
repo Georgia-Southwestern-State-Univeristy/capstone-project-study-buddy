@@ -70,7 +70,6 @@ def create_group():
 
 
 @groups_routes.route("/groups/join", methods=["POST"])
-# @jwt_required()  # Uncomment if you want only authenticated users
 def join_group():
     """
     Join an existing study group by group_id (and optionally an invite code).
@@ -82,7 +81,6 @@ def join_group():
         # 1. Extract necessary fields
         group_id = data.get("group_id")
         user_id = data.get("user_id")  # or get_jwt_identity() if using JWT
-        #invite_code = data.get("invite_code")  # Optional, only if you have an invite system
 
         if not group_id:
             return jsonify({"error": "group_id is required"}), 400
@@ -98,15 +96,10 @@ def join_group():
         client = MongoDBClient.get_client()
         db = client[MongoDBClient.get_db_name()]
 
-        # 4. Find the group by its _id
-        group = db["study_groups"].find_one({"_id": ObjectId(group_id)})
+        # 4. Find the group by its _id (using the string id)
+        group = db["study_groups"].find_one({"_id": group_id})
         if not group:
             return jsonify({"error": f"Group with ID '{group_id}' does not exist"}), 404
-
-        # Optional: Validate the invite code, if your groups have such a field
-        # For example, if there's a 'invite_code' field in the group doc:
-        # if group.get("invite_code") and invite_code != group["invite_code"]:
-        #     return jsonify({"error": "Invalid invite code"}), 400
 
         # 5. Check if user is already a member
         if user_id in group.get("members", []):
@@ -114,7 +107,7 @@ def join_group():
 
         # 6. Add user to the group's 'members' list
         db["study_groups"].update_one(
-            {"_id": ObjectId(group_id)},
+            {"_id": group_id},
             {"$addToSet": {"members": user_id}}  # $addToSet prevents duplicates
         )
 
@@ -124,6 +117,7 @@ def join_group():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
     
 
 

@@ -34,6 +34,13 @@ export const main_routes: Routes = [
       },
       
       
+      {
+        path:'study-group',
+        loadChildren: () =>
+          import('./study-group/study-group.routes').then((m) => m.StudyGroup_routes),
+      },
+      
+      
     ],
   },
 ];

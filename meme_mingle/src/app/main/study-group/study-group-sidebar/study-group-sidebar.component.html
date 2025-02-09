@@ -1,0 +1,66 @@
+<!-- src/app/main/study-group/study-group-sidebar/study-group-sidebar.component.html -->
+
+<div class="group-sidebar" [ngClass]="{ 'collapsed': !sidebarVisible }">
+  <!-- Row 1: Header Text -->
+  <div class="header">
+    <h3>Study Groups</h3>
+  </div>
+
+  <!-- Row 2: Icons -->
+  <div class="header-actions">
+    <!-- Collapse / Expand Button -->
+    <button
+      type="button"
+      class="collapse-btn"
+      aria-label="Toggle Sidebar"
+      (click)="toggleSidebar()"
+      title="Toggle Sidebar"
+    >
+      {{ toggleIcon }} <!-- "<" when expanded, ">" when collapsed -->
+    </button>
+
+    <!-- Create New Group Button -->
+    <button
+      class="icon-button create-button"
+      routerLink="/main/study-group/create-group"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <i class="bi bi-plus-lg"></i>
+    </button>
+  </div>
+
+  <!-- Content / Group List -->
+  <div class="group-list">
+    <div *ngIf="loading" class="loading">Loading groups...</div>
+    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+    <ul>
+      <li *ngFor="let group of groups" class="group-item">
+        <div class="group-icon">
+          <img
+            *ngIf="group.image_url; else defaultImage"
+            [src]="group.image_url"
+            alt="Group Image"
+          />
+          <ng-template #defaultImage>
+            <div class="default-icon">
+              {{ group.name.charAt(0) }}
+            </div>
+          </ng-template>
+        </div>
+        <!-- Only show group info if expanded -->
+        <div class="group-info">
+          <h4 class="group-name">{{ group.name }}</h4>
+          <p class="group-description">{{ group.description }}</p>
+        </div>
+        <button 
+        class="join-button" 
+        *ngIf="!group.members?.includes(userId)"
+        (click)="joinGroup(group)"
+      >
+        Join
+      </button>
+      </li>
+    </ul>
+  </div>
+</div>
