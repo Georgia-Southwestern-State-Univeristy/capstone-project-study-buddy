@@ -39,6 +39,7 @@
    margin: 10px; // Margin to separate from other components
    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); // Inner shadow for depth
    position: relative;
+   
  
    /* Overlay Styles */
    .custom-overlay {
@@ -52,7 +53,8 @@
     top: 0;
     left: 0;
     z-index: 10; 
-    overflow: auto; 
+    overflow: auto;
+    border-radius: $border-radius; 
 
   .custom-overlay-content {
     background: #3a3a3a; // Slightly lighter than main background

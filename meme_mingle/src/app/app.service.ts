@@ -133,6 +133,21 @@ export class AppService {
     return !!localStorage.getItem('access_token');
   }
 
+  // Create Group
+  createGroup(groupData: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/groups/create`, groupData);
+  }
+
+  // Join an existing group
+  joinGroup(payload: { group_id: string; user_id: string }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/groups/join`, payload);
+  } 
+
+  //get groups
+  getGroups(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/groups/retrieve`);
+  }
+
   // Optional: Method to log out the user
   signOut() {
     localStorage.removeItem('access_token');

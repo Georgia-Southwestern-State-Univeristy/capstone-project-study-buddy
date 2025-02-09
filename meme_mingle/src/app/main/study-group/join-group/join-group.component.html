@@ -1,0 +1,20 @@
+<!-- src/app/main/study-group/join-group/join-group.component.html -->
+<div class="container mt-5">
+    <div class="card gsw-card">
+      <div class="card-header gsw-card-header text-center">
+        <h2>Join Group</h2>
+      </div>
+      <div class="card-body">
+        <div *ngIf="loading" class="alert alert-info">
+          Joining group...
+        </div>
+        <div *ngIf="message" class="alert alert-success">
+          {{ message }}
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
+      </div>
+    </div>
+  </div>
+  

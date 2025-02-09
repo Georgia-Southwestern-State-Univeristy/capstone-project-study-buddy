@@ -18,7 +18,7 @@ class EducationalPlan(BaseModel):
     assign_exercise: Optional[list[str]] = []
     share_resources: Optional[list[str]] = []
 
-# Define the MentalHealthConcern model
+# Define the EducationalConcern model
 class EducationalConcern(BaseModel):
     label: str
     severity: str

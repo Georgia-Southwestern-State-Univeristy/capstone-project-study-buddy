@@ -25,21 +25,48 @@
     <!-- Top Menu Items -->
     <div class="menu-items">
       <!-- New Chat -->
-      <button class="menu-btn" title="{{ translatedTexts['New Chat'] || 'New Chat' }}" routerLink="/main/live-conversion">
+      <button
+        class="menu-btn"
+        title="{{ translatedTexts['New Chat'] || 'New Chat' }}"
+        routerLink="/main/live-conversion"
+        routerLinkActive="active" 
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
         <i class="bi bi-magic"></i> <!-- Updated to magic wand icon -->
         <span data-translate> Chat Wizard</span>
       </button>
       <!-- AI Avatar -->
-      <button class="menu-btn" title="{{ translatedTexts['AI Avatar'] || 'AI Avatar' }}" routerLink="/main/avatar">
+      <button
+        class="menu-btn"
+        title="{{ translatedTexts['AI Avatar'] || 'AI Avatar' }}"
+        routerLink="/main/avatar"
+      >
         <span role="img" aria-label="girl">👧</span>
         <span data-translate>Buddy</span>
       </button>
 
       <!-- Quiz AI -->
-      <button class="menu-btn" title="{{ translatedTexts['Quiz AI'] || 'Quiz AI' }}" routerLink="/main/quiz-ai">
+      <button
+        class="menu-btn"
+        title="{{ translatedTexts['Quiz AI'] || 'Quiz AI' }}"
+        routerLink="/main/quiz-ai"
+        routerLinkActive="active" 
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
         <span role="img" aria-label="question">❓</span> <!-- Updated to question mark emoji -->
         <span data-translate>Quizify</span>
-        <span class="score-badge"  title="Total Score" *ngIf="totalScore !== null">{{ totalScore }}</span>
+        <span
+          class="score-badge"
+          title="Total Score"
+          *ngIf="totalScore !== null"
+          >{{ totalScore }}</span
+        >
+      </button>
+      <!-- My Groups -->
+      <button class="menu-btn" title="My Groups" routerLink="/main/study-group" routerLinkActive="active" 
+      [routerLinkActiveOptions]="{ exact: false }">
+        <i class="bi bi-people"></i>
+        <span data-translate>My Groups</span>
       </button>
     </div>
   </div>
@@ -47,7 +74,13 @@
   <!-- Bottom Menu Items -->
   <div class="menu-bottom">
     <!-- Profile with Picture -->
-    <button class="menu-btn profile-btn" title="{{ translatedTexts['Profile'] || 'Profile' }}" routerLink="/main/user-profile">
+    <button
+      class="menu-btn profile-btn"
+      title="{{ translatedTexts['Profile'] || 'Profile' }}"
+      routerLink="/main/user-profile"
+      routerLinkActive="active" 
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
       <img
         [src]="userProfilePicture"
         alt="User Avatar"
@@ -58,30 +91,13 @@
     </button>
 
     <!-- Log Out -->
-    <button class="menu-btn" (click)="signOut()" title="{{ translatedTexts['Log Out'] || 'Log Out' }}">
-      <i class="material-icons" >logout</i>
+    <button
+      class="menu-btn"
+      (click)="signOut()"
+      title="{{ translatedTexts['Log Out'] || 'Log Out' }}"
+    >
+      <i class="material-icons">logout</i>
       <span data-translate>Log Out</span>
     </button>
   </div>
 </aside>
-
-
-
-
-   <!-- Center Links -->
-    <!--
-    <div class="menu-section">
-      <button class="menu-btn" routerLink="/about">
-      <i class="material-icons">info</i>
-      <span>About</span>
-      </button>
-      <button class="menu-btn" routerLink="/contact">
-      <i class="material-icons">contact_mail</i>
-      <span>Contact Us</span>
-      </button>
-      <button class="menu-btn" routerLink="/FAQ">
-      <i class="material-icons">help</i>
-      <span>FAQ</span>
-      </button>
-    </div>
-    -->
