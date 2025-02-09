@@ -106,4 +106,64 @@ By refining existing concepts with original features and more vigorous integrati
 **Study-Buddy** is poised to make a meaningful impact in the educational sector by combining advanced AI technologies with a user-friendly and engaging design. Its thoughtful integration of **GitHub Copilot** and **Azure services** not only ensures high-quality software development but also showcases the potential of AI in creating transformative educational tools. We believe that **Study-Buddy** embodies creativity, technological excellence, and significant potential to enhance learning experiences globally.
 
 **Join us in revolutionizing education with AI-powered solutions!**
+---
 
+### **Contributing to Study-Buddy**
+
+We welcome contributions to Study-Buddy! Here’s a quick guide to help you get started:
+
+#### **How to Contribute**
+
+1. **Fork the Repository:**
+   - Click the "Fork" button at the top right corner of this repository to create a copy under your GitHub account.
+
+2. **Clone Your Fork:**
+   - Clone your fork to your local machine using:
+     ```bash
+     git clone https://github.com/your-username/capstone-project-study-buddy.git
+     ```
+
+3. **Create a Branch:**
+   - Create a new branch for your feature or bugfix:
+     ```bash
+     git checkout -b feature-or-bugfix-name
+     ```
+
+4. **Make Changes:**
+   - Implement your changes in the codebase. Ensure to follow the project's coding style and guidelines.
+
+5. **Commit Your Changes:**
+   - Commit your changes with a meaningful commit message:
+     ```bash
+     git add .
+     git commit -m "Description of your changes"
+     ```
+
+6. **Push to Your Fork:**
+   - Push your changes to your forked repository:
+     ```bash
+     git push origin feature-or-bugfix-name
+     ```
+
+7. **Create a Pull Request:**
+   - Go to the original repository and click on "Compare & pull request".
+   - Provide a clear description of your changes and why they are necessary.
+
+#### **Workflow**
+
+1. **Open an Issue:**
+   - If your contribution is significant (e.g., adding a new feature), open an issue first to discuss your proposal.
+
+2. **Code Review:**
+   - Your pull request will be reviewed by the maintainers. Be prepared to make changes based on feedback.
+
+3. **Merge:**
+   - Once approved, your pull request will be merged into the main branch.
+
+#### **Code of Conduct**
+
+- Be respectful and considerate of others.
+- Provide constructive feedback.
+- Follow the guidelines for code contributions.
+
+Thank you for contributing to Study-Buddy!
