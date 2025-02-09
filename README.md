@@ -101,9 +101,6 @@ By refining existing concepts with original features and more vigorous integrati
 
 ---
 
-### **Conclusion**
-
-**Study-Buddy** is poised to make a meaningful impact in the educational sector by combining advanced AI technologies with a user-friendly and engaging design. Its thoughtful integration of **GitHub Copilot** and **Azure services** not only ensures high-quality software development but also showcases the potential of AI in creating transformative educational tools. We believe that **Study-Buddy** embodies creativity, technological excellence, and significant potential to enhance learning experiences globally.
 
 **Join us in revolutionizing education with AI-powered solutions!**
 ---
@@ -165,5 +162,10 @@ We welcome contributions to Study-Buddy! Here’s a quick guide to help you get 
 - Be respectful and considerate of others.
 - Provide constructive feedback.
 - Follow the guidelines for code contributions.
+
+---
+### **Conclusion**
+
+**Study-Buddy** is poised to make a meaningful impact in the educational sector by combining advanced AI technologies with a user-friendly and engaging design. Its thoughtful integration of **GitHub Copilot** and **Azure services** not only ensures high-quality software development but also showcases the potential of AI in creating transformative educational tools. We believe that **Study-Buddy** embodies creativity, technological excellence, and significant potential to enhance learning experiences globally.
 
 Thank you for contributing to Study-Buddy!
