@@ -3,6 +3,7 @@ This module is the entry point of the application. It initializes the Flask app,
 """
 
 """ Step 1: Import required libraries """
+from utils.socketIo import socketio
 from dotenv import load_dotenv
 from utils.extensions import oauth, mail
 import os
@@ -28,6 +29,8 @@ def run_app():
     app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET_KEY")
     app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
     
+    
+
     jwt = JWTManager(app)
     mail.init_app(app)
 
@@ -82,6 +85,9 @@ def run_app():
 
     scheduler.start()
 
+    # **Initialize SocketIO** after the app is created
+    socketio.init_app(app)
+
     return app, jwt, mail
 
 
@@ -94,4 +100,5 @@ if __name__ == '__main__':
     PORT = os.getenv("FLASK_RUN_PORT") or 8000
     # DB pre-load
     load_agent_facts_to_db()
-    app.run(debug=True, host=HOST, port=PORT)
+    # **Run using socketio.run instead of app.run**
+    socketio.run(app, host=HOST, port=PORT, debug=True)
