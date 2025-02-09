@@ -36,6 +36,11 @@
    - **Secure Login/Signup:** Offers both manual entering of credentials and Google Authenticator for secure and hassle-free authentication for users.
 -**Forgot Password Option:** Provides the secure and user-friendly feature of resetting passwords with verification, through an email that guarantees both account security and accessibility.
 
+6. **Collaborative study groups** and peer discussion forums.
+7. **Career guidance features** like resume building and job search assistance. 
+
+
+
 ---
 
 ### **Technological Implementation**
