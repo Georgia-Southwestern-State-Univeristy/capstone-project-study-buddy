@@ -1,0 +1,12 @@
+.logo {
+    position:absolute;  /* increase size by 1.5x */
+  
+    transform: scale(1.25); /* Scales the image by 1.5x */
+  
+    top: 20px;
+    left: 20px;
+    width: 150px; /* Adjust the size as needed */
+    z-index: 20; /* Ensure it stays above other elements */
+    /* Add additional styling if necessary */
+    
+  }

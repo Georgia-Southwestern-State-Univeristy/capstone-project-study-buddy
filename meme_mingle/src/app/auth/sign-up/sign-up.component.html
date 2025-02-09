@@ -1,188 +1,214 @@
-<div class="signup-container">
-  <!-- Left Section: Banner Image -->
-  <div class="signup-left">
-    <img src="../../assets/img/banner.png" alt="Banner Image" class="banner-image" />
+<div class="signin-container">
+  <!-- Left 50%: Banner Image -->
+  <div class="signin-left">
+    <!-- Feature Section -->
+    <div class="features">
+      <h2 class="features-title">Explore Features</h2>
+      <div class="feature-item">
+        <i class="bi bi-magic"></i>
+        <span>Chat Wizard</span>
+      </div>
+      <div class="feature-item">
+        <span role="img" aria-label="girl">👧</span>
+        <span>Buddy Ai</span>
+      </div>
+      <div class="feature-item">
+        <span role="img" aria-label="question">❓</span>
+        <span>Quizify</span>
+      </div>
+    </div>
   </div>
+  
+  
 
-  <!-- Right Section: Conditional Rendering for Sign-In / Sign-Up -->
-  <div class="signup-right">
-        <div class="card shadow-lg custom-card header">
-          <div class="card-body ms-3 me-3">
+  <!-- Right 50%: Sign-in Form -->
+  <div class="signin-right">
+    <div class="card custom-card">
+      <div class="card-body ms-3 me-3">
+        <!-- Toggle Buttons -->
+        <h5 class="switch_sign title fw-bold fs-3">
+          <button
+            class="toggle-btn-left"
+            [class.active]="isSignInActive"
+            (click)="showSignIn()"
+          >
+            Sign In
+          </button>
+          <button
+            class="toggle-btn-right"
+            [class.active]="!isSignInActive"
+            (click)="showSignUp()"
+          >
+            Sign Up
+          </button>
 
-            <!-- Toggle Buttons -->
-            <h5 class="switch_sign title fw-bold fs-4 text-center">
-              <button 
-              class="toggle-btn-left"
-              [class.active]="isSignInActive" 
-                (click)="showSignIn()">
-                Sign In
-              </button>
-              <button 
-              class="toggle-btn-right"
-              [class.active]="isSignUpActive" 
-                (click)="showSignUp()">
+        </h5>
+
+
+        <!-- Sign-In Form -->
+        <div *ngIf="isSignUpActive">
+
+          <form class = "signup-form" [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
+            <div class="row">
+
+              <!-- Profile Picture -->
+              <div class="profile-picture-section col-lg-4 col-md-6 col-sm-6">
+                <label for="profilePicture" class="label fw-bold">Profile Picture
+
+                </label>
+                <input type="file" id="profilePicture" (change)="onFileChange($event)" accept="image/*"
+                style="display: none;" #fileInput 
+                >
+                <div *ngIf="currentProfilePicture" class="current-picture" (click)="triggerFileInput(fileInput)">
+                  <img 
+                    [src]="currentProfilePicture" 
+                    class="current" 
+                    alt="Current Profile Picture" 
+                    width="50px" 
+                    height="50px"
+                    style="cursor: pointer;" 
+                  >
+                  <div>
+                    {{data}}
+                  </div>
+                </div>
+              
+              
+              </div>
+
+              <!-- Email -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Email</label>
+                <input 
+                  type="email" 
+                  class="form-control custom-input" 
+                  formControlName="email" 
+                  placeholder="Email"
+                  [ngClass]="{
+                    'is-invalid':
+                      (signUpForm.get('email')!.touched && signUpForm.get('email')!.invalid) ||
+                      (submitted && signUpForm.get('email')!.invalid)
+                  }"
+                  >
+                  <small class="text-danger" *ngIf="(signUpForm.get('email')!.touched || submitted) && signUpForm.get('email')!.errors?.['required']">
+                    Email is required.
+                  </small>
+              </div>
+
+              <!-- Password -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Password</label>
+                <input 
+                  type="password" 
+                  class="form-control custom-input" 
+                  formControlName="password" 
+                  placeholder="Password">
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Confirm Password</label>
+                <input 
+                  type="password" 
+                  class="form-control custom-input" 
+                  formControlName="confirmPassword" 
+                  placeholder="Confirm Password">
+              </div>
+
+              <!-- Username -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Username</label>
+                <input 
+                  type="text" 
+                  class="form-control custom-input" 
+                  formControlName="username" 
+                  placeholder="Username">
+              </div>
+
+              <!-- Name -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Name</label>
+                <input 
+                  type="text" 
+                  class="form-control custom-input" 
+                  formControlName="name" 
+                  placeholder="Name">
+              </div>
+
+              <!-- Gender -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Gender</label>
+                <select 
+                  class="form-control custom-input" 
+                  formControlName="gender">
+                  <option value="" disabled selected>Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <!-- Age -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Age</label>
+                <input 
+                  type="number" 
+                  class="form-control custom-input" 
+                  formControlName="age" 
+                  placeholder="Age">
+              </div>
+
+              <!-- Place of Residence -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Place of Residence</label>
+                <input 
+                  type="text" 
+                  class="form-control custom-input" 
+                  formControlName="placeOfResidence" 
+                  placeholder="Residence">
+              </div>
+
+              <!-- Field of Study -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Field of Study</label>
+                <input 
+                  type="text" 
+                  class="form-control custom-input" 
+                  formControlName="fieldOfStudy" 
+                  placeholder="Field of Study">
+              </div>
+
+              <!-- Preferred Language -->
+              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+                <label class="label">Preferred Language</label>
+                <select 
+                  class="form-control custom-input" 
+                  formControlName="preferredLanguage">
+                  <option value="" disabled selected>Select Language</option>
+                  <option *ngFor="let lang of supportedLanguges" [value]="lang.code">
+                    {{ lang.label }}
+                  </option>
+                </select>
+              </div>
+
+            </div>
+            <div class="d-flex gap-4 justify-content-center mt-sm-2">
+              <button type="submit" class="btn btn-outline-success rounded-5">
                 Sign Up
               </button>
-            </h5>
-
-            <!-- Sign-Up Form -->
-            <div *ngIf="isSignUpActive">
-              <p class="card-text fw-bold text-center">
-                Join us and start your fun learning adventure!
-              </p>
-              <form class = "signup-form" [formGroup]="signUpForm" (ngSubmit)="onSubmit()">
-                <div class="row">
-
-                  <!-- Profile Picture -->
-                  <div class="profile-picture-section col-lg-4 col-md-6 col-sm-6">
-                    <label for="profilePicture" class="label fw-bold">Profile Picture
-
-                    </label>
-                    <input type="file" id="profilePicture" (change)="onFileChange($event)" accept="image/*"
-                    style="display: none;" #fileInput 
-                    >
-                    <div *ngIf="currentProfilePicture" class="current-picture" (click)="triggerFileInput(fileInput)">
-                      <img 
-                        [src]="currentProfilePicture" 
-                        class="current" 
-                        alt="Current Profile Picture" 
-                        width="50px" 
-                        height="50px"
-                        style="cursor: pointer;" 
-                      >
-                      <div>
-                        {{data}}
-                      </div>
-                    </div>
-                  
-                  
-                  </div>
-
-                  <!-- Email -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Email</label>
-                    <input 
-                      type="email" 
-                      class="form-control custom-input" 
-                      formControlName="email" 
-                      placeholder="Email"
-                      [ngClass]="{
-                        'is-invalid':
-                          (signUpForm.get('email')!.touched && signUpForm.get('email')!.invalid) ||
-                          (submitted && signUpForm.get('email')!.invalid)
-                      }"
-                      >
-                      <small class="text-danger" *ngIf="(signUpForm.get('email')!.touched || submitted) && signUpForm.get('email')!.errors?.['required']">
-                        Email is required.
-                      </small>
-                  </div>
-
-                  <!-- Password -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Password</label>
-                    <input 
-                      type="password" 
-                      class="form-control custom-input" 
-                      formControlName="password" 
-                      placeholder="Password">
-                  </div>
-
-                  <!-- Confirm Password -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Confirm Password</label>
-                    <input 
-                      type="password" 
-                      class="form-control custom-input" 
-                      formControlName="confirmPassword" 
-                      placeholder="Confirm Password">
-                  </div>
-
-                  <!-- Username -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Username</label>
-                    <input 
-                      type="text" 
-                      class="form-control custom-input" 
-                      formControlName="username" 
-                      placeholder="Username">
-                  </div>
-
-                  <!-- Name -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Name</label>
-                    <input 
-                      type="text" 
-                      class="form-control custom-input" 
-                      formControlName="name" 
-                      placeholder="Name">
-                  </div>
-
-                  <!-- Gender -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Gender</label>
-                    <select 
-                      class="form-control custom-input" 
-                      formControlName="gender">
-                      <option value="" disabled selected>Select Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  <!-- Age -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Age</label>
-                    <input 
-                      type="number" 
-                      class="form-control custom-input" 
-                      formControlName="age" 
-                      placeholder="Age">
-                  </div>
-
-                  <!-- Place of Residence -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Place of Residence</label>
-                    <input 
-                      type="text" 
-                      class="form-control custom-input" 
-                      formControlName="placeOfResidence" 
-                      placeholder="Residence">
-                  </div>
-
-                  <!-- Field of Study -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Field of Study</label>
-                    <input 
-                      type="text" 
-                      class="form-control custom-input" 
-                      formControlName="fieldOfStudy" 
-                      placeholder="Field of Study">
-                  </div>
-
-                  <!-- Preferred Language -->
-                  <div class="label_input col-lg-4 col-md-6 col-sm-6">
-                    <label class="label">Preferred Language</label>
-                    <select 
-                      class="form-control custom-input" 
-                      formControlName="preferredLanguage">
-                      <option value="" disabled selected>Select Language</option>
-                      <option *ngFor="let lang of supportedLanguges" [value]="lang.code">
-                        {{ lang.label }}
-                      </option>
-                    </select>
-                  </div>
-
-                </div>
-                <div class="d-flex gap-4 justify-content-center mt-sm-2">
-                  <button type="submit" class="btn btn-outline-success rounded-5">
-                    Sign Up
-                  </button>
-                </div>
-              </form>
             </div>
-          </div>
-        </div>
-    
+          </form>
+        </div>        
+
+        <!-- Error Message
+        <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+          {{ errorMessage }}
+        </div> -->
+      </div>
+    </div>
   </div>
+
+  <!-- Wave Design at Bottom-Left -->
+   <div class="children"></div>
+  <div class="wave"></div>
 </div>

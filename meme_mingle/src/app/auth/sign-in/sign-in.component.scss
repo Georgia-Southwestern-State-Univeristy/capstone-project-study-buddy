@@ -13,7 +13,7 @@
   display: flex;
   height: 100vh;
   width: 100%;
-  background-color: white; /* Dark teal-blue for background */
+  background-color: #ffffff; /* Dark teal-blue for background */
   position: relative; /* Added to position the wave correctly */
   overflow: hidden; /* Prevent overflow caused by the wave */
   
@@ -136,7 +136,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 10px;
+  z-index: 10;
+  
 }
 
 /* Toggle Buttons */
@@ -211,6 +213,7 @@
   .google .btn {
     width: 100%; /* Full width buttons on mobile */
     padding: 10px 20px; /* Adjusted padding */
+    
   }
 }
 
@@ -268,7 +271,7 @@
   display: inline-block;
   margin: 20px auto;
   padding: 10px 20px;
-  background: #FFBD59; /* Solid dark background */
+  background: #ffffff; /* Solid dark background */
   border-radius: 30px;
   font-weight: bold;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Soft shadow */
@@ -295,7 +298,7 @@
 
 .switch_sign .toggle-btn-left.active,
 .switch_sign .toggle-btn-right.active {
-  background: black; /* Dark gray active background */
+  background: #0b1365; /* Dark gray active background */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Soft shadow */
   color: #ffffff; /* White text for active state */
   transform: scale(1.08); /* Moderate scale for attention */
@@ -303,9 +306,9 @@
 
 .switch_sign .toggle-btn-left:hover,
 .switch_sign .toggle-btn-right:hover {
-  background: white; /* Lighter gray on hover */
+  background: #FFBD59; /* Lighter gray on hover */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Soft shadow */
-  color: black; /* White text */
+  color: rgb(255, 255, 255); /* White text */
   transform: scale(1.1); /* Slight scale for hover effect */
 }
 
@@ -334,6 +337,7 @@
   padding: 20px;
   font-family: sans-serif; /* Updated to standard font */
   color: black; /* White text */
+  
 }
 .card {
   border: #000000;
@@ -364,6 +368,7 @@
   gap: 20px; /* Space between elements */
   justify-content: center;
   align-items: center;
+
 }
 
 .login .btn {
@@ -373,7 +378,7 @@
   font-weight: bold;
   text-transform: uppercase;
   color: #ffffff; /* White text for contrast */
-  background: #FFBD59; /* Dark gray background */
+  background: #0b1365; /* Dark gray background */
   border: 2px solid transparent;
   border-radius: 30px; /* Rounded button */
   box-shadow: none; /* Remove shadows */
@@ -384,7 +389,7 @@
 }
 
 .login .btn:hover {
-  background: #777777; /* Lighter gray on hover */
+  background: #FFBD59; /* Lighter gray on hover */
   box-shadow: none; /* Remove shadows */
   transform: scale(1.05); /* Slightly increase size on hover */
   box-shadow: 0 6px 12px var(--shadow-color); /* Enhanced shadow on hover */
@@ -433,6 +438,8 @@
   background: transparent; /* Transparent to inherit gradient */
   padding: 8px 20px; /* Adjust padding for balance */
   transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  z-index: 10;
 }
 
 .google .btn:hover {
@@ -451,31 +458,17 @@
   font-size: small;
 }
 
-.logo {
-  position: absolute;
-    /* increase size by 1.5x */
-
-  transform: scale(1.25); /* Scales the image by 1.5x */
-
-  top: 20px;
-  left: 20px;
-  width: 150px; /* Adjust the size as needed */
-  z-index: 10; /* Ensure it stays above other elements */
-  /* Add additional styling if necessary */
-  
-}
-
 .wave {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%; /* Full width for a smooth wave */
   height: 375px; /* Increased height by 1.5x from 250px to 375px */
-  background-image: url('../../../assets/img/wave.png'); /* Corrected path to wave.png */
+  background-image: url('../../../assets/img/wave-fotor-2025020555251.png'); /* Corrected path to wave.png */
   background-repeat: no-repeat;
   background-size: contain; /* Changed from cover to contain */
   background-position: left bottom; /* Ensure wave is anchored at the bottom */
-  z-index: 1; /* Lower z-index to stay behind other elements */
+  z-index:1; /* Lower z-index to stay behind other elements */
   
   /* Optional: Add a slight wave animation */
   /* animation: waveAnimation 10s linear infinite; */
@@ -485,9 +478,9 @@
   position: absolute;
   bottom: 0;
   left: 5%;
-  width: 150%; /* Increased width by 1.5x from 100% to 150% */
-  height: 375px; /* Increased height by 1.5x from 250px to 375px */
-  background-image: url('../../../assets/img/file.png'); /* Path to children.png */
+  width: 100%; /* Increased width by 1.5x from 100% to 150% */
+  height: 35%; /* Increased height by 1.5x from 250px to 375px */
+  background-image: url('../../../assets/img/GSW-logo.png'); /* Path to children.png */
   background-repeat: no-repeat;
   background-size: contain;
   background-position: left bottom; /* Ensure wave is anchored at the bottom */
@@ -544,11 +537,11 @@
   /* Adjust children image for smaller screens */
   .children {
     width: 100%; /* Ensure it doesn't overflow horizontally */
-    height: 200px; /* Reduce height significantly */
+    height: 18%; /* Reduce height significantly */
   }
 
   .wave{
-    height: 200px;
+    height: 35%;
   }
 
   /* Adjust the sign-in card size */
