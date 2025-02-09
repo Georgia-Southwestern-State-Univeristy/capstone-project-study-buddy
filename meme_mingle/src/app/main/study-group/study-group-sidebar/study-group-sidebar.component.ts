@@ -48,8 +48,34 @@ export class StudyGroupSidebarComponent implements OnInit {
   }
 
   joinGroup(group: any): void {
-    console.log('Join group', group);
-    // Additional logic for joining the group can go here
+    console.log('Group data:', group);
+    if (!group?.id) {
+      this.errorMessage = 'Group ID not found.';
+      return;
+    }
+    if (!this.userId) {
+      this.router.navigate(['/auth/sign-in'], { queryParams: { returnUrl: this.router.url } });
+      return;
+    }
+    this.loading = true;
+    const payload = {
+      group_id: group.id,
+      user_id: this.userId
+    };
+    this.appService.joinGroup(payload).subscribe({
+      next: (response) => {
+        console.log('Joined group successfully:', response);
+        if (!group.members) {
+          group.members = [];
+        }
+        group.members.push(this.userId);
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.error || 'Error joining group.';
+        this.loading = false;
+      }
+    });
   }
 
   // New methods for toggle and create
