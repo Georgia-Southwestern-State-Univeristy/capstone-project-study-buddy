@@ -21,13 +21,7 @@
   /* padding-bottom: 200px; */
 }
 
-/* Left Section: Banner Image */
-.signin-left {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+
 
 /* Features Section Styling */
 /* CSS Variables */
@@ -40,95 +34,6 @@
   --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   --hover-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
-
-/* Features Section */
-.features {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  background-color: var(--background-color);
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: var(--card-shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--hover-shadow);
-  }
-}
-
-.features-title {
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--text-color);
-  margin-bottom: 20px;
-  border-bottom: 2px solid var(--primary-color);
-  padding-bottom: 10px;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-  font-size: 1.2rem;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: color 0.3s ease, transform 0.3s ease;
-
-  i, span[role="img"] {
-    font-size: 1.6rem;
-    color: var(--primary-color);
-  }
-
-  &:hover {
-    color: var(--primary-color);
-    transform: translateX(10px);
-  }
-
-  span {
-    font-weight: 500;
-    text-transform: capitalize;
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .features {
-    padding: 20px;
-  }
-
-  .features-title {
-    font-size: 1.5rem;
-  }
-
-  .feature-item {
-    font-size: 1rem;
-    gap: 10px;
-  }
-}
-
-
-/* Media Query for Smaller Screens */
-@media (max-width: 768px) {
-  .features {
-    padding: 20px;
-  }
-
-  .features-title {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-  }
-
-  .feature-item {
-    font-size: 1rem;
-    gap: 10px;
-  }
-}
-
-
 
 /* Right Section: Form Card */
 .signin-right {
