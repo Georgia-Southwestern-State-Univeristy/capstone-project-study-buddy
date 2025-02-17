@@ -1,0 +1,157 @@
+<div class="signin-container">
+  <!-- Left 50%: Banner Image -->
+  <div class="signin-left">
+    <!-- Feature Section -->
+    <div class="features">
+      <h2 class="features-title">Explore Features</h2>
+      <div class="feature-item">
+        <i class="bi bi-magic"></i>
+        <span>Chat Wizard</span>
+      </div>
+      <div class="feature-item">
+        <span role="img" aria-label="girl">👧</span>
+        <span>Buddy Ai</span>
+      </div>
+      <div class="feature-item">
+        <span role="img" aria-label="question">❓</span>
+        <span>Quizify</span>
+      </div>
+    </div>
+  </div>
+  
+  
+
+  <!-- Right 50%: Sign-in Form -->
+  <div class="signin-right">
+    <div class="card custom-card">
+      <div class="card-body ms-3 me-3">
+        <!-- Toggle Buttons -->
+        <h5 class="switch_sign title fw-bold fs-3">
+          <button
+            class="toggle-btn-left"
+            [class.active]="isSignInActive"
+            (click)="showSignIn()"
+          >
+            Sign In
+          </button>
+          <button
+            class="toggle-btn-right"
+            [class.active]="!isSignInActive"
+            (click)="showSignUp()"
+          >
+            Sign Up
+          </button>
+
+        </h5>
+
+
+        <!-- Sign-In Form -->
+        <div *ngIf="isSignInActive">
+
+          <form class="signin-form" [formGroup]="signInForm" (ngSubmit)="onSubmit()">
+            <!-- Identifier Field -->
+            <div class="mb-3 input-group custom-input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input
+                type="text"
+                class="form-control custom-input"
+                id="identifier"
+                formControlName="identifier"
+                placeholder="Enter your email or username"
+                [ngClass]="{
+                  'is-invalid':
+                    (signInForm.get('identifier')!.touched && signInForm.get('identifier')!.invalid) ||
+                    (submitted && signInForm.get('identifier')!.invalid)
+                }"
+              >
+              <small class="text-danger" *ngIf="(signInForm.get('identifier')!.touched || submitted) && signInForm.get('identifier')!.errors?.['required']">
+                Email or Username is required.
+              </small>
+            </div>          
+ 
+
+            <!-- Password Field -->
+            <div class="mb-3 input-group custom-input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                class="form-control custom-input"
+                id="password"
+                formControlName="password"
+                placeholder="Enter your password"
+                [ngClass]="{
+                  'is-invalid':
+                    (signInForm.get('password')!.touched && signInForm.get('password')!.invalid) ||
+                    (submitted && signInForm.get('password')!.invalid)
+                }"
+              >
+              <small class="text-danger" *ngIf="(signInForm.get('password')!.touched || submitted) && signInForm.get('password')!.errors?.['required']">
+                Password is required.
+              </small>
+              <div class="form-check-end mt-2 d-flex justify-content-between gap-1">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  id="showPassword"
+                  (change)="togglePasswordVisibility()"
+                >
+                <label class="form-check-label" for="showPassword">Show Password</label>
+                <p class="card-text">
+                  <a routerLink="/auth/forgot-password" class="fw-bold for ms-2">Forgot-password?</a>
+                </p>
+              </div>
+            </div>
+
+
+            <!-- Submit Button -->
+            <div class="login d-flex flex-column gap-3 justify-content-center">
+              <button
+                type="submit"
+                class="btn"
+                [disabled]="isSubmitting"
+              >
+                {{ isSubmitting ? 'Logging in...' : 'Log In' }}
+              </button>
+              
+            </div>
+ 
+          </form>
+        </div>
+
+        <!-- Sign-Up Placeholder -->
+        <div *ngIf="!isSignInActive" class="card shadow-lg custom-card headermt-3">
+          <div class="card-body text-center">
+            <h5 class="card-title title fw-bold fs-4">Sign Up</h5>
+            <!-- Add sign-up form here if needed in future -->
+          </div>
+        </div>
+
+        <!-- Divider -->
+        <div class="OR d-flex align-items-center">
+          <div class="flex-grow-1 border-bottom"></div>
+          <span class="mx-2">OR</span>
+          <div class="flex-grow-1 border-bottom"></div>
+        </div>
+
+        <!-- Google Sign-In Button -->
+        <div class="google d-flex justify-content-center">
+          <button
+            class="btn"
+            (click)="signInWithGoogle()"
+          >
+            <i class="bi bi-google me-2"></i> Sign in with Google
+          </button>
+        </div>
+
+        <!-- Error Message
+        <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+          {{ errorMessage }}
+        </div> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Wave Design at Bottom-Left -->
+   <div class="children"></div>
+  <div class="wave"></div>
+</div>

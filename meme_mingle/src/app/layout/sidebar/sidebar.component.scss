@@ -1,0 +1,268 @@
+/*******************************************
+ * GSW Theme Variables
+ *******************************************/
+$gsw-primary: #003366;           // Deep blue (GSW primary)
+$gsw-secondary: #ffcc00;         // Rich gold (GSW secondary)
+$gsw-secondary-muted: lighten($gsw-secondary, 40%); // Muted gold for gradients
+
+/*******************************************
+ * Existing Variables & Breakpoints
+ *******************************************/
+$sidebar-width: 280px;
+$sidebar-width-collapsed-desktop: 80px; 
+$transition-duration: 0.35s;
+$transition-ease: ease-in-out;
+$mobile-breakpoint: 768px;
+$sidebar-width-mobile: 200px;  
+$sidebar-width-collapsed-mobile: 60px;
+
+/*******************************************
+ * Sidebar Wrapper (Base)
+ *******************************************/
+.sidebar-wrapper {
+  width: $sidebar-width;
+  height: 98.4vh;
+  background-image: linear-gradient(80deg, $gsw-primary, $gsw-secondary-muted);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+  transition: all $transition-duration $transition-ease;
+  border-radius: 15px; 
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  border: 2px solid darken($gsw-primary, 10%);
+
+  &.collapsed {
+    width: $sidebar-width-collapsed-desktop;
+    padding-right: 0;
+    padding-left: 0;
+
+    .sidebar-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      
+      .logo-wrapper {
+        .sidebar-logo-img {
+          width: 90px;
+          margin: 0;
+          padding-left: 0.5rem;
+        }
+      }
+      .collapse-btn {
+        margin-top: 1rem;
+        height: 50px;
+        width: 50px;
+        border: 2px solid darken($gsw-primary, 10%);
+      }
+    }
+    .menu-items,
+    .menu-bottom {
+      align-items: center;
+
+      .menu-btn {
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        justify-content: center;
+        border: 2px solid darken($gsw-primary, 10%);
+        background-color: white;
+        span:not([role="img"]) {
+          display: none;
+        }
+        span[role="img"] {
+          display: inline;
+        }
+        &:hover {
+          background-color: darken($gsw-secondary, 10%);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        &.active {
+          background-color: darken($gsw-secondary, 10%);
+          border-color: darken($gsw-primary, 15%);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          color: $gsw-primary;
+        }
+      }
+    }
+  }
+}
+
+/*******************************************
+ * Header & Collapse Button
+ *******************************************/
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  .logo-wrapper {
+    .sidebar-logo-img {
+      width: 150px;
+      height: auto;
+    }
+  }
+  .collapse-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    color: $gsw-primary;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background $transition-duration $transition-ease;
+    border: 2px solid $gsw-secondary;
+    &:hover {
+      background: lighten($gsw-secondary, 20%);
+    }
+    
+  }
+}
+
+/*******************************************
+ * Top Menu Items
+ *******************************************/
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  .menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background-color: white;
+    border: 2px solid darken($gsw-secondary, 10%);
+    font-size: 1rem;
+    font-weight: 600;
+    color: $gsw-primary;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 30px;
+    i {
+      font-size: 1.2rem;
+    }
+    &:hover {
+      background-color: darken($gsw-secondary, 10%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    &.active {
+      background-color: darken($gsw-secondary, 10%);
+      border-color: darken($gsw-primary, 15%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      color: $gsw-primary;
+    }
+    .score-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: darken($gsw-primary, 10%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      &:hover {
+        background-color: darken($gsw-primary, 10%);
+        transform: scale(1.1);
+      }
+      
+    }
+  }
+}
+
+
+/*******************************************
+ * Bottom Menu Items
+ *******************************************/
+.menu-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  .menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background-color: white;
+    border: 2px solid darken($gsw-secondary, 10%);
+    font-size: 1rem;
+    font-weight: 600;
+    color: $gsw-primary;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 30px;
+    &:hover {
+      background-color: darken($gsw-secondary, 10%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    &.active {
+      background-color: darken($gsw-secondary, 10%);
+      border-color: darken($gsw-primary, 15%);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      color: $gsw-primary;
+    }
+  }
+  .profile-btn {
+    img.user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+/*******************************************
+ * MOBILE STYLES
+ *******************************************/
+@media (max-width: #{$mobile-breakpoint}) {
+  .sidebar-wrapper {
+    width: $sidebar-width-mobile;
+    .sidebar-header {
+      justify-content: space-between;
+      .logo-wrapper {
+        .sidebar-logo-img {
+          width: 120px;
+        }
+      }
+    }
+    &.collapsed {
+      width: $sidebar-width-collapsed-mobile;
+      .menu-items,
+      .menu-bottom {
+        align-items: center;
+        .menu-btn {
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          background-color: $gsw-secondary;
+          border: 2px solid darken($gsw-secondary, 10%);
+          span:not([role="img"]) {
+            display: none;
+          }
+          span[role="img"] {
+            display: inline;
+          }
+          &:hover {
+            background-color: darken($gsw-secondary, 10%);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          }
+        }
+      }
+    }
+  }
+}

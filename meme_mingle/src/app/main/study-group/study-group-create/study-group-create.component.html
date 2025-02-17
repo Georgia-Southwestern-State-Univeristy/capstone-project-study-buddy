@@ -1,0 +1,115 @@
+<!-- src/app/main/study-group/study-group-create/study-group-create.component.html -->
+<div class="container mt-5">
+  <div class="card gsw-card">
+    <div class="card-header gsw-card-header text-center">
+      <h2>Create a New Study Group</h2>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="groupForm" (ngSubmit)="onSubmit()">
+        <!-- Group Name -->
+        <div class="mb-3">
+          <label for="name" class="form-label">Group Name</label>
+          <input
+            type="text"
+            id="name"
+            formControlName="name"
+            class="form-control"
+            placeholder="Enter group name">
+          <div *ngIf="groupForm.get('name')?.touched && groupForm.get('name')?.invalid" class="text-danger">
+            <small *ngIf="groupForm.get('name')?.errors?.['required']">Group name is required.</small>
+            <small *ngIf="groupForm.get('name')?.errors?.['minlength']">Group name must be at least 3 characters.</small>
+            <small *ngIf="groupForm.get('name')?.errors?.['maxlength']">Group name cannot exceed 50 characters.</small>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="form-control"
+            rows="3"
+            placeholder="Enter a brief description (optional)"></textarea>
+        </div>
+
+        <!-- Topics (comma separated) -->
+        <div class="mb-3">
+          <label for="topics" class="form-label">Topics</label>
+          <input
+            type="text"
+            id="topics"
+            formControlName="topics"
+            class="form-control"
+            placeholder="e.g., Calculus, Physics, Literature">
+        </div>
+
+        <!-- Privacy -->
+        <div class="mb-3">
+          <label for="privacy" class="form-label">Privacy</label>
+          <select id="privacy" formControlName="privacy" class="form-select">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+
+        <!-- Rules (comma separated) -->
+        <div class="mb-3">
+          <label for="rules" class="form-label">Rules</label>
+          <input
+            type="text"
+            id="rules"
+            formControlName="rules"
+            class="form-control"
+            placeholder="Enter rules separated by commas">
+        </div>
+
+        <!-- Group Image URL -->
+        <div class="mb-3">
+          <label for="image_url" class="form-label">Group Image URL</label>
+          <input
+            type="url"
+            id="image_url"
+            formControlName="image_url"
+            class="form-control"
+            placeholder="Enter image URL (optional)">
+        </div>
+
+        <!-- Optional: Invite Members (comma separated) -->
+        <div class="mb-3">
+          <label for="members" class="form-label">Invite Members (User IDs, comma separated)</label>
+          <input
+            type="text"
+            id="members"
+            formControlName="members"
+            class="form-control"
+            placeholder="e.g., user_123, user_456">
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-grid">
+          <button type="submit" class="btn gsw-btn-primary" [disabled]="groupForm.invalid || loading">
+            {{ loading ? 'Creating...' : 'Create Group' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- Success / Error Messages -->
+      <div *ngIf="successMessage" class="alert alert-success mt-3">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Invite Link Section (shown only if an invite link has been generated) -->
+      <div *ngIf="inviteLink" class="mt-3">
+        <label class="form-label">Shareable Invite Link:</label>
+        <div class="input-group">
+          <input type="text" [value]="inviteLink" class="form-control" readonly>
+          <button class="btn btn-secondary" (click)="copyInviteLink()">Copy Link</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

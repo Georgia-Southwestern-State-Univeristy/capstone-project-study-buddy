@@ -1,0 +1,80 @@
+/* src/app/main/study-group/study-group-create/study-group-create.component.scss */
+
+// Define GSW College theme variables (adjust colors as needed)
+$gsw-primary: #003366;            // Deep blue (GSW College primary color)
+$gsw-secondary: #ffcc00;            // Gold accent color
+$gsw-secondary-muted: lighten($gsw-secondary, 40%); // Muted gold for gradient
+$gsw-bg: #f7f7f7;                   // Light background for contrast
+$gsw-border: #e0e0e0;               // Border color
+
+// Container styling
+.container {
+  max-width: 600px;
+  margin-top: 2rem;
+  
+}
+
+// Card styling to give a modern, collegiate look
+.gsw-card {
+  border: 1px solid $gsw-border;
+  border-radius: 0.6rem;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  border: 2px solid darken($gsw-primary, 10%);
+  
+}
+
+// Card header with a gradient background that matches the sidebar design
+.gsw-card-header {
+  background-image: linear-gradient(180deg, $gsw-primary, $gsw-secondary-muted);
+  color: #fff;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  padding: 1rem;
+  h2 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+}
+
+// Primary button styling using the GSW theme colors
+.gsw-btn-primary {
+  background-color: $gsw-primary;
+  border: none;
+  color: #fff;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: darken($gsw-primary, 10%);
+  }
+  &:disabled {
+    background-color: lighten($gsw-primary, 20%);
+    cursor: not-allowed;
+  }
+}
+
+// Form element styling for consistency
+.form-label {
+  font-weight: 600;
+  color: $gsw-primary;
+}
+
+input.form-control,
+textarea.form-control,
+select.form-select {
+  border-radius: 0.25rem;
+  border: 1px solid $gsw-border;
+}
+
+// Alert styling (further customization is possible)
+.alert {
+  border-radius: 0.25rem;
+}
+
+// Global body background (if desired, applied in a higher level file)
+body {
+  background-color: $gsw-bg;
+}
