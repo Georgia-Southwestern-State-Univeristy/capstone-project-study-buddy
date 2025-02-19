@@ -1,0 +1,22 @@
+.circle-container {
+    position: relative;
+    height: 100vh;
+    overflow: hidden; /* Ensures no overflow from the circles */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #121212; /* Background similar to your example */
+  }
+  
+  .logo {
+    position:absolute;  /* increase size by 1.5x */
+  
+    transform: scale(1.25); /* Scales the image by 1.5x */
+  
+    top: 20px;
+    left: 20px;
+    width: 150px; /* Adjust the size as needed */
+    z-index: 20; /* Ensure it stays above other elements */
+    /* Add additional styling if necessary */
+    
+  }
