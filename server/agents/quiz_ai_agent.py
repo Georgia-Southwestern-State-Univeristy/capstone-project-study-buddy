@@ -60,16 +60,13 @@ def generate_questions(user_id, topic=None, file_content=None, file_mime_type=No
         f"For SA, use the format: SA[%%]Question?[&&]Answer."
     )
 
-    # Inside generate_questions(...)
+    
     try:
         response = llm.invoke(prompt)  # Call the Azure LLM with the prompt
         
-        # 1. Print the entire response object to debug
-        print("DEBUG: Raw response from LLM:", response)
-        
         # 2. If your library returns text in response.content, confirm the shape
         generated_text = response.content.strip()
-        print("DEBUG: Generated text from LLM:", generated_text)
+        
         
         # -- proceed with parsing --
         for line in generated_text.splitlines():
