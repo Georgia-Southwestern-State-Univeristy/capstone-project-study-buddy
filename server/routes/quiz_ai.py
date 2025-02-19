@@ -80,6 +80,7 @@ def get_questions(user_id):
     if "error" in result:
         return jsonify({"error": result["error"]}), 500
 
+    print('result:', result)
     return jsonify(result)
 
 @quiz_ai_routes.route('/ai/quiz/<quiz_id>/submit', methods=['POST'])

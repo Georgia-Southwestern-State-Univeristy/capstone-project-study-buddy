@@ -54,18 +54,26 @@ def generate_questions(user_id, topic=None, file_content=None, file_mime_type=No
         f"{base_prompt}"
         f"Each question should be either multiple-choice (MC) with four answer choices or a short answer (SA). "
         f"For MC questions, **exactly one** answer choice must be marked as correct by appending an asterisk (*) immediately after the answer text, without any spaces. "
-        f"Format each question-answer pair on a separate line. "
+        f"Format each question-answer pair on a separate line. Do not prepend numbers or bullets before each question. Do not include any commentary or extra lines. "
         f"Separate the question and options using [&&]. "
         f"For MC, use the format: MC[&&]Question?[&&]Answer1[&&]Answer2[&&]Answer3[&&]Answer4. "
         f"For SA, use the format: SA[%%]Question?[&&]Answer."
     )
 
+    # Inside generate_questions(...)
     try:
-        response = llm(prompt)  # Call the Azure LLM with the prompt
-        generated_text = response.content.strip()  # Get the text response from the LLM
-
-        # Process the generated text to extract questions
+        response = llm.invoke(prompt)  # Call the Azure LLM with the prompt
+        
+        # 1. Print the entire response object to debug
+        print("DEBUG: Raw response from LLM:", response)
+        
+        # 2. If your library returns text in response.content, confirm the shape
+        generated_text = response.content.strip()
+        print("DEBUG: Generated text from LLM:", generated_text)
+        
+        # -- proceed with parsing --
         for line in generated_text.splitlines():
+
             if not line.strip():
                 continue  # Skip empty lines
 
