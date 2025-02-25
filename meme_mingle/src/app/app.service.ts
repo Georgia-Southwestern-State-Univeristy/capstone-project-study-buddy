@@ -148,6 +148,12 @@ export class AppService {
     return this.http.get(`${this.baseUrl}/groups/retrieve`);
   }
 
+  //get group post by group id
+  getGroupPosts(groupId: string): Observable<any> {
+    const url = `${this.baseUrl}/group_posts/${groupId}`;
+    return this.http.get<any>(url);
+  }
+
   // Optional: Method to log out the user
   signOut() {
     localStorage.removeItem('access_token');

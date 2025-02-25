@@ -1,0 +1,101 @@
+/* group-posts-list.component.scss */
+
+/* -----------------------------------------------
+  GSW College Theme Variables (same as before)
+------------------------------------------------- */
+$gsw-primary: #003366;
+$gsw-secondary: #ffcc00;
+$gsw-secondary-muted: lighten($gsw-secondary, 40%);
+$gsw-bg: #f7f7f7;
+$gsw-border: #e0e0e0;
+
+/* Additional color variables */
+$error-color: #c0392b;
+$success-color: #27ae60;
+
+/* Container => similar to .gsw-card */
+.group-posts-container {
+  width: 100%;
+  max-width: 700px;
+  margin: 2rem auto;
+  border: 2px solid darken($gsw-primary, 10%);
+  border-radius: 0.6rem;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+
+  /* Header => gradient background consistent with .gsw-card-header */
+  .group-posts-header {
+    background-image: linear-gradient(180deg, $gsw-primary, $gsw-secondary-muted);
+    color: #fff;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    padding: 1rem;
+    h2 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+  }
+
+  /* Alerts => reuse alert styling */
+  .alert {
+    margin: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+
+    &.alert-danger {
+      background-color: rgba($error-color, 0.1);
+      border: 1px solid $error-color;
+      color: $error-color;
+    }
+
+    &.alert-info {
+      background-color: rgba($gsw-primary, 0.1);
+      border: 1px solid $gsw-primary;
+      color: $gsw-primary;
+    }
+  }
+
+  .loading {
+    margin: 1rem;
+    p {
+      font-style: italic;
+      color: $gsw-primary;
+    }
+  }
+
+  /* Card for each post => similar styling to .post-container but nested */
+  .post-card {
+    border: 1px solid $gsw-border;
+    border-radius: 0.4rem;
+    margin: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    .post-card-header {
+      background-color: lighten($gsw-primary, 15%);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-top-left-radius: 0.4rem;
+      border-top-right-radius: 0.4rem;
+
+      h3 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+    }
+
+    .post-card-body {
+      padding: 1rem;
+
+      p {
+        margin: 0.5rem 0;
+        color: $gsw-secondary;
+        &:first-of-type {
+          margin-top: 0;
+        }
+      }
+    }
+  }
+}
+

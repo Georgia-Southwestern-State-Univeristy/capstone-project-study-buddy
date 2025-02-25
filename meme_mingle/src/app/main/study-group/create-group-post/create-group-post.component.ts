@@ -20,7 +20,7 @@ export class CreateGroupPostComponent {
   errorMessage: string | null = null;
   
   // Adjust the URL if needed
-  private apiUrl = 'http://localhost:5000/group_posts';
+  private apiUrl = 'http://localhost:8000/group_posts';
 
   constructor(
     private fb: FormBuilder,
