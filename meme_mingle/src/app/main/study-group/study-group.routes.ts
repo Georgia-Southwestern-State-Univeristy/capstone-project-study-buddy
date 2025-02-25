@@ -11,6 +11,11 @@ export const StudyGroup_routes: Routes = [
                 pathMatch:'full'
             },
             {
+                path:'create-group-post',
+                loadComponent: () =>
+                  import('./create-group-post/create-group-post.component').then((m) => m.CreateGroupPostComponent),
+            },
+            {
                 path:'create-group',
                 loadComponent: () =>
                   import('./study-group-create/study-group-create.component').then((m) => m.StudyGroupCreateComponent),

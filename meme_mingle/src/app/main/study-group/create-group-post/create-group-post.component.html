@@ -1,0 +1,66 @@
+<!-- create-group-post.component.html -->
+<div class="post-container">
+    <!-- Gradient header for consistent style -->
+    <div class="post-header">
+      <h2>Create a New Group Post</h2>
+    </div>
+  
+    <!-- Success Message -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+  
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  
+    <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="user_id">User ID</label>
+        <input
+          id="user_id"
+          type="text"
+          formControlName="user_id"
+          class="form-control"
+          placeholder="Enter User ID"
+        />
+        <div class="error" *ngIf="postForm.get('user_id')?.invalid && postForm.get('user_id')?.touched">
+          User ID is required.
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="group_id">Group ID</label>
+        <input
+          id="group_id"
+          type="text"
+          formControlName="group_id"
+          class="form-control"
+          placeholder="Enter Group ID"
+        />
+        <div class="error" *ngIf="postForm.get('group_id')?.invalid && postForm.get('group_id')?.touched">
+          Group ID is required.
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="content">Content</label>
+        <textarea
+          id="content"
+          rows="4"
+          formControlName="content"
+          class="form-control"
+          placeholder="Write your post content here..."
+        ></textarea>
+        <div class="error" *ngIf="postForm.get('content')?.invalid && postForm.get('content')?.touched">
+          Content is required.
+        </div>
+      </div>
+  
+      <button type="submit" class="btn-submit" [disabled]="postForm.invalid">
+        Create Post
+      </button>
+    </form>
+  </div>
+  

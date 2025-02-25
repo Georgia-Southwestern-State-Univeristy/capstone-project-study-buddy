@@ -38,7 +38,7 @@ export class SignUpComponent implements OnInit {
   errorMessage: string = '';
   hidePassword = true;
   submitted = false;
-  currentProfilePicture :any='assets/img/download.png'
+  currentProfilePicture :any='assets/img/user_avtar.jpg'
   hideConfirmPassword = true;
   selectedFile: File | null = null;
   fileError: string = '';
@@ -91,7 +91,6 @@ export class SignUpComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length) {
       const file = input.files[0];
-      console.log('hello')
       // Validate file type
       const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
       if (!allowedTypes.includes(file.type)) {
