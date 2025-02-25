@@ -1,0 +1,103 @@
+<aside id="sidebar" class="sidebar-wrapper" [class.collapsed]="!sidebarVisible">
+  <!-- Top Section: Header and Top Menu Items -->
+  <div class="top-section">
+    <!-- Header Section with Logo and Collapse Button -->
+    <div class="sidebar-header d-flex align-items-center justify-content-between">
+      <div class="logo-wrapper">
+        <img
+          src="assets/img/logo.png"
+          alt="Study Buddy Logo"
+          class="sidebar-logo-img"
+        />
+      </div>
+      <!-- Collapse Button -->
+      <button
+        type="button"
+        class="collapse-btn"
+        aria-label="Toggle Sidebar"
+        (click)="toggleSidebar()"
+        title="{{ translatedTexts['Toggle Sidebar'] || 'Toggle Sidebar' }}"
+      >
+        {{ toggleIcon }}
+      </button>
+    </div>
+
+    <!-- Top Menu Items -->
+    <div class="menu-items">
+      <!-- New Chat -->
+      <button
+        class="menu-btn"
+        title="{{ translatedTexts['New Chat'] || 'New Chat' }}"
+        routerLink="/main/live-conversion"
+        routerLinkActive="active" 
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <i class="bi bi-magic"></i> <!-- Updated to magic wand icon -->
+        <span data-translate> Chat Wizard</span>
+      </button>
+      <!-- AI Avatar -->
+      <button
+        class="menu-btn"
+        title="{{ translatedTexts['AI Avatar'] || 'AI Avatar' }}"
+        routerLink="/main/avatar"
+      >
+        <span role="img" aria-label="girl">👧</span>
+        <span data-translate>Buddy</span>
+      </button>
+
+      <!-- Quiz AI -->
+      <button
+        class="menu-btn"
+        title="{{ translatedTexts['Quiz AI'] || 'Quiz AI' }}"
+        routerLink="/main/quiz-ai"
+        routerLinkActive="active" 
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <span role="img" aria-label="question">❓</span> <!-- Updated to question mark emoji -->
+        <span data-translate>Quizify</span>
+        <span
+          class="score-badge"
+          title="Total Score"
+          *ngIf="totalScore !== null"
+          >{{ totalScore }}</span
+        >
+      </button>
+      <!-- My Groups -->
+      <button class="menu-btn" title="My Groups" routerLink="/main/study-group" routerLinkActive="active" 
+      [routerLinkActiveOptions]="{ exact: false }">
+        <i class="bi bi-people"></i>
+        <span data-translate>My Groups</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Bottom Menu Items -->
+  <div class="menu-bottom">
+    <!-- Profile with Picture -->
+    <button
+      class="menu-btn profile-btn"
+      title="{{ translatedTexts['Profile'] || 'Profile' }}"
+      routerLink="/main/user-profile"
+      routerLinkActive="active" 
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      <img
+        [src]="userProfilePicture"
+        alt="User Avatar"
+        class="user-avatar"
+        (error)="userProfilePicture = '/assets/img/user_avatar.jpg'"
+      />
+      <span data-translate>Profile</span>
+    </button>
+
+    <!-- Log Out -->
+    <button
+      class="menu-btn"
+      (click)="signOut()"
+      title="{{ translatedTexts['Log Out'] || 'Log Out' }}"
+    >
+      <i class="material-icons">logout</i>
+      <span data-translate>Log Out</span>
+    </button>
+  </div>
+</aside>

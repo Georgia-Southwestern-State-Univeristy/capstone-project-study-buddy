@@ -1,0 +1,230 @@
+/* ----------------------------
+   Navbar container
+----------------------------- */
+.mememingle-headernav {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  /* Matching sidebar's gradient */
+  background: linear-gradient(to right, #fff3db, #ffb84d);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 2;
+  padding: 0 20px;
+  justify-content: space-between; /* we'll customize each section's size */
+
+  /* 1) Left Section: Toggle, Icon Buttons, Mobile Menu */
+  .left-section {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* space between toggle, icons, menu icon */
+
+    #sidebar-toggle {
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #333;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      font-size: 1.5rem;
+      font-weight: 700;
+
+      &:hover {
+        background-color: #f0f0f0;
+      }
+    }
+
+    .top-icons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+
+      .icon-btn {
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+
+        i {
+          font-size: 1.3rem;
+          color: #333;
+        }
+
+        &:hover {
+          background: #f0f0f0;
+        }
+      }
+    }
+
+    .menu-icon {
+      display: none; /* hidden on desktop */
+      cursor: pointer;
+      z-index: 3;
+
+      .material-icons {
+        font-size: 32px;
+        color: #333;
+      }
+
+      &.active .material-icons {
+        color: #000;
+      }
+    }
+  }
+
+  /* 2) Center Section: About, Contact, FAQ */
+  .center-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Let it shrink or grow as needed */
+    flex: 1;
+
+    .mememingle-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+
+      span {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #333;
+        cursor: pointer;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: #3c3c8c;
+        }
+      }
+    }
+
+    .center-dropdown-menu {
+      display: none;
+      position: relative; /* or absolute if you prefer */
+      top: 0; /* adjust if absolutely positioned */
+      left: 0; 
+      right: 0;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-top: 1px solid #ccc;
+      flex-direction: column;
+      padding: 10px 0;
+      z-index: 3;
+
+      a {
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        color: #333;
+        text-decoration: none;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: rgba(60, 60, 140, 0.1);
+        }
+
+        .material-icons {
+          font-size: 1rem;
+          font-weight: 700;
+          margin-right: 10px;
+        }
+      }
+
+      &.show {
+        display: flex;
+      }
+    }
+  }
+
+  /* 3) Right Section: User Avatar */
+  .right-section {
+    display: flex;
+    align-items: center;
+    position: relative; /* needed for dropdown positioning */
+    margin-left: 10px; 
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      object-fit: cover;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: 60px;
+      background-color: rgba(255, 255, 255, 0.95);
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      width: 180px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: none;
+      flex-direction: column;
+      padding: 10px 0;
+      z-index: 5;
+
+      &.show {
+        display: flex;
+      }
+
+      &.sidebar-open {
+        right: auto;
+        left: 0;
+      }
+
+      a {
+        display: flex;
+        align-items: center;
+        padding: 10px 20px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: rgba(255, 184, 77, 0.1);
+        }
+
+        .material-icons {
+          font-size: 20px;
+          margin-right: 10px;
+        }
+      }
+    }
+  }
+}
+
+/* ----------------------------
+   Responsive Adjustments
+----------------------------- */
+@media screen and (max-width: 768px) {
+  /* Hide center links, show menu icon */
+  .center-section .mememingle-links {
+    display: none;
+  }
+
+  .left-section .menu-icon {
+    display: block;
+  }
+}
