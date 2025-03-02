@@ -56,7 +56,7 @@
 - **Azure Text Analytics:** To identify the user's mood and recommend appropriate coping mechanisms.
 - **Azure Translator Service:** To provide multilingual support.
 - **Azure OpenAI Services:** To generate and score the content for conversation and quizzes.
-- **Azure Document Intelligence:**For uploaded document processing.
+- **Azure Document Intelligence:** For uploaded document processing.
 - **Azure Cosmos DB for MongoDB(vCore):** Stores user data and provides data management.
 - **Azure Container Registry:** Stores and manages Docker images of our backend services in an efficient way for version control and distribution.
 - **Azure Container Apps:** This was used to deploy and scale our microservices architecture easily.
