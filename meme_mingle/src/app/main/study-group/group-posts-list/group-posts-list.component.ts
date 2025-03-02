@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { AppService } from 'src/app/app.service'; // Adjust path as needed
 
@@ -23,14 +23,21 @@ export class GroupPostsListComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private appService: AppService
+    private appService: AppService,
+    private router: Router
   ) {}
+  
+  onCreatePost(): void {
+    this.router.navigate(['/main/study-group/create-group-post'], {
+      queryParams: { groupId: this.groupId },
+    });
+  }
 
   ngOnInit(): void {
-    // 1) Grab the groupId from the route param
-    this.groupId = this.route.snapshot.paramMap.get('groupId') as string;
-    // 2) Fetch the group posts
-    this.fetchGroupPosts();
+    this.route.paramMap.subscribe(params => {
+      this.groupId = params.get('groupId') as string;
+      this.fetchGroupPosts();
+    });
   }
 
   fetchGroupPosts(): void {

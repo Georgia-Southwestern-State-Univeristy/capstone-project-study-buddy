@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 
 @Component({
   standalone: true,
@@ -24,14 +26,28 @@ export class CreateGroupPostComponent {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
+    private http: HttpClient,
+    private route: ActivatedRoute,
+    private location: Location
   ) {
-    // Define your form fields, matching the GroupPost model in your backend
     this.postForm = this.fb.group({
-      user_id: ['', Validators.required],
-      group_id: ['', Validators.required],
+      user_id: [''],
+      group_id: [''],
       content: ['', Validators.required],
     });
+  }
+  ngOnInit(): void {
+    const userId = localStorage.getItem('user_id') || '';
+    this.route.queryParams.subscribe((params) => {
+      const grpId = params['groupId'] || '';
+      this.postForm.patchValue({
+        user_id: userId,
+        group_id: grpId
+      });
+    });
+  }
+  onBack(): void {
+    this.location.back();
   }
 
   onSubmit(): void {

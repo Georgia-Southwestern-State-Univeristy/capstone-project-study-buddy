@@ -20,6 +20,7 @@ export class StudyGroupSidebarComponent implements OnInit {
   toggleIcon: string = '<';
   translatedTexts: { [key: string]: string } = {};
   userId: string = '';
+  selectedGroupId: string = '';
 
   constructor(private appService: AppService, private router: Router,  private sidebarService: SidebarService,) {}
 
@@ -84,5 +85,14 @@ export class StudyGroupSidebarComponent implements OnInit {
   this.sidebarVisible = !this.sidebarVisible;
   this.toggleIcon = this.sidebarVisible ? '<' : '>';
   this.sidebarService.toggleSidebar(); // Notify service about the change
+}
+
+openGroupPosts(group: any): void {
+  if (group.members?.includes(this.userId)) {
+    this.selectedGroupId = group.id;
+    this.router.navigate(['/main/study-group/group-posts', group.id]);
+  } else{
+    console.log('You have not joined this group yet.');
+  }
 }
 }

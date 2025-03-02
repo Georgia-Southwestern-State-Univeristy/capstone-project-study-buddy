@@ -58,6 +58,11 @@ $transition-ease: ease-in-out;
         .join-button {
           display: none;
         }
+
+        &.active {
+          background: rgba(255, 255, 255, 0.2);
+          border: 1px solid $gsw-secondary;
+        }
       }
     }
   }
@@ -146,6 +151,10 @@ $transition-ease: ease-in-out;
 
       &:hover {
         background: rgba(255, 255, 255, 0.2);
+      }
+      &.active {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid $gsw-secondary;
       }
 
       .group-icon {

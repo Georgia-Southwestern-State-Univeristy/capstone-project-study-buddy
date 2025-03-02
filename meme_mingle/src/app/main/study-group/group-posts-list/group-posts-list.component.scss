@@ -17,24 +17,42 @@ $success-color: #27ae60;
 .group-posts-container {
   width: 100%;
   max-width: 700px;
-  margin: 2rem auto;
+  margin: 10px auto;
   border: 2px solid darken($gsw-primary, 10%);
-  border-radius: 0.6rem;
+  border-radius: 15px;
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 
   /* Header => gradient background consistent with .gsw-card-header */
   .group-posts-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     background-image: linear-gradient(180deg, $gsw-primary, $gsw-secondary-muted);
     color: #fff;
     border-top-left-radius: 0.5rem;
     border-top-right-radius: 0.5rem;
     padding: 1rem;
+  
     h2 {
       margin: 0;
       font-weight: 700;
       font-size: 1.5rem;
-      text-align: center;
+    }
+  
+    .add-post-btn {
+      background-color: $gsw-secondary;
+      color: #fff;
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  
+      &:hover {
+        background-color: darken($gsw-secondary, 10%);
+      }
     }
   }
 

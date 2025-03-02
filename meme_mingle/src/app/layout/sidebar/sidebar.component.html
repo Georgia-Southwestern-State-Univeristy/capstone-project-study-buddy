@@ -74,7 +74,8 @@
       class="menu-btn"
       title="{{ translatedTexts['Resume Builder'] || 'Resume Builder' }}"
       routerLink="/main/resume-builder"
-    >
+      routerLinkActive="active" 
+      [routerLinkActiveOptions]="{ exact: false }">
       <span role="img" aria-label="paper">📝</span>
       <span data-translate>Resume</span>
     </button>

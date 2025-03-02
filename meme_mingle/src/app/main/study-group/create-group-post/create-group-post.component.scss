@@ -23,16 +23,35 @@ $success-color: #27ae60;
 
   // Header similar to .gsw-card-header
   .post-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     background-image: linear-gradient(180deg, $gsw-primary, $gsw-secondary-muted);
     color: #fff;
     border-top-left-radius: 0.5rem;
     border-top-right-radius: 0.5rem;
     padding: 1rem;
+  
+    .back-btn {
+      background: transparent;
+      color: #fff;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-right: 1rem;
+      transition: opacity 0.3s ease;
+  
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+  
     h2 {
       margin: 0;
       font-weight: 700;
       font-size: 1.5rem;
       text-align: center;
+      flex-grow: 1;
     }
   }
 
