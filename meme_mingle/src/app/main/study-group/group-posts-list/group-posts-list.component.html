@@ -1,39 +1,68 @@
 <div class="group-posts-container">
-    <!-- Header with GSW gradient styling (like your study-group-create) -->
-    <div class="group-posts-header">
-      <h2>Group Posts for {{ groupId }}</h2>
-      <button class="add-post-btn" (click)="onCreatePost()">+ Create Post</button>
-    </div>
-  
-    <!-- Loading Indicator -->
-    <div class="loading" *ngIf="loading">
-      <p>Loading posts...</p>
-    </div>
-  
-    <!-- Error Message -->
-    <div *ngIf="errorMessage" class="alert alert-danger">
-      {{ errorMessage }}
-    </div>
-  
-    <!-- No Posts Found -->
-    <div *ngIf="!loading && posts?.length === 0 && !errorMessage" class="alert alert-info">
-      No posts found for this group.
-    </div>
-  
-    <!-- Posts List -->
-    <div class="post-card" *ngFor="let post of posts">
-      <div class="post-card-header">
-        <!-- If you have a title field or user info, display it here -->
-        <h3>{{ post.title || 'Untitled Post' }}</h3>
+  <!-- Header -->
+  <div class="group-posts-header">
+    <h2>Group Posts for {{ groupId }}</h2>
+    <button class="add-post-btn" (click)="onCreatePost()">+ Create Post</button>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div class="loading" *ngIf="loading">
+    <p>Loading posts...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- No Posts Found -->
+  <div *ngIf="!loading && posts?.length === 0 && !errorMessage" class="alert alert-info">
+    No posts found for this group.
+  </div>
+
+  <!-- Posts List -->
+  <div class="post" *ngFor="let post of posts">
+    <!-- Post Header: avatar, username, timestamp, etc. -->
+    <div class="post-header">
+      <img
+        [src]="userProfilePicture"
+        alt="User Avatar"
+        class="user-avatar"
+        (error)="userProfilePicture = '/assets/img/user_avatar.jpg'"
+      />
+      <div class="post-user-info">
+        <span class="user-name">{{ post.user_id || 'Anonymous' }}</span>
+        <span class="post-time">{{ post.created_at }}</span>
       </div>
-      <div class="post-card-body">
-        <p> {{ post.content }}</p>
-        <p><strong>User:</strong> {{ post.user_id }}</p>
-        <p><strong>Comments:</strong>{{post.comments}}</p>
-        <p><strong>Posted At:</strong>{{post.created_at}}</p>
-        <p><strong>Likes:</strong> {{ post.likes || 0 }}</p>
-        <!-- Add more fields as needed from your post object -->
+      <!-- Replaced the FA ellipsis with Bootstrap Icons three-dots -->
+      <div class="post-options">
+        <i class="bi bi-three-dots"></i>
+      </div>
+    </div>
+
+    <!-- Post Body -->
+    <div class="post-content">
+      <p>{{ post.content }}</p>
+      <!-- If there is an image property, optionally display it here:
+      <img *ngIf="post.imageUrl" [src]="post.imageUrl" alt="Post Image" />
+      -->
+    </div>
+
+    <!-- Post Footer: actions like like/comment/share -->
+    <div class="post-footer">
+      <div class="actions">
+        <button>
+          <i class="bi bi-heart"></i>
+          <span class="action-label">{{ post.likes || 0 }}</span>
+        </button>
+        <button>
+          <i class="bi bi-chat"></i>
+          <span class="action-label">{{ post.comments || 0 }}</span>
+        </button>
+        <button>
+          <i class="bi bi-share"></i>
+        </button>
       </div>
     </div>
   </div>
-  
+</div>

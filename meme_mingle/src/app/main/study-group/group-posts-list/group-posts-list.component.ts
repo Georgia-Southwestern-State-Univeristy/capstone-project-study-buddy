@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
 import { AppService } from 'src/app/app.service'; // Adjust path as needed
-
+import { environment } from '../../../shared/environments/environment';
 @Component({
   standalone: true,
   selector: 'app-group-posts-list',
@@ -20,6 +20,8 @@ export class GroupPostsListComponent implements OnInit {
   posts: any[] = [];
   loading = false;
   errorMessage: string | null = null;
+  userProfilePicture: string = '/assets/img/user_avtar.jpg';
+  backendUrl = environment.baseUrl; 
 
   constructor(
     private route: ActivatedRoute,
@@ -64,4 +66,24 @@ export class GroupPostsListComponent implements OnInit {
         }
       });
   }
+
+  // Fetch user profile picture
+  fetchUserProfile(): void {
+    this.appService.getUserProfile().subscribe({
+      next: (response) => {
+        if (response.profile_picture) {
+          this.userProfilePicture = response.profile_picture.startsWith('http')
+            ? response.profile_picture
+            : `${this.backendUrl}${response.profile_picture}`;
+        } else {
+          this.userProfilePicture = '/assets/img/user_avtar.jpg';
+        }
+      },
+      error: (error) => {
+        console.error('Error fetching user profile:', error);
+        this.userProfilePicture = '/assets/img/user_avtar.jpg';
+      },
+    });
+  }
+
 }
