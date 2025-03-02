@@ -38,7 +38,10 @@
 
 6. **Collaborative study groups** and peer discussion forums.
    - The **Study-Buddy** platform offers comprehensive collaborative study groups and peer discussion forums, allowing users to create, join, and manage study groups with features like real-time chat, group posts, and threaded discussions, all backed by a robust Flask-Python backend and an interactive Angular.js frontend, ensuring a dynamic and engaging learning environment.
-7. **Career guidance features** like resume building and job search assistance. 
+7. **Career guidance features** 
+   - **Resume Building**: Users can create and manage their resumes using the resume builder feature. The system allows users to input their personal information, education, work experience, projects, skills, and references. Resumes can be enhanced with AI suggestions to improve their ATS (Applicant Tracking System) scores, ensuring better chances of getting noticed by recruiters. Users can also generate well-structured resumes in various formats, ready to be shared with potential employers.
+
+   - **Job Search Assistance**: The platform integrates job search functionalities to help users find job listings that match their skills and preferences. Users can receive personalized job recommendations through the platform. The system supports searching for jobs based on various criteria, including location, job title, and industry. By incorporating these features, **Study-Buddy** not only supports academic growth but also aids users in their career development journey.
 
 
 
