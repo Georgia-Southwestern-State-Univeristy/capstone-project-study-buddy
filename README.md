@@ -37,6 +37,7 @@
 -**Forgot Password Option:** Provides the secure and user-friendly feature of resetting passwords with verification, through an email that guarantees both account security and accessibility.
 
 6. **Collaborative study groups** and peer discussion forums.
+ -The **Study-Buddy** platform offers comprehensive collaborative study groups and peer discussion forums, allowing users to create, join, and manage study groups with features like real-time chat, group posts, and threaded discussions, all backed by a robust Flask-Python backend and an interactive Angular.js frontend, ensuring a dynamic and engaging learning environment.
 7. **Career guidance features** like resume building and job search assistance. 
 
 
