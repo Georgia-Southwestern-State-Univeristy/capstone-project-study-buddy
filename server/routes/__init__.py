@@ -7,6 +7,7 @@ from .translator import translator_routes
 from .quiz_ai import quiz_ai_routes
 from .group import groups_routes
 from .group_post import group_posts_routes
+from .resume import resume_routes
 
 """step 2: Define the register_blueprints function"""
 def register_blueprints(app):
@@ -18,6 +19,7 @@ def register_blueprints(app):
     app.register_blueprint(quiz_ai_routes)
     app.register_blueprint(groups_routes)
     app.register_blueprint(group_posts_routes)
+    app.register_blueprint(resume_routes)
 
 
     
