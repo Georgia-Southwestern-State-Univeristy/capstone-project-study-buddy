@@ -255,7 +255,7 @@
  
        &.Mentor {
          .message-content {
-           background: #FFBD59; // Neutral dark background for mentor messages
+           background: #003366; // Neutral dark background for mentor messages
            align-items: flex-start;
            text-align: left;
            color: $text-color;
@@ -272,7 +272,7 @@
            height: 40px;
            border-radius: 50%;
            margin: 0 8px;
-           box-shadow: 0 2px 6px rgba(255, 184, 77, 0.5);
+             box-shadow: 0 2px 6px rgba(0, 51, 102, 0.5);
          }
  
          .message-content {
@@ -559,45 +559,46 @@
 /* Common Container */
 .common-container {
   background-color: rgba(255, 189, 89, 0.9); // Glossy feel with reduced opacity
+  border-radius: $border-radius;
 
   .input-area {
     background-color: rgba(255, 189, 89, 0.9); // Same glossy background
-    // ...existing code...
+    border-radius: $border-radius;
 
     button {
-      background-color: #3f51b5; // Bootstrap primary button color
-      // ...existing code...
+      background-color: #003366; // Bootstrap primary button color
+      
     }
   }
 
   .status-indicators {
     background-color: #ffffff; // White background
-    // ...existing code...
+   
 
     button {
-      background-color: #3f51b5; // Bootstrap primary button color
-      // ...existing code...
+      background-color: #003366; // Bootstrap primary button color
+    
     }
   }
 
   .control-panel {
     background-color: rgba(255, 189, 89, 0.9); // Same glossy background
-    // ...existing code...
+    border-radius: $border-radius;
 
     button {
-      background-color: #3f51b5; // Bootstrap primary button color
-      // ...existing code...
+      background-color: #003366; // Bootstrap primary button color
+      
     }
   }
 
   button {
-    background-color: #3f51b5; // Bootstrap primary button color
-    // ...existing code...
+    background-color: #003366; // Bootstrap primary button color
+  
   }
 
   .file_upload_button button {
-    background-color: #3f51b5; // Same color as other buttons
-    // ...existing code...
+    background-color: #003366; // Same color as other buttons
+    
   }
 }
  
@@ -625,6 +626,5 @@
      opacity: 1;
    }
  }
-
 
 

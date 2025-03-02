@@ -79,6 +79,10 @@ class Resume(BaseModel):
     projects: List[ProjectItem] = Field(default_factory=list)
     references: List[ReferenceItem] = Field(default_factory=list)
 
+    # AI improvements
+    ai_enhanced_resume: Optional[str] = None  # store the improved resume text
+    ats_score: Optional[int] = None           # store the ATS score
+
     # Timestamps
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -86,6 +90,8 @@ class Resume(BaseModel):
     # -----------------------------------------
     # Class methods to interface with MongoDB
     # -----------------------------------------
+    
+    
     def save(self):
         """
         Insert or update the resume document in the 'resumes' collection.
@@ -107,6 +113,9 @@ class Resume(BaseModel):
         if self.id:
             # Update existing doc
             object_id = ObjectId(self.id)
+            # Remove _id from update data to avoid the immutable field error
+            if "_id" in resume_dict:
+                del resume_dict["_id"]
             resumes_coll.update_one({"_id": object_id}, {"$set": resume_dict})
         else:
             # Insert new doc
@@ -114,19 +123,18 @@ class Resume(BaseModel):
             self.id = str(result.inserted_id)
 
     @classmethod
-    def find_by_id(cls, resume_id: str):
-        """
-        Retrieve a resume by its _id from the 'resumes' collection.
-        """
+    def find_by_id(cls, resume_id):
         db_client = MongoDBClient.get_client()
         db = db_client[MongoDBClient.get_db_name()]
-        resumes_coll = db.resumes
+        data = db.resumes.find_one({"_id": ObjectId(resume_id)})
+        if not data:
+            return None
 
-        data = resumes_coll.find_one({"_id": ObjectId(resume_id)})
-        if data:
-            data["id"] = str(data["_id"])
-            return cls(**data)
-        return None
+        if "_id" in data and isinstance(data["_id"], ObjectId):
+            data["_id"] = str(data["_id"])
+
+        return cls(**data)
+       
 
     @classmethod
     def find_by_user_id(cls, user_id: str):

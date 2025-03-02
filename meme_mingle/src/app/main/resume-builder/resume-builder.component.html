@@ -1,403 +1,721 @@
-<div class="card gsw-card">
-  <div class="card-header gsw-card-header text-center">
-    <h2>Resume Builder</h2>
+<div class="resume-builder-container">
+  <!-- Progress Indicator -->
+  <div class="progress-tracker">
+    <div class="step" [ngClass]="{'active': currentStep >= 1, 'completed': currentStep > 1}">
+      <div class="step-icon">1</div>
+      <div class="step-label">Create Resume</div>
+    </div>
+    <div class="step" [ngClass]="{'active': currentStep >= 2, 'completed': currentStep > 2}">
+      <div class="step-icon">2</div>
+      <div class="step-label">Save</div>
+    </div>
+    <div class="step" [ngClass]="{'active': currentStep >= 3, 'completed': currentStep > 3}">
+      <div class="step-icon">3</div>
+      <div class="step-label">Enhance</div>
+    </div>
+    <div class="step" [ngClass]="{'active': currentStep >= 4}">
+      <div class="step-icon">4</div>
+      <div class="step-label">Download</div>
+    </div>
   </div>
 
-  <form class="resumeForm" [formGroup]="personForm" (ngSubmit)="onSubmit()">
-    <!-- 1. PERSONAL INFORMATION -->
-    <div class="form-section">
-      <h3>Personal Information</h3>
-      <div class="form-row">
-        <div class="form-group half-width">
-          <label for="fName">First Name</label>
-          <input id="fName" type="text" placeholder="First Name" formControlName="fName" />
-        </div>
-        <div class="form-group half-width">
-          <label for="lName">Last Name</label>
-          <input id="lName" type="text" placeholder="Last Name" formControlName="lName" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="description">About You</label>
-        <textarea
-          id="description"
-          placeholder="Briefly describe yourself"
-          formControlName="description"
-        ></textarea>
-      </div>
+  <div class="card gsw-card">
+    <div class="card-header gsw-card-header">
+      <h2><i class="fas fa-file-alt"></i> Resume Builder</h2>
+      <p class="header-subtitle">Create a professional resume in minutes with AI enhancement</p>
     </div>
 
-    <!-- 2. CAREER GOALS -->
-    <div class="form-section">
-      <h3>Career Goals</h3>
-      <div class="form-group">
-        <label for="career">Primary Career Goal</label>
-        <input id="career" type="text" placeholder="e.g. Software Engineer" formControlName="career" />
-      </div>
-      <div class="form-group">
-        <label for="career2">Alternate Career (Optional)</label>
-        <input
-          id="career2"
-          type="text"
-          placeholder="e.g. Data Scientist"
-          formControlName="career2"
-        />
-      </div>
-      <div class="form-group">
-        <label for="career3">Alternate Career (Optional)</label>
-        <input
-          id="career3"
-          type="text"
-          placeholder="e.g. Web Developer"
-          formControlName="career3"
-        />
-      </div>
-    </div>
-
-    <!-- 3. CONTACT INFORMATION -->
-    <div class="form-section">
-      <h3>Contact Information</h3>
-      <div class="form-row">
-        <div class="form-group half-width">
-          <label for="phoneNum">Mobile Number</label>
-          <input
-            type="tel"
-            id="phoneNum"
-            placeholder="(###) ###-####"
-            formControlName="phoneNum"
-          />
+    <!-- Main Form -->
+    <form class="resumeForm" [formGroup]="personForm" (ngSubmit)="onSubmit()">
+      <!-- Navigation Tabs -->
+      <div class="form-nav-tabs">
+        <div class="nav-tab" (click)="setActiveTab('personal')" [ngClass]="{'active': activeTab === 'personal'}">
+          <i class="fas fa-user"></i> Personal
         </div>
-        <div class="form-group half-width">
-          <label for="email">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="you@example.com"
-            formControlName="email"
-          />
+        <div class="nav-tab" (click)="setActiveTab('education')" [ngClass]="{'active': activeTab === 'education'}">
+          <i class="fas fa-graduation-cap"></i> Education
+        </div>
+        <div class="nav-tab" (click)="setActiveTab('experience')" [ngClass]="{'active': activeTab === 'experience'}">
+          <i class="fas fa-briefcase"></i> Experience
+        </div>
+        <div class="nav-tab" (click)="setActiveTab('skills')" [ngClass]="{'active': activeTab === 'skills'}">
+          <i class="fas fa-star"></i> Skills
+        </div>
+        <div class="nav-tab" (click)="setActiveTab('projects')" [ngClass]="{'active': activeTab === 'projects'}">
+          <i class="fas fa-code-branch"></i> Projects
         </div>
       </div>
-      <div class="form-group">
-        <label for="website">Personal Website (Optional)</label>
-        <input
-          type="text"
-          id="website"
-          placeholder="www.your-site.com"
-          formControlName="website"
-        />
-      </div>
 
-      <!-- MULTIPLE SOCIAL MEDIA ACCOUNTS -->
-      <h4 class="subheader">Social Media Accounts</h4>
-      <div formArrayName="socialAccounts">
-        <div
-          class="mini-card"
-          *ngFor="let social of socialAccountsControls; let i = index"
-          [formGroupName]="i"
-        >
-          <!-- Remove button top-right -->
-          <button
-            type="button"
-            class="btn btn-danger remove-btn small-remove"
-            (click)="removeSocialAccount(i)"
-          >
-            &times;
-          </button>
-
-          <div class="form-row">
-            <div class="form-group half-width">
-              <label>Platform</label>
-              <input
-                type="text"
-                placeholder="e.g. LinkedIn"
-                formControlName="platform"
-              />
-            </div>
-            <div class="form-group half-width">
-              <label>Handle</label>
-              <input
-                type="text"
-                placeholder="e.g. @john_doe"
-                formControlName="handle"
-              />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Profile URL</label>
-            <input
-              type="text"
-              placeholder="e.g. https://www.linkedin.com/in/john-doe"
-              formControlName="link"
-            />
-          </div>
-        </div>
-
-        <!-- Button to add more Social Accounts -->
-        <button
-          type="button"
-          class="btn btn-secondary add-btn"
-          (click)="addSocialAccount()"
-        >
-          + Add Another Social Media
-        </button>
-      </div>
-    </div>
-
-    <!-- 4. SKILLS & ACHIEVEMENTS -->
-    <div class="form-section">
-      <h3>Skills & Achievements</h3>
-      <div class="form-group">
-        <label for="skills">Relevant Skills</label>
-        <textarea
-          id="skills"
-          placeholder="List your relevant skills (e.g. Java, React, etc.)"
-          formControlName="skills"
-        ></textarea>
-      </div>
-      <div class="form-group">
-        <label for="achievements">Achievements/Awards</label>
-        <textarea
-          id="achievements"
-          placeholder="e.g. Dean’s List, Hackathon Winner, etc."
-          formControlName="achievements"
-        ></textarea>
-      </div>
-      <div class="form-group">
-        <label for="certifications">Certifications</label>
-        <textarea
-          id="certifications"
-          placeholder="e.g. AWS Certified, PMP, etc."
-          formControlName="certifications"
-        ></textarea>
-      </div>
-    </div>
-
-    <!-- 5. EDUCATION (MULTIPLE) -->
-    <div class="form-section">
-      <h3>Education</h3>
-      <div formArrayName="education">
-        <div
-          class="mini-card"
-          *ngFor="let edu of educationControls; let i = index"
-          [formGroupName]="i"
-        >
-          <button
-            type="button"
-            class="btn btn-danger remove-btn small-remove"
-            (click)="removeEducation(i)"
-          >
-            &times;
-          </button>
-
-          <div class="form-group">
-            <label for="school">School/University Name</label>
-            <input
-              id="school"
-              type="text"
-              placeholder="e.g. Georgia Southwestern University"
-              formControlName="school"
-            />
+      <!-- Personal Information Tab -->
+      <div class="form-tab-content" *ngIf="activeTab === 'personal'">
+        <!-- 1. PERSONAL INFORMATION -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-user-circle"></i>
+            <h3>Personal Information</h3>
           </div>
           <div class="form-row">
             <div class="form-group half-width">
-              <label for="grad">Graduation Date</label>
-              <input type="month" id="grad" formControlName="grad" />
+              <label for="fName">First Name <span class="required">*</span></label>
+              <input id="fName" type="text" placeholder="First Name" formControlName="fName" />
+              <div class="form-hint">Your legal first name</div>
             </div>
             <div class="form-group half-width">
-              <label for="major">Degree/Major</label>
-              <input
-                type="text"
-                id="major"
-                placeholder="e.g. B.S. in Computer Science"
-                formControlName="major"
-              />
-            </div>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          class="btn btn-secondary add-btn"
-          (click)="addEducation()"
-        >
-          + Add Another Education
-        </button>
-      </div>
-    </div>
-
-    <!-- 6. WORK EXPERIENCE (MULTIPLE) -->
-    <div class="form-section">
-      <h3>Work Experience</h3>
-      <div formArrayName="experience">
-        <div
-          class="mini-card"
-          *ngFor="let exp of experienceControls; let i = index"
-          [formGroupName]="i"
-        >
-          <button
-            type="button"
-            class="btn btn-danger remove-btn small-remove"
-            (click)="removeExperience(i)"
-          >
-            &times;
-          </button>
-
-          <div class="form-row">
-            <div class="form-group half-width">
-              <label for="exp_company">Company Name</label>
-              <input
-                type="text"
-                id="exp_company"
-                placeholder="e.g. Google"
-                formControlName="exp_company"
-              />
-            </div>
-            <div class="form-group half-width">
-              <label for="exp_date">Time at Company</label>
-              <input
-                type="text"
-                id="exp_date"
-                placeholder="e.g. 2021 - 2023"
-                formControlName="exp_date"
-              />
+              <label for="lName">Last Name <span class="required">*</span></label>
+              <input id="lName" type="text" placeholder="Last Name" formControlName="lName" />
             </div>
           </div>
           <div class="form-group">
-            <label for="exp_description">Description of Role</label>
+            <label for="description">Professional Summary</label>
             <textarea
-              id="exp_description"
-              placeholder="What did you do at this company?"
-              formControlName="exp_description"
+              id="description"
+              placeholder="Briefly describe your professional background and career goals"
+              formControlName="description"
+            ></textarea>
+            <div class="character-counter">{{ getCharacterCount('description') }}/300 characters</div>
+          </div>
+        </div>
+
+        <!-- 2. CAREER GOALS -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-bullseye"></i>
+            <h3>Career Goals</h3>
+          </div>
+          <div class="form-group">
+            <label for="career">Primary Career Goal <span class="required">*</span></label>
+            <input id="career" type="text" placeholder="e.g. Software Engineer" formControlName="career" />
+          </div>
+          <div class="form-row">
+            <div class="form-group half-width">
+              <label for="career2">Alternate Career</label>
+              <input
+                id="career2"
+                type="text"
+                placeholder="e.g. Data Scientist"
+                formControlName="career2"
+              />
+            </div>
+            <div class="form-group half-width">
+              <label for="career3">Alternate Career</label>
+              <input
+                id="career3"
+                type="text"
+                placeholder="e.g. Web Developer"
+                formControlName="career3"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. CONTACT INFORMATION -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-address-card"></i>
+            <h3>Contact Information</h3>
+          </div>
+          <div class="form-row">
+            <div class="form-group half-width">
+              <label for="phoneNum">Mobile Number <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <i class="fas fa-phone"></i>
+                <input
+                  type="tel"
+                  id="phoneNum"
+                  placeholder="(###) ###-####"
+                  formControlName="phoneNum"
+                />
+              </div>
+            </div>
+            <div class="form-group half-width">
+              <label for="email">E-mail <span class="required">*</span></label>
+              <div class="input-with-icon">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="you@example.com"
+                  formControlName="email"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="website">Personal Website</label>
+            <div class="input-with-icon">
+              <i class="fas fa-globe"></i>
+              <input
+                type="text"
+                id="website"
+                placeholder="www.your-site.com"
+                formControlName="website"
+              />
+            </div>
+          </div>
+
+          <!-- MULTIPLE SOCIAL MEDIA ACCOUNTS -->
+          <div class="subsection-header">
+            <h4>Social Media Accounts</h4>
+            <div class="tooltip-icon" title="Add your professional social media profiles">
+              <i class="fas fa-info-circle"></i>
+            </div>
+          </div>
+          
+          <div formArrayName="socialAccounts" class="social-accounts-container">
+            <div
+              class="mini-card social-card"
+              *ngFor="let social of socialAccountsControls; let i = index"
+              [formGroupName]="i"
+            >
+              <button
+                type="button"
+                class="btn btn-danger remove-btn small-remove"
+                (click)="removeSocialAccount(i)"
+              >
+                &times;
+              </button>
+
+              <div class="form-row">
+                <div class="form-group half-width">
+                  <label>Platform</label>
+                  <select formControlName="platform" class="platform-select">
+                    <option value="">Select platform</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="GitHub">GitHub</option>
+                    <option value="Twitter">Twitter</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group half-width">
+                  <label>Handle</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. @john_doe"
+                    formControlName="handle"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Profile URL</label>
+                <div class="input-with-icon">
+                  <i class="fas fa-link"></i>
+                  <input
+                    type="text"
+                    placeholder="e.g. https://www.linkedin.com/in/john-doe"
+                    formControlName="link"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Button to add more Social Accounts -->
+            <button
+              type="button"
+              class="btn btn-secondary add-btn"
+              (click)="addSocialAccount()"
+            >
+               Add Social Media Profile
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Education Tab -->
+      <div class="form-tab-content" *ngIf="activeTab === 'education'">
+        <!-- 5. EDUCATION -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-graduation-cap"></i>
+            <h3>Education</h3>
+          </div>
+          <div formArrayName="education" class="education-container">
+            <div
+              class="mini-card education-card"
+              *ngFor="let edu of educationControls; let i = index"
+              [formGroupName]="i"
+            >
+              <button
+                type="button"
+                class="btn btn-danger remove-btn small-remove"
+                (click)="removeEducation(i)"
+              >
+                &times;
+              </button>
+
+              <div class="card-header-mini">Education #{{i + 1}}</div>
+
+              <div class="form-group">
+                <label for="school">School/University Name <span class="required">*</span></label>
+                <div class="input-with-icon">
+                  <i class="fas fa-university"></i>
+                  <input
+                    id="school"
+                    type="text"
+                    placeholder="e.g. Georgia Southwestern University"
+                    formControlName="school"
+                  />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group half-width">
+                  <label for="grad">Graduation Date</label>
+                  <input type="month" id="grad" formControlName="grad" />
+                </div>
+                <div class="form-group half-width">
+                  <label for="major">Degree/Major <span class="required">*</span></label>
+                  <input
+                    type="text"
+                    id="major"
+                    placeholder="e.g. B.S. in Computer Science"
+                    formControlName="major"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary add-btn"
+              (click)="addEducation()"
+            >
+               Add Education
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience Tab -->
+      <div class="form-tab-content" *ngIf="activeTab === 'experience'">
+        <!-- 6. WORK EXPERIENCE -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-briefcase"></i>
+            <h3>Work Experience</h3>
+          </div>
+          <div formArrayName="experience">
+            <div
+              class="mini-card experience-card"
+              *ngFor="let exp of experienceControls; let i = index"
+              [formGroupName]="i"
+            >
+              <button
+                type="button"
+                class="btn btn-danger remove-btn small-remove"
+                (click)="removeExperience(i)"
+              >
+                &times;
+              </button>
+
+              <div class="card-header-mini">Experience #{{i + 1}}</div>
+
+              <div class="form-row">
+                <div class="form-group half-width">
+                  <label for="exp_company">Company Name <span class="required">*</span></label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-building"></i>
+                    <input
+                      type="text"
+                      id="exp_company"
+                      placeholder="e.g. Google"
+                      formControlName="exp_company"
+                    />
+                  </div>
+                </div>
+                <div class="form-group half-width">
+                  <label for="exp_date">Employment Period <span class="required">*</span></label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                    <input
+                      type="text"
+                      id="exp_date"
+                      placeholder="e.g. 2021 - 2023"
+                      formControlName="exp_date"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="exp_description">Description of Role <span class="required">*</span></label>
+                <textarea
+                  id="exp_description"
+                  placeholder="Describe your responsibilities, achievements, and technologies used"
+                  formControlName="exp_description"
+                ></textarea>
+                <div class="writing-tips">
+                  <i class="fas fa-lightbulb"></i> Pro tip: Use action verbs and quantify your achievements when possible
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary add-btn"
+              (click)="addExperience()"
+            >
+               Add Work Experience
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Tab -->
+      <div class="form-tab-content" *ngIf="activeTab === 'skills'">
+        <!-- 4. SKILLS & ACHIEVEMENTS -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-star"></i>
+            <h3>Skills & Achievements</h3>
+          </div>
+          <div class="form-group">
+            <label for="skills">Technical Skills <span class="required">*</span></label>
+            <div class="skills-chips-container">
+              <textarea
+                id="skills"
+                placeholder="List your relevant skills (e.g. Java, React, Project Management)"
+                formControlName="skills"
+              ></textarea>
+              <div class="skills-suggestions">
+                <span class="skill-chip" (click)="addSkill('JavaScript')">JavaScript</span>
+                <span class="skill-chip" (click)="addSkill('Python')">Python</span>
+                <span class="skill-chip" (click)="addSkill('React')">React</span>
+                <span class="skill-chip" (click)="addSkill('Angular')">Angular</span>
+                <span class="skill-chip" (click)="addSkill('Node.js')">Node.js</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="achievements">Achievements/Awards</label>
+            <textarea
+              id="achievements"
+              placeholder="e.g. Dean's List, Hackathon Winner, etc."
+              formControlName="achievements"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="certifications">Certifications</label>
+            <textarea
+              id="certifications"
+              placeholder="e.g. AWS Certified, PMP, etc."
+              formControlName="certifications"
             ></textarea>
           </div>
         </div>
-
-        <button
-          type="button"
-          class="btn btn-secondary add-btn"
-          (click)="addExperience()"
-        >
-          + Add Another Experience
-        </button>
       </div>
-    </div>
 
-    <!-- 7. PROJECTS (MULTIPLE) -->
-    <div class="form-section">
-      <h3>Projects (Optional)</h3>
-      <div formArrayName="projects">
-        <div
-          class="mini-card"
-          *ngFor="let proj of projectControls; let i = index"
-          [formGroupName]="i"
-        >
-          <button
-            type="button"
-            class="btn btn-danger remove-btn small-remove"
-            (click)="removeProject(i)"
-          >
-            &times;
-          </button>
-
-          <div class="form-row">
-            <div class="form-group half-width">
-              <label for="projectName">Project Name</label>
-              <input
-                type="text"
-                id="projectName"
-                placeholder="e.g. Personal Portfolio"
-                formControlName="projectName"
-              />
-            </div>
-            <div class="form-group half-width">
-              <label for="projectUrl">Project URL</label>
-              <input
-                type="text"
-                id="projectUrl"
-                placeholder="e.g. https://myportfolio.com"
-                formControlName="projectUrl"
-              />
-            </div>
+      <!-- Projects Tab -->
+      <div class="form-tab-content" *ngIf="activeTab === 'projects'">
+        <!-- 7. PROJECTS -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-code-branch"></i>
+            <h3>Projects</h3>
           </div>
-          <div class="form-group">
-            <label for="projectDesc">Project Description</label>
-            <textarea
-              id="projectDesc"
-              placeholder="Short summary of your project."
-              formControlName="projectDesc"
-            ></textarea>
-          </div>
-        </div>
+          <div formArrayName="projects">
+            <div
+              class="mini-card project-card"
+              *ngFor="let proj of projectControls; let i = index"
+              [formGroupName]="i"
+            >
+              <button
+                type="button"
+                class="btn btn-danger remove-btn small-remove"
+                (click)="removeProject(i)"
+              >
+                &times;
+              </button>
 
-        <button
-          type="button"
-          class="btn btn-secondary add-btn"
-          (click)="addProject()"
-        >
-          + Add Another Project
-        </button>
-      </div>
-    </div>
+              <div class="card-header-mini">Project #{{i + 1}}</div>
 
-    <!-- 8. REFERENCES (MULTIPLE) -->
-    <div class="form-section">
-      <h3>References</h3>
-      <div formArrayName="references">
-        <div
-          class="mini-card"
-          *ngFor="let ref of referenceControls; let i = index"
-          [formGroupName]="i"
-        >
-          <button
-            type="button"
-            class="btn btn-danger remove-btn small-remove"
-            (click)="removeReference(i)"
-          >
-            &times;
-          </button>
-
-          <div class="form-row">
-            <div class="form-group half-width">
-              <label for="refName">Reference Name</label>
-              <input
-                type="text"
-                id="refName"
-                placeholder="e.g. John Doe"
-                formControlName="refName"
-              />
+              <div class="form-row">
+                <div class="form-group half-width">
+                  <label for="projectName">Project Name <span class="required">*</span></label>
+                  <input
+                    type="text"
+                    id="projectName"
+                    placeholder="e.g. Personal Portfolio"
+                    formControlName="projectName"
+                  />
+                </div>
+                <div class="form-group half-width">
+                  <label for="projectUrl">Project URL</label>
+                  <div class="input-with-icon">
+                    <i class="fas fa-link"></i>
+                    <input
+                      type="text"
+                      id="projectUrl"
+                      placeholder="e.g. https://github.com/yourusername/project"
+                      formControlName="projectUrl"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="projectDesc">Project Description <span class="required">*</span></label>
+                <textarea
+                  id="projectDesc"
+                  placeholder="Describe the project, your role, technologies used, and outcomes"
+                  formControlName="projectDesc"
+                ></textarea>
+              </div>
             </div>
-            <div class="form-group half-width">
-              <label for="refContact">Contact Info</label>
-              <input
-                type="text"
-                id="refContact"
-                placeholder="Email or Phone"
-                formControlName="refContact"
-              />
-            </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary add-btn"
+              (click)="addProject()"
+            >
+               Add Project
+            </button>
           </div>
         </div>
 
+        <!-- 8. REFERENCES -->
+        <div class="form-section">
+          <div class="section-header">
+            <i class="fas fa-user-check"></i>
+            <h3>References</h3>
+          </div>
+          <div formArrayName="references">
+            <div
+              class="mini-card reference-card"
+              *ngFor="let ref of referenceControls; let i = index"
+              [formGroupName]="i"
+            >
+              <button
+                type="button"
+                class="btn btn-danger remove-btn small-remove"
+                (click)="removeReference(i)"
+              >
+                &times;
+              </button>
+
+              <div class="form-row">
+                <div class="form-group half-width">
+                  <label for="refName">Reference Name</label>
+                  <input
+                    type="text"
+                    id="refName"
+                    placeholder="e.g. John Doe"
+                    formControlName="refName"
+                  />
+                </div>
+                <div class="form-group half-width">
+                  <label for="refContact">Contact Info</label>
+                  <input
+                    type="text"
+                    id="refContact"
+                    placeholder="Email or Phone"
+                    formControlName="refContact"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-secondary add-btn"
+              (click)="addReference()"
+            >
+               Add Reference
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <!-- Navigation buttons -->
+        <div class="tab-navigation">
+          <button 
+            type="button" 
+            class="btn btn-outline-secondary" 
+            [disabled]="isPreviousTabDisabled()"
+            (click)="goToPreviousTab()"
+          >
+            <i class="fas fa-arrow-left"></i> Previous
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-outline-primary" 
+            [disabled]="isNextTabDisabled()"
+            (click)="goToNextTab()"
+          >
+            Next <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+        
+        <!-- Submit buttons -->
+        <div class="submit-buttons">
+          <!-- "Save to DB" button calls onSubmit() -->
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="saveResumeBtn"
+          >
+            <i class="fas fa-save"></i> Save Resume
+          </button>
+
+          <!-- "Download Original" uses docxtemplater -->
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="downloadOriginalDocx()"
+          >
+            <i class="fas fa-file-download"></i> Download Draft
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- AFTER SAVE => Show extra buttons & improved text -->
+    <div class="after-save" *ngIf="createdResumeId">
+      <div class="success-indicator">
+        <i class="fas fa-check-circle"></i>
+        <span class="resume-id-badge">Resume ID: {{ createdResumeId }}</span>
+      </div>
+
+      <div class="enhancement-actions">
+        <!-- 1) AI Enhance -->
         <button
           type="button"
-          class="btn btn-secondary add-btn"
-          (click)="addReference()"
+          class="btn btn-enhance"
+          (click)="improveResume()"
+          [disabled]="isImproving"
         >
-          + Add Another Reference
+          <i class="fas" [ngClass]="isImproving ? 'fa-spinner fa-spin' : 'fa-magic'"></i>
+          {{ isImproving ? 'Enhancing Resume...' : 'Enhance with AI' }}
+        </button>
+
+        <!-- 2) Download Enhanced => only if we have AI text -->
+        <button
+          type="button"
+          class="btn btn-download"
+          (click)="downloadEnhancedDocx()"
+          [disabled]="!enhancedResumeText"
+        >
+          <i class="fas fa-file-download"></i>
+          Download Enhanced
         </button>
       </div>
+      
+      <!-- Enhanced Preview -->
+      <div class="enhanced-preview" *ngIf="enhancedResumeText">
+        <div class="preview-header">
+          <div class="preview-title">
+            <i class="fas fa-robot"></i>
+            <h3>AI-Enhanced Resume</h3>
+          </div>
+          
+          <div class="ats-score-container">
+            <div class="ats-score-label">ATS Score</div>
+            <div class="ats-score-circle" [ngStyle]="{ '--score': atsScore }">
+              <span>{{ atsScore || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="enhanced-content">
+          <pre>{{ enhancedResumeText }}</pre>
+        </div>
+        
+        <div class="enhancement-tips">
+          <div class="tip-card">
+            <i class="fas fa-lightbulb"></i>
+            <p>Keywords optimized for increased visibility by recruiters' automated systems.</p>
+          </div>
+          <div class="tip-card">
+            <i class="fas fa-chart-line"></i>
+            <p>Professional tone and language improved for better industry alignment.</p>
+          </div>
+          <div class="tip-card">
+            <i class="fas fa-check-circle"></i>
+            <p>Grammar and formatting perfected for professional appearance.</p>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+  <!-- Dialog Boxes -->
 
-    <!-- 9. SUBMIT -->
-    <div class="form-actions">
-      <button
-        type="submit"
-        class="btn btn-primary"
-        id="generateBtn"
-        (click)="generate()"
-      >
-        GENERATE
+<!-- Success Dialog -->
+<div class="dialog-overlay" *ngIf="showSuccessDialog">
+  <div class="dialog-box dialog-success">
+    <div class="dialog-header">
+      <i class="fas fa-check-circle"></i>
+      <h3>{{ successDialogTitle }}</h3>
+      <button type="button" class="dialog-close" (click)="closeDialog()">×</button>
+    </div>
+    <div class="dialog-content">
+      <p>{{ successDialogMessage }}</p>
+      
+      <!-- Resume ID (conditionally shown) -->
+      <div *ngIf="createdResumeId && showResumeIdInDialog">
+        <p>Your resume has been saved successfully with ID:</p>
+        <div class="resume-id-highlight">{{ createdResumeId }}</div>
+      </div>
+      
+      <!-- ATS Score (conditionally shown) -->
+      <div class="ats-score-display" *ngIf="atsScore && showAtsScoreInDialog">
+        <div class="score-circle" [ngStyle]="{ '--score': atsScore + '%' }">
+          <span>{{ atsScore }}</span>
+        </div>
+        <div>
+          <p><strong>ATS Compatibility Score</strong></p>
+          <p>Your resume has been optimized for Applicant Tracking Systems</p>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="btn btn-success" (click)="closeDialog()">
+        <i class="fas fa-check"></i> Continue
       </button>
     </div>
-  </form>
+  </div>
+</div>
+
+<!-- Error Dialog -->
+<div class="dialog-overlay" *ngIf="showErrorDialog">
+  <div class="dialog-box dialog-error">
+    <div class="dialog-header">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>{{ errorDialogTitle }}</h3>
+      <button type="button" class="dialog-close" (click)="closeDialog()">×</button>
+    </div>
+    <div class="dialog-content">
+      <p>{{ errorDialogMessage }}</p>
+      <p *ngIf="errorDetails" class="text-muted"><small>Technical details: {{ errorDetails }}</small></p>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">
+        <i class="fas fa-times"></i> Close
+      </button>
+      <button *ngIf="errorRetryAction" type="button" class="btn btn-danger" (click)="retryErrorAction()">
+        <i class="fas fa-redo"></i> Try Again
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Info Dialog -->
+<div class="dialog-overlay" *ngIf="showInfoDialog">
+  <div class="dialog-box dialog-info">
+    <div class="dialog-header">
+      <i class="fas fa-info-circle"></i>
+      <h3>{{ infoDialogTitle }}</h3>
+      <button type="button" class="dialog-close" (click)="closeDialog()">×</button>
+    </div>
+    <div class="dialog-content">
+      <p>{{ infoDialogMessage }}</p>
+    </div>
+    <div class="dialog-footer">
+      <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" (click)="confirmInfoAction()">
+        <i class="fas" [ngClass]="infoDialogConfirmIcon"></i> {{ infoDialogConfirmText }}
+      </button>
+    </div>
+  </div>
+</div>
 </div>

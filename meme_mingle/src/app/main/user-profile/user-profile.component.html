@@ -104,7 +104,7 @@
         <label data-translate>Language:</label>
         <mat-form-field appearance="outline" >
           <mat-label style="color: #ffb84d;" >{{ translatedTexts['Preferred Language'] ||'Preferred Language' }}</mat-label>
-          <mat-select formControlName="preferredLanguage" style="color: #ffffff; ">
+          <mat-select formControlName="preferredLanguage">
             <mat-option
               *ngFor="let lang of supportedLanguages"
               [value]="lang.code"

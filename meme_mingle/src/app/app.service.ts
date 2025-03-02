@@ -154,6 +154,17 @@ export class AppService {
     return this.http.get<any>(url);
   }
 
+  createResume(resumeData: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/resumes`, resumeData);
+  }
+  
+  getResumes(resumeId: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/resumes/${resumeId}`);
+  }
+  // improve the resume with AI after creating
+  improveResume(resumeId: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/resumes/${resumeId}/improve`, {});
+  }
   // Optional: Method to log out the user
   signOut() {
     localStorage.removeItem('access_token');

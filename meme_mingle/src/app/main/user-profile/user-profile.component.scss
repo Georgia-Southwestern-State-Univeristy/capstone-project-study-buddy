@@ -1,167 +1,294 @@
+// GSW College Theme Variables (matching resume-builder)
+$gsw-primary: #003366;
+$gsw-secondary: #ffcc00;
+$gsw-accent: #2196F3;
+$gsw-success: #4CAF50;
+$gsw-warning: #FF9800;
+$gsw-danger: #F44336;
+$gsw-light: #f8f9fa;
+$gsw-dark: #212529;
+$gsw-bg: #f7f7f7;
+$gsw-border: #e0e0e0;
+$shadow-sm: 0 .125rem .25rem rgba(0, 0, 0, .075);
+$shadow-md: 0 .5rem 1rem rgba(0, 0, 0, .15);
+$transition-base: all .2s ease-in-out;
+$border-radius-lg: 1rem;
+$border-radius-md: 0.75rem;
+$border-radius-sm: 0.5rem;
+
 .profile-page {
   min-height: 100vh;
-  background-color: transparent; // Dark background for the entire page
+  background-color: $gsw-bg;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
-
+  padding: 2rem 1rem;
+  
   .profile-title {
-    font-size: 2.5rem;
-    color: #ffb84d;
+    font-size: 2.4rem;
+    color: $gsw-primary;
     margin-bottom: 2rem;
-    font-weight: 600;
+    font-weight: 700;
     text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position: relative;
+    
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, $gsw-secondary, transparent);
+    }
   }
 }
 
 /* Main card container */
 .profile-card {
-  background-color: #1e1e1e;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  border-radius: 1rem;
-  padding: 2rem;
+  background-color: #fff;
+  border-radius: $border-radius-lg;
+  padding: 2.5rem 2rem;
   width: 100%;
-  max-width: 500px; /* Adjust for your layout */
-  border: 2px solid #ffb84d;
+  max-width: 550px;
+  border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-shadow: $shadow-md;
+  position: relative;
+  overflow: hidden;
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, $gsw-primary, darken($gsw-primary, 15%), $gsw-primary);
+  }
 }
 
 /* Avatar container */
 .avatar-container {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
   cursor: pointer;
-
+  position: relative;
+  
   .avatar {
-    width: 150px;
-    height: 150px;
+    width: 140px;
+    height: 140px;
     border-radius: 50%;
     object-fit: cover;
-    border: 4px solid #333; /* Base border */
-    box-shadow: 0 0 0 4px #ffb84d, /* Outer glow ring */
-                0 0 15px 2px rgba(255, 184, 77, 0.5); /* Subtle outer glow */
-    transition: transform 0.3s, box-shadow 0.3s;
-
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, filter 0.3s, box-shadow 0.3s;
+    filter: brightness(1);
+    
     &:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 0 6px #ffb84d,
-                  0 0 25px 4px rgba(255, 184, 77, 0.7);
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     }
+  }
+  
+  &:after {
+    content: '\f030';  // Camera icon from Font Awesome
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    width: 35px;
+    height: 35px;
+    background: $gsw-secondary;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $gsw-dark;
+    font-size: 0.9rem;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+    border: 2px solid white;
+  }
+  
+  &:hover:after {
+    transform: scale(1.15);
   }
 }
 
 /* Container for form-like fields */
 .fields-container {
   width: 100%;
+  padding: 1.5rem;
+  background-color: $gsw-light;
+  border-radius: $border-radius-md;
+  border: 1px solid $gsw-border;
+  margin-bottom: 1rem;
 
   .field-row {
     display: flex;
     flex-direction: column;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
 
-    label {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #ffffff;
+    &:last-child {
       margin-bottom: 0.5rem;
     }
-
+    
+    label {
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: $gsw-dark;
+      margin-bottom: 0.5rem;
+      
+      &:before {
+        font-family: 'Font Awesome 6 Free';
+        margin-right: 8px;
+        color: $gsw-primary;
+        width: 20px;
+        text-align: center;
+        font-weight: 900;
+      }
+    }
+    
+    // Add icons to each field type
+    &:nth-child(1) label:before { content: '\f007'; } // name - user icon
+    &:nth-child(2) label:before { content: '\f2bd'; } // username - user-circle
+    &:nth-child(3) label:before { content: '\f0e0'; } // email - envelope
+    &:nth-child(5) label:before { content: '\f3c5'; } // place - map-marker
+    &:nth-child(6) label:before { content: '\f19d'; } // field - graduation-cap
+    &:nth-child(7) label:before { content: '\f0ac'; } // language - globe
+    
     input {
-      background-color: #2a2a2a;
-      border: none;
-      border-radius: 0.5rem;
-      padding: 0.8rem;
+      background-color: #fff;
+      border: 1.5px solid darken($gsw-border, 5%);
+      border-radius: $border-radius-sm;
+      padding: 0.8rem 1rem;
       font-size: 1rem;
-      color: #cccccc;
+      color: $gsw-dark;
       outline: none;
-      transition: background-color 0.2s;
+      transition: $transition-base;
 
       &:focus {
-        background-color: #444444;
+        border-color: $gsw-accent;
+        box-shadow: 0 0 0 3px rgba($gsw-accent, 0.25);
+        outline: none;
       }
 
-      &[readonly] {
-        cursor: default;
+      &[disabled] {
+        cursor: not-allowed;
+        background-color: rgba($gsw-light, 0.5);
+        border-style: dashed;
+        opacity: 0.8;
+      }
+      
+      &::placeholder {
+        color: #aab;
+        opacity: 0.8;
       }
     }
 
-    /* Style the Angular Material form field for the dark theme */
+    /* Enhanced material form field styling */
     mat-form-field {
       width: 100%;
-  
-      .mat-form-field-label {
-        color: #ffb84d !important;
-  
-        &.mat-form-field-label-floating {
-          color: #ffffff !important;
+      
+      ::ng-deep {
+        .mat-form-field-wrapper {
+          padding-bottom: 0;
         }
-      }
-  
-      .mat-form-field-flex {
-        background-color: #3a3a3a;
-        border-radius: 0.5rem;
-      }
-  
-      .mat-form-field-appearance-outline {
-        .mat-form-field-outline-thick,
-        .mat-form-field-outline-start,
-        .mat-form-field-outline-end {
-          stroke: #ffb84d !important;
+      
+        .mat-form-field-flex {
+          background-color: #fff;
+          border-radius: $border-radius-sm;
+          padding: 0.5rem 0.75rem !important;
+          border: 1.5px solid darken($gsw-border, 5%);
         }
-      }
-  
-      .mat-select-arrow {
-        color: #ffb84d;
-      }
-  
-      .mat-select-panel {
-        background-color: #2a2a2a;
-  
-        .mat-option-text {
-          color: #ffffff;
+        
+        .mat-form-field-underline {
+          display: none;
         }
-  
-        .mat-option.mat-active,
-        .mat-option:hover {
-          background-color: #444444;
+        
+        .mat-form-field-infix {
+          padding: 0.5em 0;
+        }
+        
+        .mat-select-value, .mat-select-arrow {
+          color: $gsw-dark;
+        }
+        
+        .mat-form-field-label {
+          color: $gsw-primary !important;
+        }
+        
+        .mat-form-field-appearance-outline .mat-form-field-outline {
+          color: rgba($gsw-primary, 0.5);
         }
       }
     }
   }
 
-  /* GENDER SLIDER STYLES */
+  /* IMPROVED GENDER SLIDER STYLES */
   .gender-row {
+    label:before { 
+      content: '\f228'; // Mars and Venus icon
+    }
+    
     .gender-slider {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background-color: #2a2a2a;
-      border-radius: 0.5rem;
+      background-color: white;
+      border-radius: 2rem;
       padding: 0.6rem 1rem;
+      border: 1.5px solid darken($gsw-border, 5%);
 
       .nav-arrow {
-        background: transparent;
+        background: $gsw-primary;
         border: none;
-        color: #ffb84d;
-        font-size: 1.5rem;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
         cursor: pointer;
-        transition: color 0.2s, transform 0.2s;
-
+        transition: $transition-base;
+        
         &:hover {
-          color: #ffffff;
-          transform: scale(1.15);
+          background-color: darken($gsw-primary, 10%);
+          transform: scale(1.1);
+        }
+        
+        &:active {
+          transform: scale(0.95);
         }
       }
 
       .gender-value {
-        color: #ffffff;
-        font-size: 1rem;
+        color: $gsw-dark;
+        font-size: 1.1rem;
         font-weight: 600;
-        min-width: 50px;
+        min-width: 100px;
         text-align: center;
-        margin: 0 1rem; /* spacing between arrows */
+        
+        &:after {
+          content: '';
+          display: block;
+          width: 30px;
+          height: 2px;
+          background: $gsw-secondary;
+          margin: 5px auto 0;
+          border-radius: 1px;
+        }
       }
     }
   }
@@ -170,66 +297,105 @@
 /* Button group at the bottom */
 .button-group {
   display: flex;
-  flex-direction: row;
+  gap: 1rem;
   justify-content: center;
-  margin-top: 1.5rem;
+  width: 100%;
+  margin-top: 2rem;
 
   .edit-button {
-    border: 2px solid #ffb84d;
-    background-color: #2a2a2a;
-    color: #ffffff;
-    padding: 0.8rem 1.5rem;
-    border-radius: 2rem;
+    flex: 1;
+    border: none;
+    background-color: $gsw-primary;
+    color: white;
+    padding: 0.9rem 1.5rem;
+    border-radius: 8px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.5px;
+    
+    &:before {
+      content: '\f044'; // Edit icon
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+    }
 
     &:hover {
-      background-color: #1a1a1a;
-      color: #ffffff;
+      background-color: darken($gsw-primary, 10%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(1px);
     }
 
     &:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      box-shadow: none;
+      
+      &:before {
+        content: '\f110'; // Spinner icon
+        animation: fa-spin 1s infinite steps(8);
+      }
     }
   }
 
   .delete-button {
-    margin-left: 1rem;
-    border: 2px solid #ff4d4d;
-    background-color: #2a2a2a;
-    color: #ffffff;
-    padding: 0.8rem 1.5rem;
-    border-radius: 2rem;
-    font-size: 1rem;
-    font-weight: 600;
+    flex: 1;
+    border: 1px solid $gsw-danger;
+    background-color: white;
+    color: $gsw-danger;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
+    transition: all 0.3s;
+    gap: 8px;
+    
+    &:before {
+      content: '\f1f8'; // Trash icon
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+    }
 
     &:hover {
-      background-color: #ff4d4d; 
-      color: #1a1a1a;
-      border: 2px solid #1a1a1a;
+      background-color: $gsw-danger;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     &:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
     }
   }
 }
 
-/* 
- * 1) Basic mobile styles at 576px (already present, just refining them).
- * 2) Additional breakpoint at 768px for tablets. 
- */
+/* Loading spinner animation */
+@keyframes fa-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 
-/* For screens <= 576px (small phones) */
+/* Responsive Design */
 @media (max-width: 576px) {
   .profile-page {
-    padding: 1rem;
+    padding: 1rem 0.5rem;
   }
 
   .profile-title {
@@ -238,12 +404,31 @@
   }
 
   .profile-card {
-    padding: 1.2rem;
+    padding: 1.5rem 1rem;
+    border-radius: $border-radius-md;
   }
 
-  .avatar {
-    width: 100px;
-    height: 100px;
+  .avatar-container {
+    margin-bottom: 1.5rem;
+    
+    .avatar {
+      width: 110px;
+      height: 110px;
+    }
+  }
+  
+  .button-group {
+    flex-direction: column;
+    
+    .edit-button, .delete-button {
+      width: 100%;
+    }
+    
+    .delete-button {
+      order: -1; // Move delete button above edit button
+      padding: 0.7rem;
+      margin-bottom: 0.5rem;
+    }
   }
 }
 
@@ -252,15 +437,16 @@
   .profile-card {
     max-width: 90%;
     margin: 0 auto;
+    padding: 2rem 1.5rem;
   }
 
-  .avatar {
-    width: 120px;
-    height: 120px;
+  .avatar-container .avatar {
+    width: 130px;
+    height: 130px;
   }
 
   .profile-title {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 }
 
