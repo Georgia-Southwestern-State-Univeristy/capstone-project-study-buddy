@@ -1,0 +1,38 @@
+<div class="group-posts-container">
+    <!-- Header with GSW gradient styling (like your study-group-create) -->
+    <div class="group-posts-header">
+      <h2>Group Posts for {{ groupId }}</h2>
+    </div>
+  
+    <!-- Loading Indicator -->
+    <div class="loading" *ngIf="loading">
+      <p>Loading posts...</p>
+    </div>
+  
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+  
+    <!-- No Posts Found -->
+    <div *ngIf="!loading && posts?.length === 0 && !errorMessage" class="alert alert-info">
+      No posts found for this group.
+    </div>
+  
+    <!-- Posts List -->
+    <div class="post-card" *ngFor="let post of posts">
+      <div class="post-card-header">
+        <!-- If you have a title field or user info, display it here -->
+        <h3>{{ post.title || 'Untitled Post' }}</h3>
+      </div>
+      <div class="post-card-body">
+        <p> {{ post.content }}</p>
+        <p><strong>User:</strong> {{ post.user_id }}</p>
+        <p><strong>Comments:</strong>{{post.comments}}</p>
+        <p><strong>Posted At:</strong>{{post.created_at}}</p>
+        <p><strong>Likes:</strong> {{ post.likes || 0 }}</p>
+        <!-- Add more fields as needed from your post object -->
+      </div>
+    </div>
+  </div>
+  

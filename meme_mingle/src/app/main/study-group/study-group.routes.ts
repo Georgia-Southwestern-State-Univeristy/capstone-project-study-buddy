@@ -16,6 +16,11 @@ export const StudyGroup_routes: Routes = [
                   import('./create-group-post/create-group-post.component').then((m) => m.CreateGroupPostComponent),
             },
             {
+                path:'group-posts/:groupId',
+                loadComponent: () =>
+                  import('./group-posts-list/group-posts-list.component').then((m) => m.GroupPostsListComponent),
+            },
+            {
                 path:'create-group',
                 loadComponent: () =>
                   import('./study-group-create/study-group-create.component').then((m) => m.StudyGroupCreateComponent),
