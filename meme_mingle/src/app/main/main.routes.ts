@@ -39,6 +39,12 @@ export const main_routes: Routes = [
         loadChildren: () =>
           import('./study-group/study-group.routes').then((m) => m.StudyGroup_routes),
       },
+
+      {
+        path: 'resume-builder',
+        loadComponent: () =>
+          import('./resume-builder/resume-builder.component').then((m) => m.ResumeBuilderComponent),
+      }
       
       
     ],

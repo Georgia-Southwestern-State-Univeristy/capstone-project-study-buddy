@@ -458,38 +458,6 @@
   font-size: small;
 }
 
-.wave {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%; /* Full width for a smooth wave */
-  height: 375px; /* Increased height by 1.5x from 250px to 375px */
-  background-image: url('../../../assets/img/wave-fotor-2025020555251.png'); /* Corrected path to wave.png */
-  background-repeat: no-repeat;
-  background-size: contain; /* Changed from cover to contain */
-  background-position: left bottom; /* Ensure wave is anchored at the bottom */
-  z-index:1; /* Lower z-index to stay behind other elements */
-  
-  /* Optional: Add a slight wave animation */
-  /* animation: waveAnimation 10s linear infinite; */
-}
-
-.children {
-  position: absolute;
-  bottom: 0;
-  left: 5%;
-  width: 100%; /* Increased width by 1.5x from 100% to 150% */
-  height: 35%; /* Increased height by 1.5x from 250px to 375px */
-  background-image: url('../../../assets/img/GSW-logo.png'); /* Path to children.png */
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: left bottom; /* Ensure wave is anchored at the bottom */
-  z-index: 2; /* Higher than .wave to appear on top */
-
-  
-  /* Optional: Add animations or additional styling */
-  /* animation: fadeIn 2s ease-in-out forwards; */
-}
 /* Responsive Adjustments */
 @media (max-width: 540px) {
   .children {

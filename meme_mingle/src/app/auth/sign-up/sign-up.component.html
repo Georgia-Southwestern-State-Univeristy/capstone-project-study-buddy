@@ -57,7 +57,7 @@
               </div>
 
               <!-- Email -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-15 col-md-15 col-sm-15">
                 <label class="label">Email</label>
                 <input 
                   type="email" 
@@ -76,37 +76,63 @@
               </div>
 
               <!-- Password -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-8 col-md-8 col-sm-8">
                 <label class="label">Password</label>
                 <input 
                   type="password" 
                   class="form-control custom-input" 
                   formControlName="password" 
-                  placeholder="Password">
+                  placeholder="Password"
+                  id="password"
+
+                  [ngClass]="{
+                    'is-invalid':
+                      (signUpForm.get('password')!.touched && signUpForm.get('password')!.invalid) ||
+                      (submitted && signUpForm.get('password')!.invalid)
+                  }"
+                  >
+                  <small class="text-danger" *ngIf="(signUpForm.get('password')!.touched || submitted) && signUpForm.get('password')!.errors?.['required']">
+                    Password is required.
+                  </small>
+
               </div>
 
               <!-- Confirm Password -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-8 col-md-8 col-sm-8">
                 <label class="label">Confirm Password</label>
                 <input 
                   type="password" 
                   class="form-control custom-input" 
                   formControlName="confirmPassword" 
-                  placeholder="Confirm Password">
+                  placeholder="Confirm Password"
+                  id="confirmPassword">
+
+
               </div>
 
               <!-- Username -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-8 col-md-8 col-sm-8">
                 <label class="label">Username</label>
                 <input 
                   type="text" 
                   class="form-control custom-input" 
                   formControlName="username" 
-                  placeholder="Username">
+                  placeholder="Username"
+
+                  [ngClass]="{
+                    'is-invalid':
+                      (signUpForm.get('username')!.touched && signUpForm.get('username')!.invalid) ||
+                      (submitted && signUpForm.get('username')!.invalid)
+                  }"
+                  >
+                  <small class="text-danger" *ngIf="(signUpForm.get('username')!.touched || submitted) && signUpForm.get('username')!.errors?.['required']">
+                    Username is required.
+                  </small>
+
               </div>
 
               <!-- Name -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-8 col-md-8 col-sm-8">
                 <label class="label">Name</label>
                 <input 
                   type="text" 
@@ -116,7 +142,7 @@
               </div>
 
               <!-- Gender -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-7 col-md-7 col-sm-7">
                 <label class="label">Gender</label>
                 <select 
                   class="form-control custom-input" 
@@ -129,7 +155,7 @@
               </div>
 
               <!-- Age -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-4 col-md-4 col-sm-4">
                 <label class="label">Age</label>
                 <input 
                   type="number" 
@@ -139,7 +165,7 @@
               </div>
 
               <!-- Place of Residence -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-10 col-md-10 col-sm-10">
                 <label class="label">Place of Residence</label>
                 <input 
                   type="text" 
@@ -149,7 +175,7 @@
               </div>
 
               <!-- Field of Study -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-8 col-md-8 col-sm-8">
                 <label class="label">Field of Study</label>
                 <input 
                   type="text" 
@@ -159,7 +185,7 @@
               </div>
 
               <!-- Preferred Language -->
-              <div class="label_input col-lg-4 col-md-6 col-sm-6">
+              <div class="label_input col-lg-8 col-md-8 col-sm-8">
                 <label class="label">Preferred Language</label>
                 <select 
                   class="form-control custom-input" 
@@ -187,8 +213,4 @@
       </div>
     </div>
   </div>
-
-  <!-- Wave Design at Bottom-Left -->
-   <div class="children"></div>
-  <div class="wave"></div>
 </div>

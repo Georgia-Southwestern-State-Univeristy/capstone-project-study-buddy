@@ -1,0 +1,78 @@
+<div class="card gsw-card">
+  <div class="card-header gsw-card-header text-center">
+    <h2>Resume Builder</h2>
+  </div>
+<form class="resumeForm" [formGroup]="personForm" (ngSubmit)="onSubmit()">
+  <label for="fName">First Name: </label>
+  <input id="fName" type="text" placeholder="First Name" formControlName="fName" />
+
+  <label for="lName">Last Name: </label>
+  <input id="lName" type="text" placeholder="Last Name" formControlName="lName" />
+
+  <br /><br />
+
+  <label for="fName">Desired career: </label>
+  <input id="career" type="text" placeholder="Career" formControlName="career" />
+
+  <input id="career" type="text" placeholder="Career (optional)" formControlName="career2" />
+
+  <input id="career" type="text" placeholder="Career (optional)" formControlName="career3" />
+
+  <label for="phoneNum">Mobile Number: </label>
+  <input type="tel" id="phoneNum" placeholder="(###)###-####" formControlName="phoneNum" />
+
+  <label for="email">E-mail: </label>
+  <input type="email" id="email" placeholder="you@place.com" formControlName="email" />
+
+  <br /><br />
+
+  <label for="description">Description: </label>
+  <textarea id="description" placeholder="describe yourself" formControlName="description"></textarea>
+  
+  <label for="socialmedia">Social: </label>
+  <input type="text" id="socialmedia" placeholder="@social_media" formControlName="socialmedia" />
+
+  <br /><br />
+
+  <label for="website">Website: </label>
+  <input type="text" id="website" placeholder="your website" formControlName="website" />
+
+  <label for="skills"> Skills: </label>
+  <textarea id="skills" placeholder="list your relevent skills" formControlName="skills"></textarea>
+  
+  <br /><br />
+
+  <label>Education: </label>
+  <input type="text" id="school" placeholder="Name of your school" formControlName="school" />
+
+  <br /><br />
+
+  <label for="grad">Graduation Date: </label>
+  <input type="month" id="grad" formControlName="grad" />
+
+  <br /><br />
+
+  <input type="text" id="major" placeholder="Degree" formControlName="major" />
+
+  <br /><br />
+  
+  <label class="exp_label">Experience: </label>
+  <input type="text" id="exp_company" formControlName="exp_company" placeholder="company name" />
+
+  <br /><br />
+
+  <input type="text" id="exp_date" formControlName="exp_date" placeholder="time at company" />
+
+  <br /><br />
+
+  <textarea type="text" id="exp_description" formControlName="exp_description" placeholder="describe what you did at this company"></textarea>
+
+  <br />  
+
+  <br /> <br />
+
+</form>
+
+<button button type="button" class="btn btn-success" id="buuton" (click)="generate()">GENERATE</button>
+
+  </div>

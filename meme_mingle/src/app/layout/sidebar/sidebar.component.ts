@@ -54,6 +54,7 @@ export class SidebarComponent implements OnInit {
       'New Chat',
       'AI Avatar',
       'Quiz AI',
+      'Resume Builder',
       'Profile',
       'Logout',
     ];
