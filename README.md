@@ -34,10 +34,14 @@
 
 5. **User Authentication**
    - **Secure Login/Signup:** Offers both manual entering of credentials and Google Authenticator for secure and hassle-free authentication for users.
--**Forgot Password Option:** Provides the secure and user-friendly feature of resetting passwords with verification, through an email that guarantees both account security and accessibility.
+   - **Forgot Password Option:** Provides the secure and user-friendly feature of resetting passwords with verification, through an email that guarantees both account security and accessibility.
 
 6. **Collaborative study groups** and peer discussion forums.
-7. **Career guidance features** like resume building and job search assistance. 
+   - The **Study-Buddy** platform offers comprehensive collaborative study groups and peer discussion forums, allowing users to create, join, and manage study groups with features like real-time chat, group posts, and threaded discussions, all backed by a robust Flask-Python backend and an interactive Angular.js frontend, ensuring a dynamic and engaging learning environment.
+7. **Career guidance features** 
+   - **Resume Building**: Users can create and manage their resumes using the resume builder feature. The system allows users to input their personal information, education, work experience, projects, skills, and references. Resumes can be enhanced with AI suggestions to improve their ATS (Applicant Tracking System) scores, ensuring better chances of getting noticed by recruiters. Users can also generate well-structured resumes in various formats, ready to be shared with potential employers.
+
+   - **Job Search Assistance**: The platform integrates job search functionalities to help users find job listings that match their skills and preferences. Users can receive personalized job recommendations through the platform. The system supports searching for jobs based on various criteria, including location, job title, and industry. By incorporating these features, **Study-Buddy** not only supports academic growth but also aids users in their career development journey.
 
 
 
@@ -52,7 +56,7 @@
 - **Azure Text Analytics:** To identify the user's mood and recommend appropriate coping mechanisms.
 - **Azure Translator Service:** To provide multilingual support.
 - **Azure OpenAI Services:** To generate and score the content for conversation and quizzes.
-- **Azure Document Intelligence:**For uploaded document processing.
+- **Azure Document Intelligence:** For uploaded document processing.
 - **Azure Cosmos DB for MongoDB(vCore):** Stores user data and provides data management.
 - **Azure Container Registry:** Stores and manages Docker images of our backend services in an efficient way for version control and distribution.
 - **Azure Container Apps:** This was used to deploy and scale our microservices architecture easily.
