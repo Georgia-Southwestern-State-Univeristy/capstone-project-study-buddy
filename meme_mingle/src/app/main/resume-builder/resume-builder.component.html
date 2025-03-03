@@ -657,7 +657,7 @@
       
       <!-- ATS Score (conditionally shown) -->
       <div class="ats-score-display" *ngIf="atsScore && showAtsScoreInDialog">
-        <div class="score-circle" [ngStyle]="{ '--score': atsScore + '%' }">
+        <div class="score-circle" [ngStyle]="{ '--score': atsScore }">
           <span>{{ atsScore }}</span>
         </div>
         <div>

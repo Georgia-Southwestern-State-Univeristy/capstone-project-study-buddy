@@ -85,7 +85,7 @@ def run_mental_health_agent(user_id, chat_id):
         if kind is None:
             return jsonify({'error': 'Cannot guess the file type'}), 400
 
-        file_extension = kind.extension
+        
         file_mime_type = kind.mime
 
         print(f"allowed mime types: {ALLOWED_MIME_TYPES}")

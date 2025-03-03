@@ -87,6 +87,7 @@ def update_profile_fields():
             return jsonify({"message": "No fields to update."}), 200
     except Exception as e:
         current_app.logger.error(f"Error updating user profile: {str(e)}")
+        return jsonify({"error": "An error occurred while updating the profile"}), 500  # Added return statement
 
 # Delete the user profile
 @user_routes.delete('/user/profile')
