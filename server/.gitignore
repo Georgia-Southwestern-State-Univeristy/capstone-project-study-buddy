@@ -89,7 +89,6 @@ profile_default/
 ipython_config.py
 
 #models/rhubarb/
-rhubarb
 utils/rhubarb
 .DS_Store
 
