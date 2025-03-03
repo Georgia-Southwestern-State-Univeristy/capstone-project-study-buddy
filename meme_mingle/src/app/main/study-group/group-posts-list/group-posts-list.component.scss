@@ -1,0 +1,178 @@
+/* -----------------------------------------------
+  GSW College Theme Variables
+------------------------------------------------ */
+$gsw-primary: #003366;
+$gsw-secondary: #ffcc00;
+$gsw-secondary-muted: lighten($gsw-secondary, 40%);
+$gsw-bg: #f7f7f7;
+$gsw-border: #e0e0e0;
+$error-color: #c0392b;
+
+/* Container styling */
+.group-posts-container {
+  width: 100%;
+  max-width: 700px;
+  margin: 10px auto;
+  border: 2px solid darken($gsw-primary, 10%);
+  border-radius: 15px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+
+  /* Header */
+  .group-posts-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-image: linear-gradient(180deg, $gsw-primary, $gsw-secondary-muted);
+    color: #fff;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    padding: 1rem;
+    
+    h2 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+    
+    .add-post-btn {
+      background-color: $gsw-secondary;
+      color: #fff;
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      
+      &:hover {
+        background-color: darken($gsw-secondary, 10%);
+      }
+    }
+  }
+
+  /* Alerts */
+  .alert {
+    margin: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    
+    &.alert-danger {
+      background-color: rgba($error-color, 0.1);
+      border: 1px solid $error-color;
+      color: $error-color;
+    }
+    
+    &.alert-info {
+      background-color: rgba($gsw-primary, 0.1);
+      border: 1px solid $gsw-primary;
+      color: $gsw-primary;
+    }
+  }
+  
+  .loading {
+    margin: 1rem;
+    p {
+      font-style: italic;
+      color: $gsw-primary;
+    }
+  }
+
+  /* Post card styling */
+  .post {
+    background-color: #fff;
+    margin: 1rem;
+    padding: 1rem;
+    border: 1px solid $gsw-border;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    &-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      
+      .user-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 0.75rem;
+      }
+      
+      .post-user-info {
+        display: flex;
+        flex-direction: column;
+        
+        .user-name {
+          font-weight: 500;
+          font-size: 1rem;
+          color: black;
+        }
+        
+        .post-time {
+          font-size: 0.875rem;
+          color: gray;
+        }
+      }
+      
+      /* Three dots (post options) */
+      .post-options {
+        margin-left: auto; /* pushes the icon to the far right */
+        cursor: pointer;
+        i {
+          font-size: 1.25rem;
+          color: #666;
+        }
+      }
+    }
+
+    &-content {
+      p {
+        margin: 0.5rem 0;
+        font-size: 1rem;
+        line-height: 1.4;
+        color: #333;
+      }
+      img {
+        width: 100%;
+        border-radius: 0.5rem;
+        margin-top: 0.5rem;
+      }
+    }
+
+    &-footer {
+      margin-top: 0.75rem;
+      
+      .actions {
+        display: flex;
+        justify-content: space-between;
+        
+        button {
+          display: flex;
+          align-items: center;
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #666;
+          font-size: 0.9rem;
+
+          /* Icon spacing */
+          i {
+            margin-right: 0.3rem;
+            font-size: 1.1rem;
+          }
+
+          /* Extra spacing for text if needed */
+          .action-label {
+             margin-left: 0.25rem; 
+          }
+
+          &:hover {
+            color: darken(#666, 15%);
+          }
+        }
+      }
+    }
+  }
+}
