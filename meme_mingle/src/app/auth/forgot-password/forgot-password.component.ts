@@ -1,4 +1,3 @@
-// forgot-password.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
@@ -30,6 +29,7 @@ export class ForgotPasswordComponent implements OnInit {
   forgotPasswordForm!: FormGroup;
   message: string = '';
   errorMessage: string = '';
+  isSubmitting: boolean = false; // Added for loading state
 
   constructor(private fb: FormBuilder, private authService: AppService, private router: Router) {
     this.forgotPasswordForm = this.fb.group({
@@ -53,17 +53,20 @@ export class ForgotPasswordComponent implements OnInit {
       return;
     }
 
+    this.isSubmitting = true; // Set loading state
     const userEmail = this.email.value;
 
     this.authService.requestPasswordReset(userEmail).subscribe({
-      next: (response: any) => { // Replace 'any' with your response type
+      next: (response: any) => {
         this.message = response.message || 'Password reset link sent successfully.';
         this.errorMessage = '';
         this.forgotPasswordForm.reset();
+        this.isSubmitting = false; // Reset loading state
       },
-      error: (error: any) => { // Replace 'any' with your error type
+      error: (error: any) => {
         this.errorMessage = error.error.error || 'An error occurred. Please try again.';
         this.message = '';
+        this.isSubmitting = false; // Reset loading state
       },
     });
   }
