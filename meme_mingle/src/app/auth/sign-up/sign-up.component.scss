@@ -12,15 +12,19 @@
 .signin-container {
   display: flex;
   height: 100vh;
-  background-color: #ffffff; /* Dark teal-blue for background */
-  overflow: scroll; /* Prevent overflow caused by the wave */
-  float: right;
-  
-  // Optional: Adjust padding-bottom if needed
-  /* padding-bottom: 200px; */
+  width: 100%;
+  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;
 }
 
-
+/* Left Section: Banner Image */
+.signin-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 /* Features Section Styling */
 /* CSS Variables */
@@ -33,6 +37,112 @@
   --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   --hover-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
+.form-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  color: #0b1365;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.password-strength {
+  margin-top: 5px;
+}
+
+.strength-meter {
+  height: 4px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  margin-top: 5px;
+}
+
+.strength-meter-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
+}
+
+.strength-meter-fill.weak {
+  background-color: #ff4d4d;
+}
+
+.strength-meter-fill.medium {
+  background-color: #ffa64d;
+}
+
+.strength-meter-fill.strong {
+  background-color: #5cb85c;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border-color: #ddd;
+}
+
+/* Required field indicator */
+.text-danger {
+  font-size: 10px;
+}
+/* Features Section */
+.features {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background-color: var(--background-color);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+  }
+}
+
+.features-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-color);
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+
+  i, span[role="img"] {
+    font-size: 1.6rem;
+    color: var(--primary-color);
+  }
+
+  &:hover {
+    color: var(--primary-color);
+    transform: translateX(10px);
+  }
+
+  span {
+    font-weight: 500;
+    text-transform: capitalize;
+  }
+}
 
 /* Right Section: Form Card */
 .signin-right {
@@ -41,118 +151,71 @@
   justify-content: center;
   align-items: center;
   padding: 20px;
+  z-index: 10;
 }
 
 /* Toggle Buttons */
 .toggle-btn-left {
   width: 120px;
   text-align: center;
-  color: #ffffff; /* White text for contrast */
+  color: #ffffff;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
-  background-color: #003f47; /* Matching dark greenish background */
+  background-color: #003f47;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
 .toggle-btn-left.active {
-  background: #FFBD59; /* Dark gray active background */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Soft shadow */
-  color: #FFBD59; /* White text for active state */
-  transform: scale(1.08); /* Moderate scale for attention */
+  background: #FFBD59;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  color: #FFBD59;
+  transform: scale(1.08);
 }
 
 .toggle-btn-right {
   width: 120px;
   text-align: center;
-  color: #FFBD59; /* White text for contrast */
+  color: #FFBD59;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
-  background-color: #000c0e; /* Matching dark greenish background */
+  background-color: #000c0e;
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
 .toggle-btn-right.active {
-  background: #FFBD59; /* Dark gray active background */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Soft shadow */
-  color: #FFBD59; /* White text for active state */
-  transform: scale(1.08); /* Moderate scale for attention */
+  background: #FFBD59;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  color: #FFBD59;
+  transform: scale(1.08);
 }
 
 .toggle-btn-left:hover,
 .toggle-btn-right:hover {
-  background: #FFBD59; /* Lighter gray on hover */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Soft shadow */
-  color: #ffffff; /* White text */
-  transform: scale(1.1); /* Slight scale for hover effect */
+  background: #FFBD59;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  transform: scale(1.1);
 }
 
 .OR{
   color:#000000;
 }
 
-
-
-/* Media Queries */
-@media (max-width: 768px) {
-  .signin-container {
-    flex-direction: column;
-    overflow-y: scroll;
-  }
-
-  .signin-left {
-    display: none; /* Hide banner on smaller screens */
-  }
-
-  .custom-card {
-    max-width: 90%;
-    padding: 15px; /* Reduced padding for smaller screens */
-  }
-
-  .signup-form {
-    padding: 15px; /* Adjusted padding */
-  }
-
-  .login .btn,
-  .google .btn {
-    width: 100%; /* Full width buttons on mobile */
-    padding: 10px 20px; /* Adjusted padding */
-  }
-}
-
+/* Custom Card Styling */
 .custom-card {
-  position: relative; /* Allows for additional effects */
-  border-radius: 20px; /* Smooth rounded corners */
+  position: relative;
+  border-radius: 20px;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px; /* Increased size for sign-up form */
   min-height: 450px;
-  color: #ffffff; /* White text */
-  // box-shadow: 
-  //   0 4px 6px rgba(190, 49, 49, 0.1), /* Subtle shadow */
-  //   0 10px 20px rgba(0, 0, 0, 0.1); /* Enhanced subtle shadow */
+  color: #ffffff;
   padding: 20px;
-  animation: none; /* Removed twinkleGlow animation */
-  font-family: sans-serif; /* Updated to standard font */
-  // background: linear-gradient(135deg, var(--background-color), #1f4037); /* Updated with CSS variable */
-  // border: 2px solid var(--border-color); /* Updated with CSS variable */
-  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 1s ease; /* Added opacity for animation */
-  opacity: 0; /* Initial state for animation */
-  animation: fadeInUp 1s forwards; /* Added entrance animation */
-}
-
-/* Twinkling Glow Animation */
-@keyframes twinkleGlow {
-  0%, 100% {
-    box-shadow: 
-      0 0 30px rgba(0, 0, 0, 0.8), 
-      0 0 50px rgba(255, 247, 0, 0.8), 
-      0 0 70px rgba(0, 0, 0, 0.6);
-  }
-  50% {
-    box-shadow: 
-      0 0 30px rgba(0, 0, 0, 0.8), 
-      0 0 60px rgba(255, 247, 0, 1), 
-      0 0 90px rgba(0, 0, 0, 0.6);
-  }
+  font-family: sans-serif;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 1s ease;
+  opacity: 0;
+  animation: fadeInUp 1s forwards;
+  overflow-y: auto; /* Add scrolling for the sign-up form */
+  max-height: 90vh; /* Limit height on large screens */
 }
 
 /* Entrance Animation */
@@ -170,25 +233,26 @@
 /* Switch Sign Section */
 .switch_sign {
   position: relative;
-  display: inline-block;
+  display: flex;                   /* Change to flex */
+  justify-content: center;         /* Center horizontally */
+  align-items: center;             /* Center vertically */
   margin: 20px auto;
   padding: 10px 20px;
-  background: #ffffff; /* Solid dark background */
+  background: #ffffff;
   border-radius: 30px;
   font-weight: bold;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Soft shadow */
-  // animation: float 3s ease-in-out infinite, neon 1.5s ease-in-out infinite;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  text-shadow: none; /* Removed text shadow */
+  text-shadow: none;
   text-align: center;
-  color: black; /* White text */
+  color: black;
 }
 
 .switch_sign .toggle-btn-left,
 .switch_sign .toggle-btn-right {
   width: 120px;
   text-align: center;
-  color: black; /* White text for contrast */
+  color: black;
   font-size: 0.8em;
   border: none;
   padding: 10px 20px;
@@ -200,86 +264,102 @@
 
 .switch_sign .toggle-btn-left.active,
 .switch_sign .toggle-btn-right.active {
-  background: #0b1365; /* Dark gray active background */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Soft shadow */
-  color: #ffffff; /* White text for active state */
-  transform: scale(1.08); /* Moderate scale for attention */
+  background: #0b1365;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  transform: scale(1.08);
 }
 
 .switch_sign .toggle-btn-left:hover,
 .switch_sign .toggle-btn-right:hover {
-  background: #FFBD59; /* Lighter gray on hover */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Soft shadow */
-  color: rgb(255, 255, 255); /* White text */
-  transform: scale(1.1); /* Slight scale for hover effect */
+  background: #FFBD59;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  color: rgb(255, 255, 255);
+  transform: scale(1.1);
 }
 
-/* Animations */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px); /* Floating animation */
-  }
-}
-
-@keyframes neon {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(0, 168, 145, 0.7), 0 0 30px rgba(0, 133, 255, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(0, 168, 145, 1), 0 0 45px rgba(0, 133, 255, 0.7);
-  }
-}
-
-/* Signin Form */
-.signup-form{
-  width: 300px;
+/* Signup Form */
+.signup-form {
+  width: 100%;
   padding: 20px;
-  font-family: sans-serif; /* Updated to standard font */
-  color: black; /* White text */
-}
-.card {
-  border: #000000;
-  margin: auto;
-  z-index: 3;
-}
-/* Card Text */
-.card-text {
-  display: flex;
-  justify-content: left;
-  color: black; /* White text */
+  font-family: sans-serif;
+  color: black;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
-/* Links */
-.for {
-  list-style: none;
-  text-decoration: none;
-  color: black; /* White text */
-  transition: color 0.3s ease-in-out;
+.signup-form .row {
+  margin-bottom: 15px;
 }
 
-.for:hover {
-  color: #006994; /* Soft blue hover effect */
+.signup-form .label_input {
+  margin-bottom: 15px;
 }
 
-.login {
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* Space between elements */
-  justify-content: center;
-  align-items: center;
+.signup-form label {
+  color: black;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 5px;
 }
 
-.login .btn {
+.signup-form .form-control {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.signup-form .form-control:focus {
+  border-color: #FFBD59;
+  box-shadow: 0 0 0 0.2rem rgba(255, 189, 89, 0.25);
+}
+
+.signup-form .is-invalid {
+  border-color: #dc3545;
+}
+
+.signup-form .text-danger {
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+/* Profile Picture Section */
+.profile-picture-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.current-picture {
+  margin-top: 10px;
   display: inline-block;
-  padding: 12px 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #FFBD59;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.current-picture:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 189, 89, 0.5);
+}
+
+.current-picture img {
+  object-fit: cover;
+  width: 80px;
+  height: 80px;
+}
+
+/* Submit Button */
+.btn-outline-success {
+  display: inline-block;
+  padding: 10px 20px;
   font-size: 1.2em;
   font-weight: bold;
   text-transform: uppercase;
   color: #ffffff; /* White text for contrast */
-  background: #0b1365; /* Dark gray background */
+  background: #0b1365; 
   border: 2px solid transparent;
   border-radius: 30px; /* Rounded button */
   box-shadow: none; /* Remove shadows */
@@ -289,158 +369,65 @@
   transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.login .btn:hover {
-  background: #FFBD59; /* Lighter gray on hover */
+.btn-outline-success:hover {
+  background: #FFBD59; 
   box-shadow: none; /* Remove shadows */
   transform: scale(1.05); /* Slightly increase size on hover */
   box-shadow: 0 6px 12px var(--shadow-color); /* Enhanced shadow on hover */
 }
 
-.login .btn:disabled {
-  background: linear-gradient(135deg, #3a3a3a, #6a6a3a); /* Muted gradient for disabled state */
-  color: #888888; /* Dimmed text */
-  border: 2px solid #6a6a6a; /* Border for disabled state */
-  box-shadow: none; /* Remove glow for disabled state */
-  cursor: not-allowed;
-}
-
-.login .btn:active {
-  transform: scale(0.98); /* Subtle press effect */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4); /* Reduced shadow on active */
-}
-
-.login .btn:focus {
-  outline: 2px solid var(--primary-color); /* Clear focus outline */
-  outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(255, 189, 89, 0.5); /* Highlight focus state */
-}
-
-.google {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  background: #444444; /* Dark background */
-  border-radius: 30px; /* Rounded button */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.5); /* Soft shadows */
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-  text-shadow: none; /* Removed text shadow */
-  margin-top: 10px;
-  color: #ffffff; /* White text */
-}
-
-.google .btn {
-  color: #ffffff; /* White text for contrast */
-  font-weight: bold;
-  font-size: 0.9em; /* Slightly smaller font size */
-  text-transform: uppercase;
-  border: none;
-  background: transparent; /* Transparent to inherit gradient */
-  padding: 8px 20px; /* Adjust padding for balance */
-  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.google .btn:hover {
-  color: #ffffff; /* Keep text white on hover */
-  transform: scale(1.05); /* Slight scaling effect */
-  box-shadow: 0 6px 12px var(--shadow-color); /* Enhanced shadow on hover */
-}
-
-.google .btn:focus {
-  outline: 2px solid var(--primary-color); /* Clear focus outline */
-  outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(255, 189, 89, 0.5); /* Highlight focus state */
-}
-
-.form-check-end {
-  font-size: small;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 540px) {
-  .children {
-    display: none; 
-    
-  }
-  .wave{
-    display: none;
-  }
-
+/* Media Queries */
+@media (max-width: 768px) {
   .signin-container {
-    flex-direction: column; /* Stack sections vertically */
-    align-items: center;
+    flex-direction: column;
+    overflow-y: auto;
   }
 
   .signin-left {
-    display: none; /* Hide the feature section on small screens */
+    display: none;
   }
 
   .signin-right {
-    width: 100%; 
-    height: fit-content;/* Full width for the auth card */
-    padding: 10px;
+    width: 100%;
+    padding: 15px;
   }
 
   .custom-card {
-    max-width: 90%;
-    margin: 0 auto; /* Center the auth card */
-  }
-}
-
-/* Responsive Design: Adjusting for Smaller Screens */
-@media (max-width: 768px) {
-  /* Hide the left section on smaller screens */
-  .signin-left {
-    display: none;
+    max-width: 95%;
+    min-height: auto;
+    padding: 15px;
   }
 
-  /* Adjust container to center content */
-  .signin-container {
-    flex-direction: column; /* Stack elements vertically */
-    padding: 20px;
+  .signup-form {
+    padding: 10px;
+    width: 100%;
   }
 
-  /* Adjust children image for smaller screens */
-  .children {
-    width: 100%; /* Ensure it doesn't overflow horizontally */
-    height: 200px; /* Reduce height significantly */
+  .profile-picture-section {
+    margin-bottom: 15px;
   }
 
-  .wave{
-    height: 200px;
+  .current-picture img {
+    width: 60px;
+    height: 60px;
   }
-
-  /* Adjust the sign-in card size */
-  .signin-right .custom-card {
-    width: 100%; /* Take full width of the screen */
-    max-width: 360px; /* Adjust the maximum width for smaller devices */
-    margin: 0 auto; /* Center the card */
-  }
-
-  /* Adjust logo size and position */
-  .logo {
-    width: 100px; /* Smaller size for logo */
-    left: 10px; /* Adjust position */
-    top: 10px; /* Adjust position */
-    transform: none; /* Remove scaling */
-  }
-}
-
-/* Update all label elements to use white */
-.signun-form label {
-  color: black; /* White labels */
-
 }
 
 /* Update placeholder text color */
 ::placeholder {
-  color: gray; /* Changed from white to black */
-  opacity: 1; /* Ensure visibility */
+  color: gray;
+  opacity: 1;
 }
 
-/* Optional: Update other text elements if any */
+/* Title styling */
 .title {
-  font-family: sans-serif; /* Apply standard font */
-  color: #ffffff; /* White titles */
+  font-family: sans-serif;
+  color: #ffffff;
+}
+
+/* Card styling */
+.card {
+  border: none;
+  margin: auto;
+  z-index: 3;
 }

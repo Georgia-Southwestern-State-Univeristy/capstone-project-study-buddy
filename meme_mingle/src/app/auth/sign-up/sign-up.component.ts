@@ -46,7 +46,7 @@ export class SignUpComponent implements OnInit {
   isSignUpActive: boolean = true;
   isSignInActive: boolean = false;
   data:any=''
-
+  showAdditionalInfo = false;
   // Define supported languages
   supportedLanguges = supportedLanguages
   constructor(
@@ -178,6 +178,47 @@ export class SignUpComponent implements OnInit {
   triggerFileInput(fileInput: HTMLInputElement): void {
     fileInput.click(); // Programmatically trigger the file input
   }
+  // Add to sign-up.component.ts
+getPasswordStrength(): string {
+  const password = this.signUpForm.get('password')?.value;
+  if (!password) return 'weak';
+  
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  
+  const strength = (password.length >= 8 ? 1 : 0) + 
+                  (hasUpperCase ? 1 : 0) + 
+                  (hasLowerCase ? 1 : 0) + 
+                  (hasNumbers ? 1 : 0) + 
+                  (hasSpecialChar ? 1 : 0);
+  
+  if (strength <= 2) return 'weak';
+  if (strength <= 4) return 'medium';
+  return 'strong';
+}
+
+getPasswordStrengthPercent(): number {
+  const strength = this.getPasswordStrength();
+  if (strength === 'weak') return 33;
+  if (strength === 'medium') return 66;
+  return 100;
+}
+
+getFormProgress(): number {
+  const form = this.signUpForm;
+  const requiredFields = ['email', 'username', 'password', 'confirmPassword', 'name', 'age', 'gender', 'preferredLanguage'];
+  let filledFields = 0;
+  
+  requiredFields.forEach(field => {
+    if (form.get(field)?.valid && form.get(field)?.value) {
+      filledFields++;
+    }
+  });
+  
+  return Math.round((filledFields / requiredFields.length) * 100);
+}
 }
 
 
