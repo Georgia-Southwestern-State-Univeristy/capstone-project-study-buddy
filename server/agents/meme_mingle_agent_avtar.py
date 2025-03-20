@@ -328,18 +328,153 @@ class MemeMingleAIAgent(AIAgent):
                 meme_url = None
 
             # Convert AI text response to speech
-            audio_url = self.convert_text_to_speech(ai_text_response, user_id, chat_id, turn_id)
-                 
+            audio_url, filename = self.convert_text_to_speech(ai_text_response, user_id, chat_id, turn_id)
+            
+             # 4) Determine Facial Expression & Animation
+            fa_data = self.determine_facial_expression_and_animation(ai_text_response)
+            facial_expression = fa_data["facial_expression"]
+            animation = fa_data["animation"]
+            ##convert wav to mp3 and do base64 encoding
+            avatar_audio = self.convert_and_encode_audio(filename)
+
+            ##lipsync data
+            lip_sync_data = self.generate_lipsync_data(filename)
+           
+
+
+            
             # Structure the response to include both text and meme/GIF
             response = {
                 "message": ai_text_response,
                 "meme_url": meme_url,
                 "audio_url": audio_url,
+                "facial_expression": facial_expression,
+                "animation": animation,
+                "avatar_audio": avatar_audio,
+                "lip_sync_data": lip_sync_data
             }   
             return response
         except Exception as e:
             logging.error(f"Error during agent execution: {e}", exc_info=True)
             raise   
+
+   
+    def convert_and_encode_audio(self, wav_file_name):
+        """
+        Converts a WAV file to MP3 and encodes it in Base64.
+        
+        Args:
+            wav_file_name (str): The name of the WAV file to convert.
+        
+        Returns:
+            str: Base64 encoded MP3 audio.
+        """
+        try:
+            wav_file_path = os.path.join(self.generated_audio_dir, wav_file_name)
+            
+            if not os.path.isfile(wav_file_path):
+                raise FileNotFoundError(f"The file {wav_file_path} does not exist.")
+            
+            # Define the MP3 file path
+            mp3_file_path = os.path.splitext(wav_file_path)[0] + ".mp3"
+            
+            # Convert WAV to MP3
+            audio = AudioSegment.from_wav(wav_file_path)
+            audio.export(mp3_file_path, format="mp3")
+            
+            # Read the MP3 file and encode it as Base64
+            with open(mp3_file_path, "rb") as mp3_file:
+                encoded_audio = base64.b64encode(mp3_file.read()).decode("utf-8")
+            
+            return encoded_audio
+        except Exception as e:
+            logging.error(f"Error during audio conversion and encoding: {e}")
+            return ""
+
+
+
+    def generate_lipsync_data(self, wav_file_name):
+        """
+        Generates lip-sync data using Rhubarb and ensures a consistent return structure.
+        
+        Args:
+            wav_file_name (str): The name of the WAV file to process.
+        
+        Returns:
+            dict: Lip-sync data with "METADATA" and "MOUTH_CUES".
+        """
+        # Define the output JSON file path
+        wav_file_path = os.path.join(self.generated_audio_dir, wav_file_name)
+        json_file_path = os.path.splitext(wav_file_path)[0] + ".json"
+
+        # Define Rhubarb path
+        RHUBARB_PATH = os.getenv('RHUBARB_PATH')
+        if not RHUBARB_PATH:
+            # Fallback to a relative path if environment variable not set
+            RHUBARB_PATH = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                '..', 'rhubarb', 'Rhubarb-Lip-Sync-1.13.0-Windows', 'rhubarb'
+            )
+            # On Windows, append .exe if necessary
+            if os.name == 'nt' and not RHUBARB_PATH.endswith('.exe'):
+                RHUBARB_PATH += '.exe'
+
+        # Use Rhubarb to generate lip-sync data
+        command = [
+            RHUBARB_PATH,
+            "-f", "json",
+            "-o", json_file_path,
+            wav_file_path,
+            "-r", "phonetic"  # Faster but less accurate; remove for better accuracy
+        ]
+
+        try:
+            # Check if WAV file exists
+            if not os.path.isfile(wav_file_path):
+                raise FileNotFoundError(f"The WAV file {wav_file_path} does not exist.")
+
+            # Run the Rhubarb command
+            subprocess.run(command, check=True)
+            logging.info(f"Rhubarb successfully processed {wav_file_path}")
+
+            # Read and return the lip-sync data from the JSON file
+            if not os.path.isfile(json_file_path):
+                raise FileNotFoundError(f"The JSON file {json_file_path} was not created by Rhubarb.")
+
+            with open(json_file_path, "r") as json_file:
+                lip_sync_data = json.load(json_file)
+
+            # Validate the structure of lip_sync_data
+            if "metadata" not in lip_sync_data or "mouthCues" not in lip_sync_data:
+                logging.warning(f"Unexpected lip-sync data structure in {json_file_path}. Using default structure.")
+                return {
+                    "METADATA": {},
+                    "MOUTH_CUES": {}
+                }
+
+            # Normalize keys to uppercase as per requirement
+            normalized_data = {
+                "METADATA": lip_sync_data.get("metadata", {}),
+                "MOUTH_CUES": lip_sync_data.get("mouthCues", {})
+            }
+
+            return normalized_data
+
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Rhubarb failed with error: {e}")
+        except FileNotFoundError as e:
+            logging.error(e)
+        except json.JSONDecodeError as e:
+            logging.error(f"JSON decoding failed for {json_file_path}: {e}")
+        except Exception as e:
+            logging.error(f"Unexpected error during lip-sync data generation: {e}")
+
+        # Return default structure in case of any errors
+        return {
+            "METADATA": {},
+            "MOUTH_CUES": {}
+        }
+
 
 
     def determine_meme_topic(self, ai_response: str, is_initial: bool = False) -> str:
@@ -588,10 +723,106 @@ Explain that you are here to provide personalized tutoring, mentorship, and care
             
             backend_base_url = os.getenv('BACKEND_BASE_URL', 'http://localhost:8000')  # Ensure this environment variable is set
             audio_url = f"{backend_base_url}/ai_mentor/download_audio/{filename}"
-            return audio_url
+            return audio_url, filename
         except Exception as e:
             logging.error(f"Text-to-speech conversion failed: {e}")
             return "", ""
 
         
-   
+    def determine_facial_expression_and_animation(self, ai_response: str) -> dict:
+        """
+        Determines a suitable facial expression and animation based on the AI's message.
+
+        Returns:
+            dict: A dictionary with keys 'facial_expression' and 'animation'.
+        """
+
+        # The available options you want the LLM to choose from
+        facial_expressions_list = [
+            "smile", 
+            "sad", 
+            "angry", 
+            "surprised", 
+            "funnyFace", 
+            "default"
+        ]
+
+        animations_list = [
+            "Talking_0", 
+            "Talking_1", 
+            "Talking_2", 
+            "Crying", 
+            "Laughing", 
+            "Rumba", 
+            "Idle", 
+            "Terrified", 
+            "Angry"
+        ]
+
+        prompt = f"""
+You are given a list of possible facial expressions and animations. Based on the content and sentiment of the AI's response, choose the best matching facial expression and animation.
+
+- Facial expressions: {', '.join(facial_expressions_list)}
+- Animations: {', '.join(animations_list)}
+
+Rules:
+    1. Only respond with valid JSON. Example:
+       {{
+           "facial_expression": "smile",
+           "animation": "Laughing"
+       }}
+    2. Do not include any extra text or explanation outside the JSON object.
+    3. Ensure strict JSON formatting without any deviations.
+    4. If the sentiment or tone is unclear, choose:
+       {{
+           "facial_expression": "default",
+           "animation": "Idle"
+       }}
+    
+    AI Response:
+    "{ai_response}"
+    """
+
+        try:
+            # Invoke the LLM with the prompt
+            response = self.llm.invoke(prompt)
+            logging.info(f"Raw LLM response: {response.content}")
+
+            # Strip code fences if present
+            content = response.content.strip()
+            if content.startswith("```") and content.endswith("```"):
+                content = '\n'.join(content.split('\n')[1:-1])
+
+            # Parse the LLM response as JSON
+            for attempt in range(3):  # Retry up to 3 times
+                try:
+                    parsed = json.loads(content)
+                    break
+                except json.JSONDecodeError:
+                    logging.warning(f"LLM returned non-JSON response on attempt {attempt + 1}: {content}")
+                    if attempt == 2:  # Max retries reached
+                        parsed = {"facial_expression": "default", "animation": "Idle"}
+
+            # Extract fields and validate them
+            facial_expression = parsed.get("facial_expression", "default")
+            animation = parsed.get("animation", "Idle")
+
+            if facial_expression not in facial_expressions_list:
+                logging.warning(f"Invalid facial expression: {facial_expression}. Defaulting to 'default'.")
+                facial_expression = "default"
+            if animation not in animations_list:
+                logging.warning(f"Invalid animation: {animation}. Defaulting to 'Idle'.")
+                animation = "Idle"
+
+            return {
+                "facial_expression": facial_expression,
+                "animation": animation
+            }
+
+        except Exception as e:
+            logging.error(f"AI-based facial expression & animation determination failed: {e}")
+            # Fallback to defaults in case of error
+            return {
+                "facial_expression": "default",
+                "animation": "Idle"
+            }
