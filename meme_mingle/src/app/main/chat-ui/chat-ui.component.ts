@@ -281,7 +281,7 @@ export class ChatUIComponent implements OnInit, OnDestroy {
     console.log(`Initializing conversation with role: ${this.selectedRole}`);
 
     const welcomeSub = this.appService
-      .aimentorwelcome(this.userId, this.selectedRole)
+      .aimentorAvtarWelcome(this.userId, this.selectedRole)
       .subscribe({
         next: (response: any) => {
           console.log('Initialize Conversation Response:', response);
@@ -323,7 +323,7 @@ export class ChatUIComponent implements OnInit, OnDestroy {
     ) {
       this.isProcessing = true;
       const finalizeSub = this.appService
-        .finalizeChat(this.userId, this.chatId)
+        .finalizeAvtarChat(this.userId, this.chatId)
         .subscribe({
           next: () => {
             this.addMessage(
@@ -520,7 +520,7 @@ export class ChatUIComponent implements OnInit, OnDestroy {
   processUserInput(transcript: string, file?: File): void {
     this.isProcessing = true;
     const chatSub = this.appService
-      .aimentorchat(this.userId, this.chatId, this.turnId, transcript, file)
+      .aimentorAvtarchat(this.userId, this.chatId, this.turnId, transcript, file)
       .subscribe({
         next: (response: any) => {
           console.log('Process User Input Response:', response);

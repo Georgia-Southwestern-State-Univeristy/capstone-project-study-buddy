@@ -29,7 +29,6 @@ from services.azure_mongodb import MongoDBClient
 from services.azure_form_recognizer import extract_text_from_file
 from services.text_to_speech_service import text_to_speech
 from models.user import User
-from services.db.user import get_user_profile_by_user_id
 # Constants
 from utils.consts import SYSTEM_MESSAGE
 from pydub import AudioSegment
@@ -312,21 +311,6 @@ class MemeMingleAIAgent(AIAgent):
 
             ai_text_response = invocation["output"]
 
-            # Determine if it's the initial greeting
-            is_initial = (turn_id == 0)
-
-            # Fetch a relevant meme/GIF based on the AI's response or user input
-            meme_topic = self.determine_meme_topic(ai_response=ai_text_response, is_initial=is_initial)
-
-           
-            # Use helper method to get fetch_meme tool
-            fetch_meme_tool = self.get_tool_by_name("fetch_meme")
-            if fetch_meme_tool:
-                meme_url = fetch_meme_tool.func(meme_topic)
-            else:
-                logging.error("Tool 'fetch_meme' not found.")
-                meme_url = None
-
             # Convert AI text response to speech
             audio_url, filename = self.convert_text_to_speech(ai_text_response, user_id, chat_id, turn_id)
             
@@ -339,14 +323,10 @@ class MemeMingleAIAgent(AIAgent):
 
             ##lipsync data
             lip_sync_data = self.generate_lipsync_data(filename)
-           
-
-
             
             # Structure the response to include both text and meme/GIF
             response = {
                 "message": ai_text_response,
-                "meme_url": meme_url,
                 "audio_url": audio_url,
                 "facial_expression": facial_expression,
                 "animation": animation,
@@ -475,49 +455,6 @@ class MemeMingleAIAgent(AIAgent):
             "MOUTH_CUES": {}
         }
 
-
-
-    def determine_meme_topic(self, ai_response: str, is_initial: bool = False) -> str:
-        """
-        Determines the topic for fetching a meme/GIF based on the AI's response content.
-
-        Args:
-            ai_response (str): The AI's textual response.
-            is_initial (bool): Flag indicating if it's the initial interaction.
-
-        Returns:
-            str: The topic to search for memes/GIFs.
-        """
-
-        if is_initial:
-            prompt = (
-                "Analyze the following AI response and determine the most appropriate welcoming meme topic from the list below:\n\n"
-                "AI Response:\n"
-                f"{ai_response}\n\n"
-                "Available Meme Topics for Welcome:\n"
-                "welcome, hello, introduction, greeting\n\n"
-                "Based on the AI Response, select the most suitable meme topic:"
-                "you must provide the meme topic."
-            )
-        else:
-            # Define the prompt for the AI to determine the meme topic
-            prompt = (
-                "Analyze the following AI response and determine the most appropriate meme topic from the list below:\n\n"
-                "AI Response:\n"
-                f"{ai_response}\n\n"
-                "Based on the AI Response, select the most suitable meme topic:"
-                "you must provide the meme topic."
-            )
-
-        try:
-            # Assuming self.llm is your language model instance
-            response = self.llm.invoke(prompt)
-            meme_topic = response.content.strip().lower() if hasattr(response, 'content') else str(response).strip().lower()
-        except Exception as e:
-            logging.error(f"AI-based topic determination failed: {e}")
-            return "funny"  # Default topic
-
-        return meme_topic 
 
 
         

@@ -61,11 +61,15 @@ export class AppService {
   }
 
   // for generating ai mentor chat (welcome message)
-  aimentorwelcome(user_id: string, role: string = "educational mentor"): Observable<any> {
+  aimentorwelcome(user_id: string, role: string = "Education"): Observable<any> {
     const payload = { role };
     return this.http.post(`${this.baseUrl}/ai_mentor/welcome/${user_id}`, payload);
   }
 
+  aimentorAvtarWelcome(user_id: string, role: string = "Education"): Observable<any> {
+    const payload = { role };
+    return this.http.post(`${this.baseUrl}/ai_mentor_avtar/welcome/${user_id}`, payload);
+  }
   // for getting ai mentor chat (conversation)
   aimentorchat(userId: string, chatId: string, turnId: number, prompt: string, file?: File): Observable<any> {
       const formData = new FormData();
@@ -77,9 +81,25 @@ export class AppService {
       return this.http.post(`${this.baseUrl}/ai_mentor/${userId}/${chatId}`, formData);
   }
 
+  // for getting ai mentor avtar chat (conversation)
+  aimentorAvtarchat(userId: string, chatId: string, turnId: number, prompt: string, file?: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('prompt', prompt);
+    formData.append('turn_id', turnId.toString());
+    if (file) {
+        formData.append('file', file);
+    }
+    return this.http.post(`${this.baseUrl}/ai_mentor_avtar/${userId}/${chatId}`, formData);
+}
+
   // for finalizing ai mentor chat (conversation)
   finalizeChat(userId: string, chatId: string): Observable<any> {
     return this.http.patch(`${this.baseUrl}/ai_mentor/finalize/${userId}/${chatId}`, {});
+  }
+
+  // for finalizing ai mentor avtar chat (conversation)
+  finalizeAvtarChat(userId: string, chatId: string): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/ai_mentor_avtar/finalize/${userId}/${chatId}`, {});
   }
 
   // for converting speech to text
