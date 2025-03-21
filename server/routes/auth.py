@@ -16,6 +16,7 @@ from email_validator import validate_email, EmailNotValidError
 from secrets import token_urlsafe
 from flask_mail import Message
 from utils.reset_tokens import generate_reset_token, verify_reset_token
+from services.azure_blob_service import AzureBlobService
 from werkzeug.utils import secure_filename
 """Step 2: Configurations"""
 load_dotenv()
@@ -47,6 +48,9 @@ def signup():
         user_data = request.form.to_dict()
         logging.info(f"Received user data: {user_data}")
 
+        # Instantiate the blob service
+        blob_service = AzureBlobService()
+
         # Handle profile picture upload
         if 'profile_picture' in request.files:
             file = request.files['profile_picture']
@@ -54,10 +58,9 @@ def signup():
                 filename = secure_filename(file.filename)
                 # Generate a unique filename
                 unique_filename = f"{user_data['username']}_{filename}"
-                file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
-                file.save(file_path)
-                # Generate the URL link to the profile picture
-                user_data['profile_picture'] = f"/static/profile_pics/{unique_filename}"
+                 # Upload to Azure
+                uploaded_url = blob_service.upload_file(file, unique_filename)
+                user_data['profile_picture'] = uploaded_url
             else:
                 return jsonify({"error": "Invalid image format"}), 400
         else:
