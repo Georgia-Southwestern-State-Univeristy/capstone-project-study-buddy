@@ -93,17 +93,7 @@ export class QuizAiComponent implements OnInit, OnDestroy {
   preferredLanguage: string = 'en';
   translatedTexts: { [key: string]: string } = {};
   currentStep: 'generate' | 'answer' | 'feedback' = 'generate';
-  topics: string[] = [
-    'Mathematics',
-    'Physics',
-    'Chemistry',
-    'Computer Science',
-    'History',
-    'Geography',
-    'Biology',
-    'Literature',
-    // Add more topics as needed
-  ];
+  topics: string[] = [];
 
   // Define quiz levels
   levels: string[] = [
@@ -132,12 +122,40 @@ export class QuizAiComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.fetchTotalScore();
+    this.fetchUserProfile();
     this.preferredLanguage = localStorage.getItem('preferredLanguage') || 'en';
 
     if (this.preferredLanguage !== 'en') {
       this.translateContent(this.preferredLanguage);
     }
   }
+  // Fetch user profile to get interested subjects
+fetchUserProfile(): void {
+  this.appService.getUserProfile().subscribe({
+    next: (response) => {
+      // Add user's interested subjects to topics
+      if (response.user_journey && response.user_journey.interested_subjects) {
+        this.addUserInterestsToTopics(response.user_journey.interested_subjects);
+      }
+    },
+    error: (error) => {
+      console.error('Error fetching user profile:', error);
+    },
+  });
+}
+
+// Add user interests to available topics
+addUserInterestsToTopics(interests: string[]): void {
+  if (!interests || interests.length === 0) return;
+  
+  // Filter out duplicates to avoid adding topics that already exist
+  const newTopics = interests.filter(interest => 
+    !this.topics.includes(interest)
+  );
+  
+  // Add user interests to the beginning of the topics array
+  this.topics = [...newTopics, ...this.topics];
+}
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
@@ -229,6 +247,8 @@ export class QuizAiComponent implements OnInit, OnDestroy {
       this.quizForm.get('topic')?.updateValueAndValidity();
     }
   }
+
+  
 
   // Generate Quiz
   generateQuiz(): void {

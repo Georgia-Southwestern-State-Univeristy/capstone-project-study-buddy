@@ -143,18 +143,7 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
   selectedRoleImageUrl: string = 'assets/img/banner.png';
   preferredLanguage: string = 'en';
   translatedTexts: { [key: string]: string } = {};
-  historicalFigures: HistoricalFigure[] = [
-    { imageUrl:'assets/roles/Ada_Lovelace.png', display: 'Ada Lovelace', value: 'Ada Lovelace', field: 'Computer Science' },
-    { imageUrl:'assets/roles/Albert_Einstein.jpg', display: 'Albert Einstein', value: 'Albert Einstein', field: 'Physics' },
-    { imageUrl:'assets/roles/Aryabhatta.jpg', display: 'Aryabhatta', value: 'Aryabhatta', field: 'mathematician' },
-    { imageUrl:'assets/roles/Galileo_Galilei.jpg',display: 'Galileo Galilei', value: 'Galileo Galilei', field: 'Astronomy' },
-    { imageUrl:'assets/roles/Isaac_Newton.png', display: 'Isaac Newton', value: 'Isaac Newton', field: 'Mathematics' },
-    { imageUrl:'assets/roles/Leonardo_da_Vinci.jpg',display: 'Leonardo da Vinci', value: 'Leonardo da Vinci', field: 'Art and Science' },
-    { imageUrl:'assets/roles/Marie_Curie.jpg',display: 'Marie Curie', value: 'Marie Curie', field: 'Chemistry' },
-    { imageUrl:'assets/roles/Nikola_Tesla.jpg',display: 'Nikola Tesla', value: 'Nikola Tesla', field: 'Electrical Engineering' },
-    { imageUrl:'assets/roles/Thomas_Edison.jpg',display: 'Thomas Edison', value: 'Thomas Edison', field: 'Inventing' },
-    // Add more figures as needed
-  ];
+  roles: HistoricalFigure[] = [];
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
   constructor(private appService: AppService, private chatService: ChatService,private sanitizer: DomSanitizer) {}
@@ -473,12 +462,30 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
         } else {
           this.userProfilePicture = '/assets/img/user_avtar.jpg'; // Fallback image
         }
+
+        // Add user's interested subjects to historical figures
+        if (response.user_journey && response.user_journey.interested_subjects) {
+          this.addUserInterestsToFigures(response.user_journey.interested_subjects);
+        }
       },
       error: (error) => {
         console.error('Error fetching user profile:', error);
         this.userProfilePicture = '/assets/img/user_avtar.jpg'; // Fallback image
       },
     });
+  }
+
+  addUserInterestsToFigures(interests: string[]): void {
+    if (!interests || interests.length === 0) return;
+    // Create historical figure entries from user interests
+    const interestFigures: HistoricalFigure[] = interests.map(interest => ({
+      display: `Expert in ${interest}`,
+      value: `Expert in ${interest}`,
+      field: interest
+    }));
+    
+    // Add to the beginning of the array to show user interests first
+    this.roles = [...interestFigures, ...this.roles];
   }
   // New method to handle file selection
   onFileSelected(event: Event): void {
@@ -549,7 +556,7 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
 
 
   updateSelectedRoleImage(event: any): void {
-    const selectedFigure = this.historicalFigures.find(figure => figure.value === event.value);
+    const selectedFigure = this.roles.find(figure => figure.value === event.value);
     this.selectedRoleImageUrl = selectedFigure?.imageUrl || 'assets/img/banner.png';
   }
   
