@@ -8,6 +8,11 @@
   >
     <mat-card class="quiz-generation-card">
       <mat-card-title style="align-self: center; padding: 2rem;">{{ translatedTexts['Generate Your Quiz'] || 'Generate Your Quiz' }}</mat-card-title>
+      <!-- Note about customizing topics -->
+      <div class="topic-customization-note">
+        <i class="fas fa-info-circle"></i> 
+        {{ translatedTexts['Want more topics? Add your "interested subjects" in "User Profile > Academic tab."'] || 'Want more topics? Add your "interested subjects"  in "User Profile > Academic tab."' }}
+      </div>
       <mat-card-content>
         <form [formGroup]="quizForm" (ngSubmit)="generateQuiz()">
           <!-- Flex Container for Topic and Level Selection -->

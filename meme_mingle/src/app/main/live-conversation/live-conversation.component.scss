@@ -88,6 +88,25 @@
       align-items: stretch; /* Make children stretch to container's width */
       gap: 1.5rem; // Space between dropdown and button
 
+      .topic-customization-note {
+        background-color: #e8f5ff;
+        border-left: 4px solid #2196F3;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        color: #333;
+        display: flex;
+        align-items: center;
+        width: 100%;
+        
+        i {
+          color: #2196F3;
+          margin-right: 8px;
+          font-size: 1.1rem;
+        }
+      }
+
       /* Dropdown Styles */
       .role-select {
         width: 100%;

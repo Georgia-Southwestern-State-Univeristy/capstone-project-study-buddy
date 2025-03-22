@@ -40,6 +40,24 @@ $submit-btn-height: 50px;
     margin-bottom: 20px;
     width: 100%;
   }
+  .topic-customization-note {
+    background-color: #e8f5ff;
+    border-left: 4px solid #2196F3;
+    padding: 8px 12px;
+    margin: 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #333;
+    display: flex;
+    align-items: center;
+    width: auto;
+    
+    i {
+      color: #2196F3;
+      margin-right: 8px;
+      font-size: 1.1rem;
+    }
+  }
 
   .feedback-section {
     .feedback-card {
@@ -175,8 +193,10 @@ $submit-btn-height: 50px;
       
           .feedback-details {
             padding: 15px;
-            background-color: transparent;
+            background-color: #003366;
             border-top: 1px solid lighten($secondary-color, 10%);
+            border: 1px solid $border-color;
+            border-radius: $border-radius;
             
             p {
               margin: 10px 0;
@@ -184,7 +204,7 @@ $submit-btn-height: 50px;
               color: $text-color;
               
               strong {
-                color:#003366;
+                color:#ffb84d;
               }
             }
           }
