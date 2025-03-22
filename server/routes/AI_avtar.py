@@ -43,6 +43,7 @@ def get_mental_health_agent_welcome(user_id):
             "job_search",
             "web_search_bing",
             "fetch_meme",
+            "user_journey_retrieval",
         ],
         desired_role=desired_role  # Pass the desired role to the agent
     )
@@ -115,6 +116,7 @@ def run_mental_health_agent(user_id, chat_id):
             "job_search",
             "web_search_bing",
             "fetch_meme",
+            "user_journey_retrieval"
         ],
         desired_role=desired_role  
     )
