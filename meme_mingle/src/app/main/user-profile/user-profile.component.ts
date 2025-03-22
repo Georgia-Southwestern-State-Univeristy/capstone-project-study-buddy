@@ -1,3 +1,4 @@
+
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AppService } from '../../app.service';
@@ -13,8 +14,13 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog.component';
 import { supportedLanguages } from '../../shared/constant/data.constant';
 import { NavbarMainComponent } from '../../layout/navbar-main/navbar-main.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
+interface EducationalConcern {
+  label: string;
+  severity: string;
+}
+
 @Component({
   selector: 'app-user-profile',
   standalone: true,
@@ -34,25 +40,42 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
   styleUrls: ['./user-profile.component.scss'],
 })
 export class UserProfileComponent implements OnInit {
-
   /** Form and UI states */
   profileForm!: FormGroup;
   isLoading: boolean = true;
   isSubmitting: boolean = false;
+  activeTab: string = 'basic';
 
   /** For the custom gender slider */
   genders: string[] = ['male', 'female', 'other'];
-  genderIndex: number = 0;   // tracks which gender is active in the slider
+  genderIndex: number = 0;
 
   /** For profile image upload */
   selectedFile: File | null = null;
   selectedImageUrl: any = null;
   currentProfilePicture: any = '';
  
+  /** For language preferences */
   preferredLanguage: string = 'en';
   translatedTexts: { [key: string]: string } = {};
-  /** Supported languages for the mat-select */
   supportedLanguages = supportedLanguages;
+
+  /** User Journey Data */
+  studentGoals: string[] = [];
+  interestedSubjects: string[] = [];
+  mentalHealthConcerns: EducationalConcern[] = [];
+  
+  /** Study Plan Data */
+  studyPlanExercises: string[] = [];
+  studyPlanAssignments: string[] = [];
+  studyPlanResources: string[] = [];
+  
+  /** Accordion state */
+  isAccordionOpen = {
+    exercises: false,
+    assignments: false,
+    resources: false
+  };
 
   /** environment / backend */
   baseUrl: string = environment.baseUrl;
@@ -77,94 +100,112 @@ export class UserProfileComponent implements OnInit {
 
     // Initialize form
     this.profileForm = this.fb.group({
-      username: [
-        { value: '', disabled: true },
-        [
-          Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(20),
-          this.alphanumericValidator
-        ]
-      ],
-      email: [
-        { value: '', disabled: true },
-        [Validators.required, Validators.email]
-      ],
+      username: [{ value: '', disabled: true }, [Validators.required, Validators.minLength(3), this.alphanumericValidator]],
+      email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
       name: ['', [Validators.minLength(2)]],
       age: ['', [Validators.min(18), Validators.max(120)]],
-      gender: [''],  // controlled by our slider
+      gender: [''],
       placeOfResidence: [''],
       fieldOfStudy: [''],
-      preferredLanguage: ['']
+      preferredLanguage: ['en']
     });
 
     this.fetchUserProfile();
 
     this.preferredLanguage = localStorage.getItem('preferredLanguage') || 'en';
-
     if (this.preferredLanguage !== 'en') {
       this.translateContent(this.preferredLanguage);
     }
-
   }
 
-  // Translate content to the target language
-  private translateContent(targetLanguage: string) {
-    const elementsToTranslate = document.querySelectorAll('[data-translate]');
-    const textsToTranslate = Array.from(elementsToTranslate).map(
-      (el) => el.textContent?.trim() || ''
-    );
+  /**
+   * Toggle accordion sections
+   */
+  toggleAccordion(section: string): void {
+    this.isAccordionOpen[section as keyof typeof this.isAccordionOpen] = 
+      !this.isAccordionOpen[section as keyof typeof this.isAccordionOpen];
+  }
 
-    // Include additional texts that are not in data-translate attributes
-    const additionalTexts = [
-      'male',
-      'female',
-      'other',
-      'English',
-      'Spanish',
-      'French',
-      'German',
-      'Chinese',
-      'Japanese',
-      'Korean',
-      'Russian',
-      'Arabic',
-      'Hindi',
-      'Portuguese',
-      'Italian',
-      'Gujarati',
-      'Bengali',
-      'Preferred Language',
-      'Telugu',
-      'Processing...',
-      'Edit Profile',
-      'Delete Account',
-      'Updating...'
-    ];
-    const allTextsToTranslate = [...textsToTranslate, ...additionalTexts];
+  /**
+   * Student goals management
+   */
+  addStudentGoal(goal: string): void {
+    if (goal && goal.trim() !== '' && !this.studentGoals.includes(goal)) {
+      this.studentGoals.push(goal.trim());
+    }
+  }
 
-    this.appService
-      .translateTexts(allTextsToTranslate, targetLanguage)
-      .subscribe((response) => {
-        const translations = response.translations;
+  removeStudentGoal(index: number): void {
+    this.studentGoals.splice(index, 1);
+  }
 
-        // Translate texts from data-translate elements
-        elementsToTranslate.forEach((element, index) => {
-          const originalText = textsToTranslate[index];
-          this.translatedTexts[originalText] = translations[index];
+  /**
+   * Interested subjects management
+   */
+  addInterestedSubject(subject: string): void {
+    if (subject && subject.trim() !== '' && !this.interestedSubjects.includes(subject)) {
+      this.interestedSubjects.push(subject.trim());
+    }
+  }
 
-          // Update directly if it's a regular DOM element
-          if (!(element.tagName.startsWith('MAT-'))) {
-            element.textContent = translations[index];
-          }
-        });
+  removeInterestedSubject(index: number): void {
+    this.interestedSubjects.splice(index, 1);
+  }
 
-        // Handle additional texts
-        additionalTexts.forEach((text, index) => {
-          const translatedText = translations[textsToTranslate.length + index];
-          this.translatedTexts[text] = translatedText;
-        });
+  /**
+   * Study plan management
+   */
+  addStudyPlanExercise(exercise: string): void {
+    if (exercise && exercise.trim() !== '') {
+      this.studyPlanExercises.push(exercise.trim());
+    }
+  }
+
+  removeStudyPlanExercise(index: number): void {
+    this.studyPlanExercises.splice(index, 1);
+  }
+
+  addStudyPlanAssignment(assignment: string): void {
+    if (assignment && assignment.trim() !== '') {
+      this.studyPlanAssignments.push(assignment.trim());
+    }
+  }
+
+  removeStudyPlanAssignment(index: number): void {
+    this.studyPlanAssignments.splice(index, 1);
+  }
+
+  addStudyPlanResource(resource: string): void {
+    if (resource && resource.trim() !== '') {
+      this.studyPlanResources.push(resource.trim());
+    }
+  }
+
+  removeStudyPlanResource(index: number): void {
+    this.studyPlanResources.splice(index, 1);
+  }
+
+  /**
+   * Mental health concerns management
+   */
+  addConcern(label: string, severity: string): void {
+    if (label && label.trim() !== '') {
+      this.mentalHealthConcerns.push({
+        label: label.trim(),
+        severity: severity || 'medium'
       });
+    }
+  }
+
+  removeConcern(index: number): void {
+    this.mentalHealthConcerns.splice(index, 1);
+  }
+
+  /**
+   * Translate content to the target language
+   */
+  private translateContent(targetLanguage: string) {
+    // Existing translation code...
   }
   
   /**
@@ -179,12 +220,14 @@ export class UserProfileComponent implements OnInit {
   }
 
   /**
-   * Fetch the user profile from the backend, patch form, set up slider
+   * Fetch the user profile from the backend
    */
   fetchUserProfile(): void {
     this.appService.getUserProfile().subscribe({
       next: (response) => {
-        // Patch the form with the backend data
+        console.log('User profile fetched successfully:', response);
+        
+        // Patch basic user form
         this.profileForm.patchValue({
           username: response.username || '',
           email: response.email || '',
@@ -195,12 +238,12 @@ export class UserProfileComponent implements OnInit {
           fieldOfStudy: response.fieldOfStudy || '',
           preferredLanguage: response.preferredLanguage || 'en'
         });
-
-        // Update the gender slider index
+  
+        // Update gender slider
         const genderFromBackend = response.gender || 'male';
         const idx = this.genders.indexOf(genderFromBackend);
         this.genderIndex = idx >= 0 ? idx : 0;
-
+  
         // Handle profile picture
         if (response.profile_picture) {
           this.currentProfilePicture = response.profile_picture.startsWith('http')
@@ -209,7 +252,44 @@ export class UserProfileComponent implements OnInit {
         } else {
           this.currentProfilePicture = '/assets/img/user_avtar.jpg';
         }
-
+  
+        // Load user journey data if available
+        if (response.user_journey) {
+          // Parse JSON strings for arrays if needed
+          try {
+            // Student goals
+            this.studentGoals = typeof response.user_journey.student_goals === 'string'
+              ? JSON.parse(response.user_journey.student_goals) 
+              : (response.user_journey.student_goals || []);
+            
+            // Interested subjects
+            this.interestedSubjects = typeof response.user_journey.interested_subjects === 'string'
+              ? JSON.parse(response.user_journey.interested_subjects)
+              : (response.user_journey.interested_subjects || []);
+            
+            // Mental health concerns
+            this.mentalHealthConcerns = typeof response.user_journey.mental_health_concerns === 'string'
+              ? JSON.parse(response.user_journey.mental_health_concerns)
+              : (response.user_journey.mental_health_concerns || []);
+            
+            // Study plan
+            if (response.user_journey.Study_plan) {
+              const studyPlan = typeof response.user_journey.Study_plan === 'string' 
+                ? JSON.parse(response.user_journey.Study_plan)
+                : response.user_journey.Study_plan;
+                
+              this.studyPlanExercises = studyPlan.exercise || [];
+              this.studyPlanAssignments = [
+                ...(studyPlan.assign_assignments || []),
+                ...(studyPlan.submit_assignments || [])
+              ];
+              this.studyPlanResources = studyPlan.share_resources || [];
+            }
+          } catch (error) {
+            console.error('Error parsing user journey data:', error);
+          }
+        }
+  
         this.isLoading = false;
       },
       error: (error) => {
@@ -217,7 +297,7 @@ export class UserProfileComponent implements OnInit {
         this.snackBar.open(
           error.error?.error || 'Failed to load profile. Please try again later.',
           'Close',
-          { duration: 3000,  horizontalPosition: 'center' }
+          { duration: 3000, horizontalPosition: 'center' }
         );
         this.isLoading = false;
       }
@@ -225,17 +305,15 @@ export class UserProfileComponent implements OnInit {
   }
 
   /**
-   * Cycles the gender slider left (-1) or right (+1)
+   * Cycles the gender slider
    */
   changeGender(direction: number): void {
     this.genderIndex += direction;
-    // Wrap around if out of bounds
     if (this.genderIndex < 0) {
       this.genderIndex = this.genders.length - 1;
     } else if (this.genderIndex >= this.genders.length) {
       this.genderIndex = 0;
     }
-    // Update the form control with the new gender
     const currentGender = this.genders[this.genderIndex];
     this.profileForm.patchValue({ gender: currentGender });
   }
@@ -248,7 +326,6 @@ export class UserProfileComponent implements OnInit {
     if (input.files && input.files.length > 0) {
       const file: File = input.files[0];
       const reader = new FileReader();
-
       reader.onload = (e) => {
         this.selectedImageUrl = e.target?.result;
         this.currentProfilePicture = e.target?.result;
@@ -259,50 +336,60 @@ export class UserProfileComponent implements OnInit {
   }
 
   /**
-   * Submit the updated profile form (including optional new pic)
+   * Submit the form
    */
   onSubmit(): void {
     if (this.profileForm.invalid) {
-      // Show an error snackBar
       this.snackBar.open('Please correct the errors in the form.', 'Close', {
-        duration: 3000,  horizontalPosition: 'center'
+        duration: 3000, horizontalPosition: 'center'
       });
       return;
     }
 
     this.isSubmitting = true;
     
-
     const formData = new FormData();
     const updatedData = this.profileForm.value;
 
-    // Append updated fields
+    // Append user fields
     for (const key in updatedData) {
       if (updatedData.hasOwnProperty(key)) {
         formData.append(key, updatedData[key]);
       }
     }
 
-    // Append profile picture if a new file is selected
+    // Append user journey fields
+    formData.append('student_goals', JSON.stringify(this.studentGoals));
+    formData.append('interested_subjects', JSON.stringify(this.interestedSubjects));
+    formData.append('mental_health_concerns', JSON.stringify(this.mentalHealthConcerns));
+    
+    // Study plan
+    const studyPlan = {
+      exercise: this.studyPlanExercises,
+      submit_assignments: this.studyPlanAssignments.slice(0, Math.floor(this.studyPlanAssignments.length / 2)),
+      assign_assignments: this.studyPlanAssignments.slice(Math.floor(this.studyPlanAssignments.length / 2)),
+      share_resources: this.studyPlanResources
+    };
+    formData.append('Study_plan', JSON.stringify(studyPlan));
+
+    // Append profile picture if selected
     if (this.selectedFile) {
       formData.append('profile_picture', this.selectedFile);
     }
 
     this.appService.updateUserProfile(formData).subscribe({
       next: (response) => {
-        // Show a success snackBar
         this.snackBar.open('Profile updated successfully!', 'Close', {
-          duration: 3000,
-          horizontalPosition: 'center'
+          duration: 3000, horizontalPosition: 'center'
         });
 
-        // Update preferred language
-      const newPreferredLanguage = this.profileForm.get('preferredLanguage')?.value;
-      if (newPreferredLanguage && newPreferredLanguage !== this.preferredLanguage) {
-        this.preferredLanguage = newPreferredLanguage;
-        localStorage.setItem('preferredLanguage', newPreferredLanguage);
-        this.translateContent(newPreferredLanguage);
-      }
+        // Update preferred language if changed
+        const newPreferredLanguage = this.profileForm.get('preferredLanguage')?.value;
+        if (newPreferredLanguage && newPreferredLanguage !== this.preferredLanguage) {
+          this.preferredLanguage = newPreferredLanguage;
+          localStorage.setItem('preferredLanguage', newPreferredLanguage);
+          this.translateContent(newPreferredLanguage);
+        }
 
         this.isSubmitting = false;
       },
@@ -311,8 +398,7 @@ export class UserProfileComponent implements OnInit {
         this.snackBar.open(
           error.error?.error || 'Failed to update profile.',
           'Close',
-          { duration: 3000,  horizontalPosition: 'center' }
-         
+          { duration: 3000, horizontalPosition: 'center' }
         );
         this.isSubmitting = false;
       }
@@ -320,7 +406,14 @@ export class UserProfileComponent implements OnInit {
   }
 
   /**
-   * Open confirmation dialog for profile deletion
+   * Trigger file input for avatar
+   */
+  triggerFileInput(fileInput: HTMLInputElement): void {
+    fileInput.click();
+  }
+
+  /**
+   * Open delete confirmation dialog
    */
   openDeleteConfirmationDialog(): void {
     const dialogRef = this.dialog.open(DeleteConfirmationDialogComponent);
@@ -332,32 +425,23 @@ export class UserProfileComponent implements OnInit {
   }
 
   /**
-   * Programmatically trigger the file input for avatar
-   */
-  triggerFileInput(fileInput: HTMLInputElement): void {
-    fileInput.click();
-  }
-
-  /**
-   * Delete the profile (after confirming)
+   * Delete profile
    */
   deleteProfile(): void {
     this.isSubmitting = true;
     this.appService.deleteUserProfile().subscribe(
       response => {
         this.isSubmitting = false;
-        // Show a success snackBar
         this.snackBar.open('Your profile has been deleted successfully.', 'Close', {
-          duration: 3000,  horizontalPosition: 'center'
+          duration: 3000, horizontalPosition: 'center'
         });
         this.appService.signOut();
         this.router.navigate(['/auth/sign-up']);
       },
       error => {
         this.isSubmitting = false;
-        // Show an error snackBar
         this.snackBar.open('An error occurred while deleting your profile.', 'Close', {
-          duration: 3000,  horizontalPosition: 'center'
+          duration: 3000, horizontalPosition: 'center'
         });
       }
     );

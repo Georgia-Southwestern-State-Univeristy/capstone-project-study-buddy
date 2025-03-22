@@ -1,4 +1,4 @@
-// GSW College Theme Variables (matching resume-builder)
+
 $gsw-primary: #003366;
 $gsw-secondary: #ffcc00;
 $gsw-accent: #2196F3;
@@ -16,6 +16,16 @@ $border-radius-lg: 1rem;
 $border-radius-md: 0.75rem;
 $border-radius-sm: 0.5rem;
 
+// Additional variables for new components
+$tab-active-bg: #f0f7ff;
+$tab-hover-bg: #f5f5f5;
+$chip-bg: #e5f0ff;
+$chip-hover-bg: #d0e5ff;
+$concern-low-bg: #e8f5e9;
+$concern-medium-bg: #fff8e1;
+$concern-high-bg: #ffebee;
+
+/* Base Page Styles */
 .profile-page {
   min-height: 100vh;
   background-color: $gsw-bg;
@@ -46,13 +56,13 @@ $border-radius-sm: 0.5rem;
   }
 }
 
-/* Main card container */
+/* Main Profile Card */
 .profile-card {
   background-color: #fff;
   border-radius: $border-radius-lg;
   padding: 2.5rem 2rem;
   width: 100%;
-  max-width: 550px;
+  max-width: 650px;
   border: none;
   display: flex;
   flex-direction: column;
@@ -72,7 +82,7 @@ $border-radius-sm: 0.5rem;
   }
 }
 
-/* Avatar container */
+/* Avatar Section */
 .avatar-container {
   margin-bottom: 2.5rem;
   cursor: pointer;
@@ -95,7 +105,7 @@ $border-radius-sm: 0.5rem;
   }
   
   &:after {
-    content: '\f030';  // Camera icon from Font Awesome
+    content: '\f030';  // Camera icon
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
@@ -120,7 +130,61 @@ $border-radius-sm: 0.5rem;
   }
 }
 
-/* Container for form-like fields */
+/* Tabs Navigation */
+.profile-tabs {
+  display: flex;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid $gsw-border;
+  
+  button {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 0.8rem 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $gsw-dark;
+    transition: $transition-base;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    
+    i {
+      font-size: 1rem;
+      color: $gsw-primary;
+    }
+    
+    &:hover {
+      background-color: $tab-hover-bg;
+    }
+    
+    &.active {
+      color: $gsw-primary;
+      background-color: $tab-active-bg;
+      
+      &:after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background-color: $gsw-primary;
+      }
+    }
+  }
+}
+
+/* Tab Content */
+.tab-content {
+  width: 600px;
+  padding: 1rem 0;
+}
+
+/* Form Fields Container */
 .fields-container {
   width: 100%;
   padding: 1.5rem;
@@ -157,15 +221,7 @@ $border-radius-sm: 0.5rem;
       }
     }
     
-    // Add icons to each field type
-    &:nth-child(1) label:before { content: '\f007'; } // name - user icon
-    &:nth-child(2) label:before { content: '\f2bd'; } // username - user-circle
-    &:nth-child(3) label:before { content: '\f0e0'; } // email - envelope
-    &:nth-child(5) label:before { content: '\f3c5'; } // place - map-marker
-    &:nth-child(6) label:before { content: '\f19d'; } // field - graduation-cap
-    &:nth-child(7) label:before { content: '\f0ac'; } // language - globe
-    
-    input {
+    input, select {
       background-color: #fff;
       border: 1.5px solid darken($gsw-border, 5%);
       border-radius: $border-radius-sm;
@@ -178,7 +234,6 @@ $border-radius-sm: 0.5rem;
       &:focus {
         border-color: $gsw-accent;
         box-shadow: 0 0 0 3px rgba($gsw-accent, 0.25);
-        outline: none;
       }
 
       &[disabled] {
@@ -194,7 +249,7 @@ $border-radius-sm: 0.5rem;
       }
     }
 
-    /* Enhanced material form field styling */
+    /* Material form field */
     mat-form-field {
       width: 100%;
       
@@ -233,7 +288,7 @@ $border-radius-sm: 0.5rem;
     }
   }
 
-  /* IMPROVED GENDER SLIDER STYLES */
+  /* Gender slider */
   .gender-row {
     label:before { 
       content: '\f228'; // Mars and Venus icon
@@ -294,7 +349,242 @@ $border-radius-sm: 0.5rem;
   }
 }
 
-/* Button group at the bottom */
+/* Chips Container for lists (goals, subjects, etc) */
+.chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background-color: white;
+  border: 1.5px solid darken($gsw-border, 5%);
+  border-radius: $border-radius-sm;
+  padding: 0.75rem;
+  min-height: 60px;
+  
+  .chip {
+    display: flex;
+    align-items: center;
+    background-color: $chip-bg;
+    border-radius: 50px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    color: $gsw-primary;
+    font-weight: 500;
+    transition: $transition-base;
+    
+    &:hover {
+      background-color: $chip-hover-bg;
+    }
+    
+    .chip-remove {
+      background: none;
+      border: none;
+      color: $gsw-primary;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 0 0 0.4rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      transition: $transition-base;
+      
+      &:hover {
+        color: $gsw-danger;
+        transform: scale(1.2);
+      }
+    }
+  }
+  
+  .chip-input-container {
+    display: flex;
+    align-items: center;
+    margin: 0.25rem 0;
+    
+    input {
+      border: 1px dashed darken($gsw-border, 10%);
+      border-radius: 50px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.9rem;
+      background-color: transparent;
+      margin-right: 0.5rem;
+      
+      &:focus {
+        outline: none;
+        border-color: $gsw-accent;
+        background-color: rgba($gsw-accent, 0.05);
+      }
+    }
+    
+    .chip-add {
+      background-color: $gsw-primary;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: $transition-base;
+      
+      &:hover {
+        background-color: $gsw-accent;
+        transform: scale(1.1);
+      }
+    }
+  }
+}
+
+/* Study Plan Accordion */
+.study-plan-container {
+  width: 100%;
+  
+  .accordion {
+    border: 1px solid $gsw-border;
+    border-radius: $border-radius-sm;
+    overflow: hidden;
+    
+    .accordion-item {
+      border-bottom: 1px solid $gsw-border;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .accordion-header {
+        background-color: white;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-weight: 600;
+        transition: $transition-base;
+        
+        &:hover {
+          background-color: $tab-hover-bg;
+        }
+        
+        .fas {
+          color: $gsw-primary;
+          transition: transform 0.3s;
+        }
+      }
+      
+      .accordion-content {
+        padding: 1rem;
+        background-color: $gsw-light;
+        border-top: 1px solid $gsw-border;
+      }
+    }
+  }
+}
+
+/* Educational Concerns */
+.concerns-container {
+  width: 100%;
+  
+  .concern-item {
+    background-color: white;
+    border-radius: $border-radius-sm;
+    border: 1px solid $gsw-border;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    
+    .concern-header {
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      span {
+        color: $gsw-dark; 
+        font-weight: 500; 
+      }
+
+      .concern-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      
+      .severity-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        
+        &.low {
+          background-color: $concern-low-bg;
+          color: $gsw-success;
+        }
+        
+        &.medium {
+          background-color: $concern-medium-bg;
+          color: $gsw-warning;
+        }
+        
+        &.high {
+          background-color: $concern-high-bg;
+          color: $gsw-danger;
+        }
+      }
+      
+      .concern-remove {
+        background: none;
+        border: none;
+        color: $gsw-danger;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        transition: $transition-base;
+        
+        &:hover {
+          transform: scale(1.2);
+        }
+      }
+    }
+  }
+  
+  .add-concern-section {
+    margin-top: 1rem;
+    
+    .concern-inputs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      
+      input {
+        flex-grow: 1;
+      }
+      
+      select {
+        width: 120px;
+      }
+    }
+    
+    .add-concern-btn {
+      background-color: $gsw-primary;
+      color: white;
+      border: none;
+      border-radius: $border-radius-sm;
+      padding: 0.6rem 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: $transition-base;
+      
+      &:hover {
+        background-color: darken($gsw-primary, 10%);
+      }
+    }
+  }
+}
+
+/* Button group */
 .button-group {
   display: flex;
   gap: 1rem;
@@ -417,42 +707,46 @@ $border-radius-sm: 0.5rem;
     }
   }
   
+  .profile-tabs {
+    flex-wrap: wrap;
+    
+    button {
+      flex: 1 0 40%;
+      padding: 0.6rem 0.4rem;
+      font-size: 0.85rem;
+      
+      i {
+        margin-right: 0.3rem;
+      }
+    }
+  }
+  
   .button-group {
     flex-direction: column;
     
     .edit-button, .delete-button {
       width: 100%;
     }
+  }
+  
+  .concern-inputs {
+    flex-direction: column;
     
-    .delete-button {
-      order: -1; // Move delete button above edit button
-      padding: 0.7rem;
-      margin-bottom: 0.5rem;
+    select {
+      width: 100% !important;
     }
   }
 }
 
-/* For screens <= 768px (tablets) but above 576px */
+/* Tablet responsive adjustments */
 @media (max-width: 768px) and (min-width: 577px) {
   .profile-card {
     max-width: 90%;
-    margin: 0 auto;
     padding: 2rem 1.5rem;
   }
 
   .avatar-container .avatar {
     width: 130px;
     height: 130px;
-  }
-
-  .profile-title {
-    font-size: 2.2rem;
-  }
-}
-
-/* For screens between 769px and 992px (small laptops) */
-@media (max-width: 992px) and (min-width: 769px) {
-  .profile-card {
-    max-width: 80%;
   }
 }

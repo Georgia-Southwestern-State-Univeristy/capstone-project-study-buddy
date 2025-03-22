@@ -2,6 +2,7 @@ import os
 from urllib.parse import urlparse
 from azure.storage.blob import BlobServiceClient
 from werkzeug.utils import secure_filename
+from azure.core.exceptions import ResourceExistsError
 
 class AzureBlobService:
     """
@@ -9,19 +10,16 @@ class AzureBlobService:
     """
 
     def __init__(self):
-        # Load from environment variables or your app config
-        self.connection_string = os.getenv('AZURE_BLOB_CONNECTION_STRING')  
-        self.container_name = os.getenv('AZURE_BLOB_CONTAINER_NAME', "profile-pics")  
+        self.connection_string = os.getenv('AZURE_BLOB_CONNECTION_STRING')
+        self.container_name = os.getenv('AZURE_BLOB_CONTAINER_NAME', "profile-pics")
 
-        # Create the BlobServiceClient object
         self.blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
         self.container_client = self.blob_service_client.get_container_client(self.container_name)
 
-        # Ensure container exists (optional, but good practice)
         try:
             self.container_client.create_container()
-        except Exception:
-            pass  # Container already exists
+        except ResourceExistsError:
+            pass
 
     def _get_blob_name_from_url(self, blob_url: str) -> str:
         """

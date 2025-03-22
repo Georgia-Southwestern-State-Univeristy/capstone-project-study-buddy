@@ -1,123 +1,267 @@
-<div class="profile-page">
 
-  <!-- Page Title -->
+<div class="profile-page">
   <h1 class="profile-title" data-translate>My Profile</h1>
   
-  <!-- Main Card Container -->
-  <form [formGroup]="profileForm" class="profile-card">
-
-    <!-- Avatar -->
+  <!-- Profile Card with Tabs -->
+  <div class="profile-card">
+    <!-- Avatar Section -->
     <div class="avatar-container" (click)="triggerFileInput(fileInput)">
-      <input
-        type="file"
-        id="profilePicture"
-        #fileInput
-        (change)="onFileSelected($event)"
-        accept="image/*"
-        style="display: none"
-      />
-      <img
-        *ngIf="currentProfilePicture"
-        [src]="currentProfilePicture"
-        alt="Profile Picture"
-        class="avatar"
-      />
+      <input type="file" id="profilePicture" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none" />
+      <img *ngIf="currentProfilePicture" [src]="currentProfilePicture" alt="Profile Picture" class="avatar" />
     </div>
 
-    <div class="fields-container">
+    <!-- Tab Navigation -->
+    <div class="profile-tabs">
+      <button [class.active]="activeTab === 'basic'" (click)="activeTab = 'basic'">
+        <i class="fas fa-user"></i> Basic Info
+      </button>
+      <button [class.active]="activeTab === 'academic'" (click)="activeTab = 'academic'">
+        <i class="fas fa-graduation-cap"></i> Academic
+      </button>
+      <button [class.active]="activeTab === 'resources'" (click)="activeTab = 'resources'">
+        <i class="fas fa-book"></i> Resources
+      </button>
+      <button [class.active]="activeTab === 'wellbeing'" (click)="activeTab = 'wellbeing'">
+        <i class="fas fa-heart"></i> Wellbeing
+      </button>
+    </div>
 
-      <!-- Name -->
-      <div class="field-row">
-        <label data-translate>Name:</label>
-        <!-- Use formControlName instead of [value] -->
-        <input 
-          type="text"
-          formControlName="name"
-          placeholder="Your Name"
-        />
-      </div>
+    <form [formGroup]="profileForm">
+      <!-- Basic Info Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'basic'">
+        <div class="fields-container">
+          <!-- Name -->
+          <div class="field-row">
+            <label data-translate>Name:</label>
+            <input type="text" formControlName="name" placeholder="Your Name" />
+          </div>
 
-      <!-- Username -->
-      <div class="field-row">
-        <label data-translate>Username:</label>
-        <!-- Keep it disabled if you don’t want them changing it -->
-        <input 
-          type="text"
-          formControlName="username"
-          [disabled]="true"
-        />
-      </div>
+          <!-- Username -->
+          <div class="field-row">
+            <label data-translate>Username:</label>
+            <input type="text" formControlName="username" [disabled]="true" />
+          </div>
 
-      <!-- Email -->
-      <div class="field-row">
-        <label data-translate>Email:</label>
-        <input 
-          type="email"
-          formControlName="email"
-          [disabled]="true"
-        />
-      </div>
+          <!-- Email -->
+          <div class="field-row">
+            <label data-translate>Email:</label>
+            <input type="email" formControlName="email" [disabled]="true" />
+          </div>
 
-      <!-- Gender (Slider) -->
-      <div class="field-row gender-row">
-        <label data-translate>Gender:</label>
-        <div class="gender-slider">
-          <!-- Left arrow -->
-          <button type="button" class="nav-arrow" (click)="changeGender(-1)">
-            ‹
-          </button>
+          <!-- Gender (Slider) -->
+          <div class="field-row gender-row">
+            <label data-translate>Gender:</label>
+            <div class="gender-slider">
+              <button type="button" class="nav-arrow" (click)="changeGender(-1)">‹</button>
+              <span class="gender-value">
+                {{ translatedTexts[genders[genderIndex]] || genders[genderIndex] | titlecase }}
+              </span>
+              <button type="button" class="nav-arrow" (click)="changeGender(1)">›</button>
+            </div>
+          </div>
+          
+          <!-- Place of Residence -->
+          <div class="field-row">
+            <label data-translate>Place of Residence:</label>
+            <input type="text" formControlName="placeOfResidence" placeholder="N/A" />
+          </div>
 
-          <!-- Current Gender -->
-          <span class="gender-value">
-            {{ translatedTexts[genders[genderIndex]] || genders[genderIndex] | titlecase }}
-          </span>
+          <!-- Age -->
+          <div class="field-row">
+            <label data-translate>Age:</label>
+            <input type="number" formControlName="age" placeholder="Your age" min="18" max="120" />
+          </div>
 
-          <!-- Right arrow -->
-          <button type="button" class="nav-arrow" (click)="changeGender(1)">
-            ›
-          </button>
+          <!-- Preferred Language -->
+          <div class="field-row">
+            <label data-translate>Language:</label>
+            <mat-form-field appearance="outline">
+              <mat-label style="color: #ffb84d;">{{ translatedTexts['Preferred Language'] || 'Preferred Language' }}</mat-label>
+              <mat-select formControlName="preferredLanguage">
+                <mat-option *ngFor="let lang of supportedLanguages" [value]="lang.code">
+                  {{ translatedTexts[lang.label] || lang.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
       </div>
-      
-      <!-- Place of Residence -->
-      <div class="field-row">
-        <label data-translate>Place of Residence:</label>
-        <input 
-          type="text"
-          formControlName="placeOfResidence"
-          placeholder="N/A"
-        />
+
+      <!-- Academic Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'academic'">
+        <div class="fields-container">
+          <!-- Field of Study -->
+          <div class="field-row">
+            <label data-translate>Field of Study:</label>
+            <input type="text" formControlName="fieldOfStudy" placeholder="Your field of study" />
+          </div>
+
+          <!-- Goals -->
+          <div class="field-row">
+            <label data-translate>Academic Goals:</label>
+            <div class="chips-container">
+              <div class="chip" *ngFor="let goal of studentGoals; let i = index">
+                {{ goal }}
+                <button type="button" class="chip-remove" (click)="removeStudentGoal(i)">×</button>
+              </div>
+              <div class="chip-input-container">
+                <input 
+                  type="text" 
+                  #goalInput
+                  placeholder="Add a goal..." 
+                  (keydown.enter)="addStudentGoal(goalInput.value); goalInput.value = ''; $event.preventDefault()" 
+                />
+                <button type="button" class="chip-add" (click)="addStudentGoal(goalInput.value); goalInput.value = ''">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interested Subjects -->
+          <div class="field-row">
+            <label data-translate>Interested Subjects:</label>
+            <div class="chips-container">
+              <div class="chip" *ngFor="let subject of interestedSubjects; let i = index">
+                {{ subject }}
+                <button type="button" class="chip-remove" (click)="removeInterestedSubject(i)">×</button>
+              </div>
+              <div class="chip-input-container">
+                <input 
+                  type="text" 
+                  #subjectInput
+                  placeholder="Add a subject..." 
+                  (keydown.enter)="addInterestedSubject(subjectInput.value); subjectInput.value = ''; $event.preventDefault()" 
+                />
+                <button type="button" class="chip-add" (click)="addInterestedSubject(subjectInput.value); subjectInput.value = ''">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Field of Study -->
-      <div class="field-row">
-        <label data-translate>Field of Study:</label>
-        <input 
-          type="text"
-          formControlName="fieldOfStudy"
-          placeholder="N/A"
-        />
+      <!-- Resources Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'resources'">
+        <div class="fields-container">
+          <div class="field-row">
+            <label data-translate>Study Plan:</label>
+            <div class="study-plan-container">
+              <div class="accordion">
+                <div class="accordion-item">
+                  <div class="accordion-header" (click)="toggleAccordion('exercises')">
+                    <span>Exercises</span>
+                    <i class="fas" [ngClass]="{'fa-chevron-down': !isAccordionOpen.exercises, 'fa-chevron-up': isAccordionOpen.exercises}"></i>
+                  </div>
+                  <div class="accordion-content" *ngIf="isAccordionOpen.exercises">
+                    <div class="chips-container">
+                      <div class="chip" *ngFor="let exercise of studyPlanExercises; let i = index">
+                        {{ exercise }}
+                        <button type="button" class="chip-remove" (click)="removeStudyPlanExercise(i)">×</button>
+                      </div>
+                      <div class="chip-input-container">
+                        <input 
+                          type="text" 
+                          #exerciseInput
+                          placeholder="Add exercise..." 
+                          (keydown.enter)="addStudyPlanExercise(exerciseInput.value); exerciseInput.value = ''; $event.preventDefault()" 
+                        />
+                        <button type="button" class="chip-add" (click)="addStudyPlanExercise(exerciseInput.value); exerciseInput.value = ''">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="accordion-item">
+                  <div class="accordion-header" (click)="toggleAccordion('assignments')">
+                    <span>Assignments</span>
+                    <i class="fas" [ngClass]="{'fa-chevron-down': !isAccordionOpen.assignments, 'fa-chevron-up': isAccordionOpen.assignments}"></i>
+                  </div>
+                  <div class="accordion-content" *ngIf="isAccordionOpen.assignments">
+                    <div class="chips-container">
+                      <div class="chip" *ngFor="let assignment of studyPlanAssignments; let i = index">
+                        {{ assignment }}
+                        <button type="button" class="chip-remove" (click)="removeStudyPlanAssignment(i)">×</button>
+                      </div>
+                      <div class="chip-input-container">
+                        <input 
+                          type="text" 
+                          #assignmentInput
+                          placeholder="Add assignment..." 
+                          (keydown.enter)="addStudyPlanAssignment(assignmentInput.value); assignmentInput.value = ''; $event.preventDefault()" 
+                        />
+                        <button type="button" class="chip-add" (click)="addStudyPlanAssignment(assignmentInput.value); assignmentInput.value = ''">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="accordion-item">
+                  <div class="accordion-header" (click)="toggleAccordion('resources')">
+                    <span>Resources</span>
+                    <i class="fas" [ngClass]="{'fa-chevron-down': !isAccordionOpen.resources, 'fa-chevron-up': isAccordionOpen.resources}"></i>
+                  </div>
+                  <div class="accordion-content" *ngIf="isAccordionOpen.resources">
+                    <div class="chips-container">
+                      <div class="chip" *ngFor="let resource of studyPlanResources; let i = index">
+                        {{ resource }}
+                        <button type="button" class="chip-remove" (click)="removeStudyPlanResource(i)">×</button>
+                      </div>
+                      <div class="chip-input-container">
+                        <input 
+                          type="text" 
+                          #resourceInput
+                          placeholder="Add resource..." 
+                          (keydown.enter)="addStudyPlanResource(resourceInput.value); resourceInput.value = ''; $event.preventDefault()" 
+                        />
+                        <button type="button" class="chip-add" (click)="addStudyPlanResource(resourceInput.value); resourceInput.value = ''">+</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Preferred Language -->
-      <div class="field-row">
-        <label data-translate>Language:</label>
-        <mat-form-field appearance="outline" >
-          <mat-label style="color: #ffb84d;" >{{ translatedTexts['Preferred Language'] ||'Preferred Language' }}</mat-label>
-          <mat-select formControlName="preferredLanguage">
-            <mat-option
-              *ngFor="let lang of supportedLanguages"
-              [value]="lang.code"
-            >
-              {{ translatedTexts[lang.label] ||lang.label }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <!-- Wellbeing Tab -->
+      <div class="tab-content" *ngIf="activeTab === 'wellbeing'">
+        <div class="fields-container">
+          <div class="field-row">
+            <label data-translate>Educational Concerns:</label>
+            <div class="concerns-container">
+              <div class="concern-item" *ngFor="let concern of mentalHealthConcerns; let i = index">
+                <div class="concern-header">
+                  <span>{{ concern.label }}</span>
+                  <div class="concern-actions">
+                    <span class="severity-badge" [ngClass]="concern.severity">{{ concern.severity }}</span>
+                    <button type="button" class="concern-remove" (click)="removeConcern(i)">×</button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="add-concern-section">
+                <div class="concern-inputs">
+                  <input type="text" #concernLabel placeholder="Concern label..." />
+                  <select #concernSeverity>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+                <button 
+                  type="button" 
+                  class="add-concern-btn"
+                  (click)="addConcern(concernLabel.value, concernSeverity.value); concernLabel.value = ''"
+                >
+                  Add Concern
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    </form>
 
-    </div>
-
-    <!-- Actions / Buttons -->
+    <!-- Action Buttons -->
     <div class="button-group">
       <button
         class="edit-button"
@@ -125,20 +269,17 @@
         (click)="onSubmit()"
         [disabled]="isSubmitting"
       >
-      {{ isSubmitting ? (translatedTexts['Updating...'] || 'Updating...') : (translatedTexts['Edit Profile'] || 'Edit Profile') }}
+        {{ isSubmitting ? (translatedTexts['Updating...'] || 'Updating...') : (translatedTexts['Save Profile'] || 'Save Profile') }}
       </button>
 
-      <!-- Delete Account Button -->
       <button
-      class="delete-button"
-      type="button"
-      (click)="openDeleteConfirmationDialog()"
-      [disabled]="isSubmitting"
-    >
-    {{ isSubmitting ? (translatedTexts['Processing...'] || 'Processing...') : (translatedTexts['Delete Account'] || 'Delete Account') }}
-    </button>
+        class="delete-button"
+        type="button"
+        (click)="openDeleteConfirmationDialog()"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? (translatedTexts['Processing...'] || 'Processing...') : (translatedTexts['Delete Account'] || 'Delete Account') }}
+      </button>
     </div>
-
-  </form> <!-- END profile-card -->
-
-</div> <!-- END profile-page -->
+  </div>
+</div>
