@@ -40,6 +40,8 @@
         class="menu-btn"
         title="{{ translatedTexts['AI Avatar'] || 'AI Avatar' }}"
         routerLink="/main/avatar"
+        routerLinkActive="active" 
+        [routerLinkActiveOptions]="{ exact: true }"
       >
         <span role="img" aria-label="girl">👧</span>
         <span data-translate>Buddy</span>

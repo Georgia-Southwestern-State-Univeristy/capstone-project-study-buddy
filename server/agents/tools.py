@@ -16,6 +16,7 @@ from .tool_schemas import (
     AgentFactsInput,
     JobSearchInput,
     FetchMemeInput,
+    UserJourneyRetrievalInput
 )
 
 
@@ -84,6 +85,16 @@ toolbox = {
             "structured": True,
             "args_schema": JobSearchInput,
         },
+        "user_journey_retrieval": {
+           "func": get_user_journey_by_user_id,
+            "structured": True,
+            "description": (
+                "Retrieves the user's journey information, including mental health concerns, "
+                "goals, and therapy plans, by the user's ID."
+            ),
+            "args_schema": UserJourneyRetrievalInput
+
+        },
     }
 }
 
@@ -91,17 +102,6 @@ toolbox = {
 
 """extra agent tool"""
 
-
-        #"user_journey_retrieval": {
-           # "func": get_user_journey_by_user_id,
-            #"structured": True,
-            #"description": (
-             #   "Retrieves the user's journey information, including mental health concerns, "
-             #   "goals, and therapy plans, by the user's ID."
-            #),
-            #"args_schema": UserJourneyRetrievalInput
-
-        #},
         #"web_search_google": {
          #   "func": get_google_search_results,
           #  "description": "Uses Google Custom Search to fetch search results for a given query.",
