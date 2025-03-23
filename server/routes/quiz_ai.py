@@ -297,6 +297,123 @@ def get_total_score(user_id):
         logger.error(f"Failed to retrieve total score: {e}")
         return jsonify({"error": "Failed to retrieve total score."}), 500
 
+@quiz_ai_routes.route('/ai/<user_id>/topic_scores', methods=['GET'])
+def get_topic_scores(user_id):
+    """
+    Endpoint to retrieve a user's scores grouped by topics.
+    """
+    db_client = MongoDBClient.get_client()
+    db = db_client[MongoDBClient.get_db_name()]
+    
+    try:
+        # First check if user exists
+        user = db.users.find_one({"_id": ObjectId(user_id)}, {"total_score": 1})
+        if not user:
+            return jsonify({"error": "User not found."}), 404
+            
+        total_score = user.get('total_score', 0)
+        
+        # Check if the user has any quiz responses
+        response_count = db.user_responses.count_documents({"user_id": user_id})
+        logger.info(f"Found {response_count} responses for user {user_id}")
+        
+        if response_count == 0:
+            return jsonify({
+                "topic_scores": [],
+                "total_score": total_score,
+                "message": "User has not completed any quizzes yet."
+            }), 200
+        
+        # Create aggregation pipeline to get topic-wise scores
+        pipeline = [
+            # Match responses for the specific user
+            {
+                "$match": {
+                    "user_id": user_id
+                }
+            },
+            # Convert quiz_id string to ObjectId for the lookup
+            {
+                "$addFields": {
+                    "quiz_object_id": {"$toObjectId": "$quiz_id"}
+                }
+            },
+            # Join with quizzes collection to get topic information
+            {
+                "$lookup": {
+                    "from": "quizzes",
+                    "localField": "quiz_object_id",
+                    "foreignField": "_id",
+                    "as": "quiz_info"
+                }
+            },
+            # Unwind the quiz_info array (each response will have one quiz)
+            {
+                "$unwind": {
+                    "path": "$quiz_info",
+                    "preserveNullAndEmptyArrays": False
+                }
+            },
+            # Group by topic and calculate total score
+            {
+                "$group": {
+                    "_id": "$quiz_info.topic",
+                    "topic": {"$first": "$quiz_info.topic"},
+                    "total_score": {"$sum": "$score"},
+                    "quiz_count": {"$sum": 1}
+                }
+            },
+            # Project the final fields for the response
+            {
+                "$project": {
+                    "_id": 0,
+                    "topic": 1,
+                    "score": "$total_score",
+                    "quiz_count": 1
+                }
+            },
+            # Sort by topic name for consistent order
+            {
+                "$sort": {
+                    "topic": 1
+                }
+            }
+        ]
+
+        # Execute the aggregation pipeline
+        topic_scores = list(db.user_responses.aggregate(pipeline))
+        logger.info(f"Retrieved {len(topic_scores)} topics for user {user_id}")
+        
+        # For debugging: if no topics found but user has responses, check quiz topics
+        if len(topic_scores) == 0 and response_count > 0:
+            # Get a sample of user's quiz responses
+            sample_responses = list(db.user_responses.find(
+                {"user_id": user_id}, 
+                {"quiz_id": 1}
+            ).limit(5))
+            
+            # Get the corresponding quiz topics
+            quiz_data = []
+            for resp in sample_responses:
+                try:
+                    quiz = db.quizzes.find_one({"_id": ObjectId(resp["quiz_id"])}, {"topic": 1})
+                    if quiz:
+                        quiz_data.append({"quiz_id": resp["quiz_id"], "topic": quiz.get("topic")})
+                except Exception as e:
+                    logger.error(f"Error retrieving quiz data: {e}")
+            
+            logger.info(f"Sample quiz data for debugging: {quiz_data}")
+
+        return jsonify({
+            "topic_scores": topic_scores,
+            "total_score": total_score,
+            "quiz_count": response_count
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Failed to retrieve topic scores: {e}", exc_info=True)
+        return jsonify({"error": "Failed to retrieve topic scores."}), 500
+
 @quiz_ai_routes.route('/ai/scoreboard', methods=['GET'])
 def get_scoreboard():
     db_client = MongoDBClient.get_client()
