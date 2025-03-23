@@ -124,14 +124,8 @@ export class AppService {
   }
 
   // Fetch quiz questions based on topic or file
-  getQuizQuestions(userId: string, topic?: string, file?: File, numQuestions: number = 5, level?: string): Observable<any> {
-    const formData = new FormData();
-    if (topic) formData.append('topic', topic);
-    if (file) formData.append('file', file);
-    if (level) formData.append('level', level);
-    formData.append('num', numQuestions.toString());
-
-    return this.http.post(`${this.baseUrl}/ai/quiz/${userId}`, formData);
+  getQuizQuestions(userId: string, formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/ai/quiz/${userId}`, formData);
   }
 
   // Submit quiz answers

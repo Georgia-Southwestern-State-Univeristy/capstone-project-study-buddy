@@ -13,6 +13,7 @@ class Quiz(BaseModel):
     id: str = None
     user_id: str
     topic: str
+    sub_topic: Optional[str] = None
     level: str
     questions: List[Question]
     created_at: Optional[str] = None  # ISO format timestamp

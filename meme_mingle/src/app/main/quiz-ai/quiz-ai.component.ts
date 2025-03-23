@@ -112,6 +112,7 @@ export class QuizAiComponent implements OnInit, OnDestroy {
       topic: ['', Validators.required],
       level: ['Medium', Validators.required],
       numQuestions: [5, [Validators.required, Validators.min(1), Validators.max(20)]],
+      sub_topic: [''],
     });
 
     // Initialize the answer form dynamically based on questions
@@ -263,10 +264,24 @@ addUserInterestsToTopics(interests: string[]): void {
     const topic = this.quizForm.value.topic;
     const numQuestions = this.quizForm.value.numQuestions;
     const level = this.quizForm.value.level;
-
+    const sub_topic = this.quizForm.value.sub_topic;
+  
     this.currentTopic = topic ? topic : '';
+    
+    // Create FormData for file upload
+    const formData = new FormData();
+    if (topic) formData.append('topic', topic);
+    if (sub_topic) formData.append('sub_topic', sub_topic);
+    formData.append('num', numQuestions.toString());
+    formData.append('level', level);
+    
+    // Add file if selected
+    if (this.selectedFile) {
+      formData.append('file', this.selectedFile);
+    }
+    
     this.subscriptions.add(
-      this.appService.getQuizQuestions(userId, topic, this.selectedFile ?? undefined, numQuestions, level).subscribe({
+      this.appService.getQuizQuestions(userId, formData).subscribe({
         next: (response: any) => {
           this.quiz = {
             quiz_id: response.quiz_id,
@@ -288,6 +303,7 @@ addUserInterestsToTopics(interests: string[]): void {
       })
     );
   }
+  
 
   // Initialize the answer form based on the quiz questions
   initializeAnswerForm(): void {

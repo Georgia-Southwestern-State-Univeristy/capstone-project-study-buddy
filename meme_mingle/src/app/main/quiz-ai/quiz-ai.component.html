@@ -38,6 +38,13 @@
             </div>
           </div>
 
+          <!-- New Sub-topic Field -->
+          <div class="form-group">
+            <mat-form-field appearance="fill">
+              <mat-label>{{ translatedTexts['Sub-topic'] || 'Sub-topic' }}</mat-label>
+              <input matInput formControlName="sub_topic" />
+            </mat-form-field>
+          </div>
 
           <div class="form-group file-upload-group">
             <label for="fileUpload" class="file-upload-label">

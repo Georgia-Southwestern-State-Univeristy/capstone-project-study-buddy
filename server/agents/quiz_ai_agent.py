@@ -7,7 +7,7 @@ from bson import ObjectId
 import datetime
 from services.azure_form_recognizer import extract_text_from_file
 from utils.consts import language_mapping
-def generate_questions(user_id, topic=None, file_content=None, file_mime_type=None, num_questions=5, level='medium', language='en'):
+def generate_questions(user_id, topic=None, sub_topic=None, file_content=None, file_mime_type=None, num_questions=5, level='medium', language='en'):
     """
     Generates questions based on a given topic and stores them in the database.
 
@@ -45,6 +45,9 @@ def generate_questions(user_id, topic=None, file_content=None, file_mime_type=No
         base_prompt += f"Generate {num_questions} {level.lower()} level questions about {topic} in {language_name}. "
     else:
         base_prompt += f"Generate {num_questions} {level.lower()} level questions in {language_name}. "
+
+    if sub_topic:
+        base_prompt += f"Focus also on the subtopic: {sub_topic}. "
 
     if not topic and not file_content:
         return {"error": "Either a topic or a file must be provided to generate questions."}
@@ -115,6 +118,7 @@ def generate_questions(user_id, topic=None, file_content=None, file_mime_type=No
         quiz = Quiz(
             user_id=user_id,
             topic=topic if topic else "File-Based Quiz",
+            sub_topic=sub_topic,
             questions=questions,
             level=level.lower(),
             created_at=datetime.datetime.utcnow().isoformat()

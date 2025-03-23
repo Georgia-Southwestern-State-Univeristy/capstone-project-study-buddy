@@ -30,6 +30,7 @@ def get_questions(user_id):
         return jsonify({"error": "No data provided"}), 400
     
     topic = body.get('topic')
+    sub_topic = body.get('sub_topic')
     num_questions = int(body.get('num', 5))
     level = body.get('level', 'medium').lower()
     print('level:', level)
@@ -70,6 +71,7 @@ def get_questions(user_id):
     result = generate_questions(
         user_id, 
         topic, 
+        sub_topic,
         file_content, 
         file_mime_type, 
         num_questions, 
@@ -294,6 +296,6 @@ def get_total_score(user_id):
     except Exception as e:
         logger.error(f"Failed to retrieve total score: {e}")
         return jsonify({"error": "Failed to retrieve total score."}), 500
-    
+
 
 
