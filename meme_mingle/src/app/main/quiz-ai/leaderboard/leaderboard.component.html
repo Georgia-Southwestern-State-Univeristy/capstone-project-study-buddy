@@ -1,0 +1,41 @@
+<mat-card class="leaderboard-card">
+    <mat-card-title class="leaderboard-title">
+      <mat-icon class="leaderboard-icon">leaderboard</mat-icon>
+      Leaderboard
+    </mat-card-title>
+    <mat-card-content>
+      <div class="leaderboard-content" *ngIf="leaderboardData.length > 0; else noData">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>User</th>
+              <th>Quizzes</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of leaderboardData; let i = index" [ngClass]="{'top-rank': i < 3}">
+              <td class="rank-cell">
+                <div [ngClass]="'rank-badge rank-' + (i + 1)">
+                  <mat-icon *ngIf="i === 0">emoji_events</mat-icon>
+                  <mat-icon *ngIf="i === 1">military_tech</mat-icon>
+                  <mat-icon *ngIf="i === 2">workspace_premium</mat-icon>
+                  <span *ngIf="i > 2">{{ i + 1 }}</span>
+                </div>
+              </td>
+              <td class="username-cell">{{ user.username }}</td>
+              <td class="quiz-count-cell">{{ user.quiz_count }}</td>
+              <td class="score-cell">{{ user.total_score }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noData>
+        <div class="no-data">
+          <mat-icon>quiz</mat-icon>
+          <p>No quiz results yet. Be the first to take a quiz!</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>

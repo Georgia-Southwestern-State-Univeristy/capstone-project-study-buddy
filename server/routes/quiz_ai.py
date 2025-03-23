@@ -297,5 +297,107 @@ def get_total_score(user_id):
         logger.error(f"Failed to retrieve total score: {e}")
         return jsonify({"error": "Failed to retrieve total score."}), 500
 
-
-
+@quiz_ai_routes.route('/ai/scoreboard', methods=['GET'])
+def get_scoreboard():
+    db_client = MongoDBClient.get_client()
+    db = db_client[MongoDBClient.get_db_name()]
+    
+    # First, check if we have any user_responses
+    response_count = db.user_responses.count_documents({})
+    quiz_count = db.quizzes.count_documents({})
+    
+    logger.info(f"Found {response_count} user responses and {quiz_count} quizzes")
+    
+    # Convert quiz_id to ObjectId in the lookup stage
+    pipeline = [
+        {
+            "$addFields": {
+                "quiz_object_id": { "$toObjectId": "$quiz_id" }
+            }
+        },
+        {
+            "$lookup": {
+                "from": "quizzes",
+                "localField": "quiz_object_id",
+                "foreignField": "_id",
+                "as": "quiz_info"
+            }
+        },
+        {
+            "$match": {
+                "quiz_info": { "$ne": [] }  # Only include documents that had a successful join
+            }
+        },
+        {
+            "$unwind": "$quiz_info"
+        },
+        # Group by user_id and sum scores
+        {
+            "$group": {
+                "_id": "$user_id",
+                "total_score": {"$sum": "$score"},
+                "quiz_count": {"$sum": 1}
+            }
+        },
+        # Join with users collection to get usernames
+        {
+            "$addFields": {
+                "user_object_id": { "$toObjectId": "$_id" }
+            }
+        },
+        {
+            "$lookup": {
+                "from": "users",
+                "localField": "user_object_id",
+                "foreignField": "_id",
+                "as": "user_info"
+            }
+        },
+        {
+            "$unwind": {
+                "path": "$user_info",
+                "preserveNullAndEmptyArrays": True
+            }
+        },
+        # Project final results
+        {
+            "$project": {
+                "_id": 0,  # Don't include the _id in results
+                "user_id": "$_id",
+                "username": {"$ifNull": ["$user_info.username", "Unknown User"]},
+                "total_score": 1,
+                "quiz_count": 1
+            }
+        },
+        {
+            "$sort": {
+                "total_score": -1
+            }
+        }
+    ]
+    
+    try:
+        results = list(db.user_responses.aggregate(pipeline))
+        logger.info(f"Scoreboard query returned {len(results)} results")
+        
+        if not results:
+            # Execute a simpler query to debug
+            sample_responses = list(db.user_responses.find({}, {"quiz_id": 1, "user_id": 1, "score": 1}).limit(5))
+            logger.info(f"Sample user_responses: {sample_responses}")
+            
+            # Also check if users collection has data
+            sample_users = list(db.users.find({}, {"username": 1}).limit(5))
+            logger.info(f"Sample users: {sample_users}")
+        
+        return jsonify({
+            "leaderboard": results,
+            "meta": {
+                "total_users": len(results)
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error generating scoreboard: {str(e)}")
+        return jsonify({
+            "error": "Failed to generate scoreboard",
+            "message": str(e)
+        }), 500

@@ -128,6 +128,11 @@ export class AppService {
     return this.http.post<any>(`${this.baseUrl}/ai/quiz/${userId}`, formData);
   }
 
+  // Get leaderboard
+  getLeaderboard(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/ai/scoreboard`);
+  }
+
   // Submit quiz answers
   submitQuizAnswers(quizId: string, userId: string, answers: any[]): Observable<any> {
     const payload = {

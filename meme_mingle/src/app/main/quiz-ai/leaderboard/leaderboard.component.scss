@@ -1,0 +1,191 @@
+// Match the color scheme from quiz-ai.component
+$primary-color: #ffb84d;
+$background-color: #003366;
+$text-color: #ffffff;
+$border-radius: 15px;
+$box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+$border-color: #ffb84d;
+
+// Custom colors for rankings
+$gold-color: #ffd700;
+$silver-color: #c0c0c0;
+$bronze-color: #cd7f32;
+
+.leaderboard-card {
+  background-color: $background-color;
+  color: $text-color;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+  margin-bottom: 20px;
+  overflow: hidden;
+  
+  .leaderboard-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    padding: 16px;
+    border-bottom: 1px solid $primary-color;
+    color: $primary-color;
+    
+    .leaderboard-icon {
+      margin-right: 10px;
+      font-size: 1.8rem;
+      color: $primary-color;
+      width: fit-content;
+      height: fit-content;
+    }
+  }
+  
+  .leaderboard-content {
+    padding: 0;
+  }
+  
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: rgba($primary-color, 0.2);
+      color: $primary-color;
+      font-weight: bold;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    tr {
+      border-bottom: 1px solid rgba($primary-color, 0.1);
+      transition: background-color 0.2s ease;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      &:hover {
+        background-color: rgba($primary-color, 0.1);
+      }
+      
+      &.top-rank {
+        background-color: rgba($primary-color, 0.05);
+      }
+    }
+    
+    .rank-cell {
+      width: 70px;
+      text-align: center;
+      
+      .rank-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        margin: 0 auto;
+        
+        &.rank-1 {
+          background-color: $gold-color;
+          color: #333;
+          
+          mat-icon {
+            font-size: 22px;
+            width: fit-content;
+            height: fit-content;
+            color: #333;
+          }
+        }
+        
+        &.rank-2 {
+          background-color: $silver-color;
+          color: #333;
+          
+          mat-icon {
+            font-size: 20px;
+            width: fit-content;
+            height: fit-content;
+            color: #333;
+          }
+        }
+        
+        &.rank-3 {
+          background-color: $bronze-color;
+          color: #333;
+          
+          mat-icon {
+            font-size: 18px;
+            width: fit-content;
+            height: fit-content;
+            color: #333;
+          }
+        }
+        
+        span {
+          font-weight: bold;
+        }
+      }
+    }
+    
+    .username-cell {
+      font-weight: 500;
+    }
+    
+    .score-cell {
+      color: $primary-color;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+  }
+  
+  .no-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    color: rgba($text-color, 0.7);
+    
+    mat-icon {
+      font-size: 48px;
+      width: fit-content;
+      height: fit-content;
+      margin-bottom: 16px;
+      color: $primary-color;
+      opacity: 0.7;
+    }
+    
+    p {
+      font-size: 1rem;
+      text-align: center;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 600px) {
+  .leaderboard-table {
+    th, td {
+      padding: 10px 8px;
+      font-size: 0.9rem;
+    }
+    
+    .rank-cell {
+      width: 50px;
+      
+      .rank-badge {
+        width: 30px;
+        height: 30px;
+        
+        mat-icon {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}

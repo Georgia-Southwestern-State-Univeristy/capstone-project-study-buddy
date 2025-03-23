@@ -20,6 +20,54 @@ $submit-btn-height: 50px;
   position: relative;
   max-height: 98.4vh;
   
+  // Tab styling
+  ::ng-deep .mat-mdc-tab-group {
+    margin-bottom: 20px;
+    
+    .mat-mdc-tab-header {
+      background-color: #003366;
+      border-radius: $border-radius $border-radius 0 0;
+      border: 1px solid $border-color;
+      border-bottom: none;
+    }
+    
+    .mat-mdc-tab {
+      color: $text-color;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+      
+      &.mat-mdc-tab-active {
+        opacity: 1;
+        
+        .tab-label {
+          color: $primary-color;
+        }
+      }
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+    
+    .tab-label {
+      display: flex;
+      align-items: center;
+      
+      mat-icon {
+        margin-right: 8px;
+        font-size: 1.2rem;
+      }
+    }
+    
+    .mat-mdc-tab-body-wrapper {
+      background-color: transparent;
+      padding-top: 15px;
+    }
+  }
+  
+  .leaderboard-container {
+    margin-top: 20px;
+  }
 
   h1 {
     text-align: center;
@@ -703,5 +751,339 @@ $submit-btn-height: 50px;
   .quiz-card mat-card-title {
     position: relative;
     padding-right: 40px;
+  }
+}
+
+.quiz-generation-card {
+  position: relative;
+  overflow: hidden;
+  background-color: #003366;
+  transition: all 0.3s ease;
+  border-radius: $border-radius;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  
+  &:hover {
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+  }
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #004080, #002244);
+    padding: 1.5rem;
+    border-bottom: 2px solid $border-color;
+    
+    .header-icon {
+      font-size: 2.5rem;
+      width: auto;
+      height: auto;
+      margin-right: 1rem;
+      color: $primary-color;
+    }
+    
+    mat-card-title {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: $primary-color;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  .topic-customization-note {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 4px solid $primary-color;
+    padding: 12px 16px;
+    margin: 1rem;
+    border-radius: 4px;
+    
+    mat-icon {
+      color: $primary-color;
+      margin-right: 10px;
+      font-size: 1.2rem;
+    }
+    
+    span {
+      font-size: 0.9rem;
+      color: $text-color;
+      line-height: 1.4;
+    }
+  }
+  
+  mat-card-content {
+    padding: 1.5rem;
+    
+    .quiz-form {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      
+      .form-section {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 1.5rem;
+        
+        .section-title {
+          color: $primary-color;
+          margin-top: 0;
+          margin-bottom: 1rem;
+          font-size: 1.2rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          
+          &::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background-color: $primary-color;
+            margin-right: 8px;
+            border-radius: 2px;
+          }
+        }
+        
+        .section-description {
+          color: $text-muted;
+          font-size: 0.9rem;
+          margin-bottom: 1rem;
+        }
+      }
+      
+      .flex-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        
+        @media (max-width: 600px) {
+          flex-direction: column;
+        }
+      }
+      
+      .flex-item {
+        flex: 1;
+        min-width: 200px;
+      }
+      
+      .form-group {
+        margin-bottom: 1.2rem;
+        
+        mat-form-field {
+          width: 100%;
+          border-radius: 8px;
+          
+          ::ng-deep {
+            // Remove extra space below form fields
+            .mat-mdc-form-field-subscript-wrapper {
+              height: 0;
+              margin: 0 !important;
+              padding: 0 !important;
+              min-height: 0 !important;
+              position: static;
+            }
+            
+            // Remove bottom padding
+            .mat-mdc-text-field-wrapper {
+              padding-bottom: 0;
+            }
+            
+            // Fix background color issue
+            .mat-mdc-form-field-focus-overlay {
+              background-color: transparent;
+            }
+            
+            // Adjust infix container padding
+            .mat-mdc-form-field-infix {
+              padding-bottom: 8px;
+              min-height: 40px;
+            }
+            
+            // Reduce bottom gap for hint text
+            .mat-mdc-form-field-hint-wrapper {
+              padding: 0;
+              margin-top: 4px;
+            }
+            
+            // Fix select dropdown colors
+            .mat-mdc-select-value {
+              color: black;
+            }
+            
+            // Fix text color for inputs
+            input.mat-mdc-input-element, 
+            textarea.mat-mdc-input-element {
+              color: black;
+            }
+            
+            // Fix outline color
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+              border-color: rgba(255, 184, 77, 0.3);
+            }
+            
+            // Fix focused outline color
+            .mat-focused .mdc-notched-outline__leading,
+            .mat-focused .mdc-notched-outline__notch,
+            .mat-focused .mdc-notched-outline__trailing {
+              border-color: $primary-color !important;
+            }
+            // Fix label color
+            .mat-mdc-floating-label,
+            .mdc-floating-label {
+              color: black;
+              
+            }
+        
+            // Fix label color when focused
+            .mat-form-field-label.mat-accent,
+            .mat-focused .mat-form-field-label {
+              color: $primary-color;
+              font-size: large;
+            }
+            // Fix icon color
+            .mat-mdc-form-field-icon-suffix,
+            .mat-mdc-form-field-icon-prefix {
+              color: $primary-color;
+            }
+          }
+        }
+      }
+      
+      .file-upload-container {
+        width: 100%;
+        
+        .upload-area {
+          border: 2px dashed rgba(255, 184, 77, 0.5);
+          border-radius: 8px;
+          padding: 2rem;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          min-height: 150px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          
+          &:hover {
+            border-color: $primary-color;
+            background-color: rgba(255, 184, 77, 0.05);
+          }
+          
+          &.has-file {
+            border-style: solid;
+            background-color: rgba(255, 184, 77, 0.1);
+          }
+          
+          .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+            .upload-icon {
+              font-size: 3rem;
+              width: auto;
+              height: auto;
+              color: $primary-color;
+              margin-bottom: 1rem;
+            }
+            
+            .upload-text {
+              color: $text-color;
+              font-size: 1rem;
+              margin-bottom: 0.5rem;
+            }
+            
+            .upload-format {
+              color: $text-muted;
+              font-size: 0.8rem;
+            }
+          }
+          
+          .file-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            
+            .file-preview {
+              display: flex;
+              align-items: center;
+              
+              .file-icon {
+                font-size: 2.5rem;
+                color: $primary-color;
+                margin-right: 1rem;
+                width: auto;
+                height: auto;
+              }
+              
+              .file-details {
+                text-align: left;
+                
+                .file-name {
+                  color: $text-color;
+                  font-weight: 500;
+                  margin: 0 0 4px 0;
+                }
+                
+                .file-size {
+                  color: $text-muted;
+                  font-size: 0.8rem;
+                  margin: 0;
+                }
+              }
+            }
+            
+            .remove-file-btn {
+              width: 36px;
+              height: 36px;
+              
+              mat-icon {
+                font-size: 1rem;
+              }
+            }
+          }
+        }
+      }
+      
+      .form-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+        
+        .generate-button {
+          width: 100%;
+          max-width: 300px;
+          height: 48px;
+          font-size: 1.1rem;
+          font-weight: 500;
+          border-radius: 24px;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          
+          mat-icon {
+            font-size: 1.2rem;
+          }
+          
+          &:hover:not([disabled]) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+          }
+          
+          &:active:not([disabled]) {
+            transform: translateY(0);
+          }
+        }
+      }
+    }
   }
 }

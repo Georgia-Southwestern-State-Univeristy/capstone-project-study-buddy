@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, Pipe, PipeTransform } from '@angular/core';
 import { AppService } from '../../app.service';
 import { FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -16,7 +16,22 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
+import { LeaderboardComponent } from './leaderboard/leaderboard.component';
+import { MatTabsModule } from '@angular/material/tabs';
 
+@Pipe({
+  name: 'fileSize',
+  standalone: true
+})
+export class FileSizePipe implements PipeTransform {
+  transform(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+}
 
 interface Quiz {
   quiz_id: string;
@@ -65,6 +80,9 @@ interface FeedbackItem {
     MatIconModule,
     MatTooltipModule,
     MatExpansionModule,
+    MatTabsModule,
+    LeaderboardComponent,
+    FileSizePipe
   ],
   templateUrl: './quiz-ai.component.html',
   styleUrls: ['./quiz-ai.component.scss'],
