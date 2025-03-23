@@ -199,44 +199,61 @@ export class Avatar3DComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private setIdleState(): void {
-    this.updateAnimation('Idle');
+    // Prevent infinite recursion by checking current animation name
+    if (this.currentAnimationName === 'Idle') {
+      // Already in idle state, just update facial expression
+      this.updateFacialExpression('default');
+      return;
+    }
+    
+    // Otherwise try to set idle animation
+    this.updateAnimation('Idle', true);
     this.updateFacialExpression('default');
   }
-
-  // -------------------------
-  // Animation Handling
-  // -------------------------
-  private updateAnimation(animationName: string): void {
+  
+  private updateAnimation(animationName: string, isIdleFallback: boolean = false): void {
     if (!this.mainMixer) {
       console.log('AnimationMixer not initialized.');
       return;
     }
+    
     const clip = this.animationClips.find((a) => a.name === animationName);
     console.log(`Searching for animation: ${animationName}`, clip);
-
+  
     if (clip) {
       const newAction = this.mainMixer.clipAction(clip);
       console.log(`Found animation clip: ${animationName}`, newAction);
-
+  
       if (this.currentAction) {
-        console.log(
-          `Fading out current animation: ${this.currentAction.getClip().name}`
-        );
+        console.log(`Fading out current animation: ${this.currentAction.getClip().name}`);
         this.currentAction.fadeOut(0.5);
       }
-
+  
       console.log(`Fading in new animation: ${animationName}`);
       newAction.reset().fadeIn(0.5).play();
-
+  
       this.currentAction = newAction;
       this.currentAnimationName = animationName;
-
+  
       this.avatarEvent.emit(`Animation changed to ${animationName}`);
       console.log(`Animation changed to ${animationName}`);
+    } else if (!isIdleFallback) {
+      // Only try Idle as fallback if we're not already trying to play Idle
+      console.log(`Animation not found: ${animationName}. Playing fallback.`);
+      
+      // Try a different animation instead of recursively calling setIdleState
+      if (this.animationClips.length > 0) {
+        // Use first available animation as fallback
+        const fallbackName = this.animationClips[0].name;
+        console.log(`Using fallback animation: ${fallbackName}`);
+        this.updateAnimation(fallbackName, true);
+      } else {
+        console.warn('No animations available as fallback');
+        // Do nothing - avoid recursion
+      }
     } else {
-      //if clip not found, play idle animation
-      console.log(`Animation not found: ${animationName}. Playing Idle.`);
-      this.setIdleState();
+      console.warn('No fallback animations found');
+      // Do nothing - avoid recursion
     }
   }
 

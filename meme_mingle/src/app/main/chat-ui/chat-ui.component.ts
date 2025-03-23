@@ -167,18 +167,8 @@ export class ChatUIComponent implements OnInit, OnDestroy {
   selectedFile: File | null = null;
   selectedRole: string = 'Albert Einstein';
   latestMessage: string | null = null;
-
-  historicalFigures: HistoricalFigure[] = [
-    { display: 'Ada Lovelace', value: 'Ada Lovelace', field: 'Computer Science' },
-    { display: 'Albert Einstein', value: 'Albert Einstein', field: 'Physics' },
-    { display: 'Aryabhata', value: 'Aryabhata', field: 'mathematician' },
-    { display: 'Galileo Galilei', value: 'Galileo Galilei', field: 'Astronomy' },
-    { display: 'Isaac Newton', value: 'Isaac Newton', field: 'Mathematics' },
-    { display: 'Leonardo da Vinci', value: 'Leonardo da Vinci', field: 'Art and Science' },
-    { display: 'Marie Curie', value: 'Marie Curie', field: 'Chemistry' },
-    { display: 'Nikola Tesla', value: 'Nikola Tesla', field: 'Electrical Engineering' },
-    { display: 'Thomas Edison', value: 'Thomas Edison', field: 'Inventing' },
-  ];
+  translatedTexts: { [key: string]: string } = {};
+  roles: HistoricalFigure[] = [];
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
@@ -195,14 +185,6 @@ export class ChatUIComponent implements OnInit, OnDestroy {
     // Setup IDs from local storage or chat service
     this.userId = localStorage.getItem('user_id') || 'default_user';
     this.chatId = this.chatService.getChatId() || this.chatService.generateChatId();
-
-    // If you want to skip the overlay by default:
-    if (this.selectedRole) {
-      this.showOverlay = false; // Hide the overlay
-      this.initializeConversation(); // Start the conversation
-    } else {
-      this.showOverlay = true; // Show overlay if no default mentor is set
-    }
 
     // Speech Recognition Setup
     const windowObj = window as unknown as IWindow;
@@ -272,48 +254,120 @@ export class ChatUIComponent implements OnInit, OnDestroy {
       });
   }
 
-  initializeConversation(): void {
-    if (!this.selectedRole) {
-      console.error('No mentor selected. Cannot initialize conversation.');
-      return;
-    }
-    this.isProcessing = true;
-    console.log(`Initializing conversation with role: ${this.selectedRole}`);
-
-    const welcomeSub = this.appService
-      .aimentorAvtarWelcome(this.userId, this.selectedRole)
-      .subscribe({
-        next: (response: any) => {
-          console.log('Initialize Conversation Response:', response);
-          this.chatId = response.chat_id;
-          this.chatService.setChatId(this.chatId);
-          console.log('Initialize Conversation Response:', response);
-          
-          const aiMessage = response.text;
-          const audioUrl = response.audioUrl;
-          const imageUrl = response.imageUrl;
-          const animation = response.animation;                  // Extract animation
-          const facialExpression = response.facial_expression || response.facialExpression;
-          const lipSyncData = response.lip_sync_data || response.lipsync;
-          const avatarAudio = response.avatar_audio || response.avatarAudio;
-  
-        // this.addMessage('Mentor', aiMessage, audioUrl, imageUrl, animation, facialExpression, lipSyncData, avatarAudio);
-        // Pass audioUrl and avatarAudio without attempting to play them
-        this.addMessage('Mentor', aiMessage, undefined, imageUrl, animation, facialExpression, lipSyncData, avatarAudio);
-
-          // if (audioUrl) {
-          //   this.playAudio(audioUrl);
-          // }
-          this.isProcessing = false;
-          this.startListening();
-        },
-        error: (error: any) => {
-          console.error('Error fetching initial greeting:', error);
-          this.isProcessing = false;
-        },
-      });
-    this.subscriptions.add(welcomeSub);
+  // Fix the parameter order in initializeConversation method
+initializeConversation(): void {
+  if (!this.selectedRole) {
+    console.error('No mentor selected. Cannot initialize conversation.');
+    return;
   }
+  this.isProcessing = true;
+  console.log(`Initializing conversation with role: ${this.selectedRole}`);
+
+  const welcomeSub = this.appService
+    .aimentorAvtarWelcome(this.userId, this.selectedRole)
+    .subscribe({
+      next: (response: any) => {
+        console.log('Initialize Conversation Response:', response);
+        this.chatId = response.chat_id;
+        this.chatService.setChatId(this.chatId);
+        
+        // Extract message and properties with proper fallbacks
+        let aiMessage = 'Welcome! I am here to assist you.';
+        if (typeof response.text === 'string') aiMessage = response.text;
+        else if (typeof response.message === 'string') aiMessage = response.message;
+        else if (response.message && typeof response.message.text === 'string') 
+          aiMessage = response.message.text;
+        else if (response.message && typeof response.message.message === 'string')
+          aiMessage = response.message.message;
+        
+        const audioUrl = response.audio_url || response.audioUrl ||
+                        (response.message && (response.message.audio_url || response.message.audioUrl));
+        
+        const avatarAudio = response.avatar_audio || response.avatarAudio ||
+                           (response.message && (response.message.avatar_audio || response.message.avatarAudio));
+        
+        const animation = response.animation || 
+                         (response.message && response.message.animation) || "Talking_1";
+        
+        // Fix: Use a string for facial expression, not an object
+        const facialExpression = "smile";
+        
+        const lipSyncData = response.lip_sync_data || response.lipsync ||
+                           (response.message && (response.message.lip_sync_data || response.message.lipsync));
+        
+        console.log('Final extracted data for avatar:', {
+          message: aiMessage,
+          audioUrl,
+          avatarAudio,
+          animation,
+          facialExpression,
+          lipSyncData
+        });
+
+        // FIX: Correct parameter order
+        this.addMessage(
+          'Mentor', 
+          aiMessage, 
+          audioUrl, 
+          undefined, // imageUrl
+          animation, 
+          facialExpression, 
+          lipSyncData, 
+          avatarAudio
+        );
+        
+        this.isProcessing = false;
+        this.startListening();
+      },
+      error: (error: any) => {
+        console.error('Error fetching initial greeting:', error);
+        this.isProcessing = false;
+      },
+    });
+  this.subscriptions.add(welcomeSub);
+}
+
+// Fix the parameter order in processUserInput method
+processUserInput(transcript: string, file?: File): void {
+  this.isProcessing = true;
+  const chatSub = this.appService
+    .aimentorAvtarchat(this.userId, this.chatId, this.turnId, transcript, file)
+    .subscribe({
+      next: (response: any) => {
+        console.log('Process User Input Response:', response);
+
+        const aiMessage = response.message;
+        const audioUrl = response.audio_url;
+        // Fix: Use a known working animation 
+        const animation = response.animation || "Talking_1";
+        // Fix: Use a string for facial expression, not an object
+        const facialExpression = "smile";
+        const lipSyncData = response.lip_sync_data || response.lipsync;
+        const avatarAudio = response.avatar_audio || response.avatarAudio;
+
+        // FIX: Correct parameter order
+        this.addMessage(
+          'Mentor', 
+          aiMessage, 
+          audioUrl, 
+          undefined, // imageUrl
+          animation, 
+          facialExpression, 
+          lipSyncData, 
+          avatarAudio
+        );
+        
+        this.turnId += 1;
+        this.isProcessing = false;
+      },
+      error: (error: any) => {
+        console.error('Error processing user input:', error);
+        this.isProcessing = false;
+        this.startListening();
+      },
+    });
+  this.subscriptions.add(chatSub);
+}
 
   finalizeChat(): void {
     if (
@@ -342,6 +396,74 @@ export class ChatUIComponent implements OnInit, OnDestroy {
         });
       this.subscriptions.add(finalizeSub);
     }
+  }
+
+  // Translate content to the target language
+  private translateContent(targetLanguage: string) {
+    const elementsToTranslate = document.querySelectorAll('[data-translate]');
+    const textsToTranslate = Array.from(elementsToTranslate).map(
+      (el) => el.textContent?.trim() || ''
+    );
+
+    // Include additional texts that are not in data-translate attributes
+    const additionalTexts = [
+    'Welcome to AI Chat',
+    'Choose a historical figure to inspire your conversation.',
+    'Select Your Mentor',
+    'Start Conversation',
+    'Ada Lovelace', 
+    'Albert Einstein',
+    'Aryabhatta',
+    'Galileo Galilei', 
+    'Isaac Newton', 
+    'Leonardo da Vinci', 
+    'Marie Curie', 
+    'Nikola Tesla', 
+    'Thomas Edison', 
+    'Astronomy',
+    'Art and Science',
+    'Electrical Engineering',
+    'Inventing',
+    'mathematician',
+    'Type your message here...',
+    'Pause Listening',
+    'Resume Listening',
+    'File upload',
+    'New Conversation',
+    'Unmute',
+    'Mute',
+    'Replay Audio',
+    'Mathematics',
+    'Physics',
+    'Chemistry',
+    'Computer Science',
+    'AI is speaking...',
+    'AI is listening...',
+  ];
+    const allTextsToTranslate = [...textsToTranslate, ...additionalTexts];
+
+    this.appService
+      .translateTexts(allTextsToTranslate, targetLanguage)
+      .subscribe((response) => {
+        const translations = response.translations;
+
+        // Translate texts from data-translate elements
+        elementsToTranslate.forEach((element, index) => {
+          const originalText = textsToTranslate[index];
+          this.translatedTexts[originalText] = translations[index];
+
+          // Update directly if it's a regular DOM element
+          if (!(element.tagName.startsWith('MAT-'))) {
+            element.textContent = translations[index];
+          }
+        });
+
+        // Handle additional texts
+        additionalTexts.forEach((text, index) => {
+          const translatedText = translations[textsToTranslate.length + index];
+          this.translatedTexts[text] = translatedText;
+        });
+      });
   }
 
   // -------------------------
@@ -517,38 +639,7 @@ export class ChatUIComponent implements OnInit, OnDestroy {
     this.selectedFile = null;
   }
 
-  processUserInput(transcript: string, file?: File): void {
-    this.isProcessing = true;
-    const chatSub = this.appService
-      .aimentorAvtarchat(this.userId, this.chatId, this.turnId, transcript, file)
-      .subscribe({
-        next: (response: any) => {
-          console.log('Process User Input Response:', response);
-
-          const aiMessage = response.message;
-          const audioUrl = response.audio_url;
-          const imageUrl = response.meme_url;
-          const animation = response.animation;                  // Extract animation
-          const facialExpression = response.facial_expression || response.facialExpression;
-          const lipSyncData = response.lip_sync_data || response.lipsync;
-          const avatarAudio = response.avatar_audio || response.avatarAudio;
-
-
-        this.addMessage('Mentor', aiMessage, audioUrl, imageUrl, animation, facialExpression, lipSyncData, avatarAudio);
-          // if (audioUrl) {
-          //   this.playAudio(audioUrl);
-          // }
-          this.turnId += 1;
-          this.isProcessing = false;
-        },
-        error: (error: any) => {
-          console.error('Error processing user input:', error);
-          this.isProcessing = false;
-          this.startListening();
-        },
-      });
-    this.subscriptions.add(chatSub);
-  }
+  
 
   // -------------------------
   // Child Avatar Event Handler
@@ -576,20 +667,40 @@ export class ChatUIComponent implements OnInit, OnDestroy {
   fetchUserProfile(): void {
     this.appService.getUserProfile().subscribe({
       next: (response) => {
+        
+        // Construct the full URL for the profile picture
         if (response.profile_picture) {
-          this.userProfilePicture = response.profile_picture.startsWith('http')
-            ? response.profile_picture
+          this.userProfilePicture = response.profile_picture.startsWith('http') 
+            ? response.profile_picture 
             : `${this.backendUrl}${response.profile_picture}`;
           console.log('User profile picture:', this.userProfilePicture);
         } else {
-          this.userProfilePicture = '/assets/img/user_avtar.jpg';
+          this.userProfilePicture = '/assets/img/user_avtar.jpg'; // Fallback image
+        }
+
+        // Add user's interested subjects to historical figures
+        if (response.user_journey && response.user_journey.interested_subjects) {
+          this.addUserInterestsToFigures(response.user_journey.interested_subjects);
         }
       },
       error: (error) => {
         console.error('Error fetching user profile:', error);
-        this.userProfilePicture = '/assets/img/user_avtar.jpg';
+        this.userProfilePicture = '/assets/img/user_avtar.jpg'; // Fallback image
       },
     });
+  }
+
+  addUserInterestsToFigures(interests: string[]): void {
+    if (!interests || interests.length === 0) return;
+    // Create historical figure entries from user interests
+    const interestFigures: HistoricalFigure[] = interests.map(interest => ({
+      display: `Expert in ${interest}`,
+      value: `Expert in ${interest}`,
+      field: interest
+    }));
+    
+    // Add to the beginning of the array to show user interests first
+    this.roles = [...interestFigures, ...this.roles];
   }
 
 get latestMentorMessage(): ConversationMessage | null {

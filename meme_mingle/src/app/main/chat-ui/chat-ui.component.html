@@ -8,24 +8,31 @@
   <!-- Initial Overlay -->
   <div *ngIf="showOverlay" class="custom-overlay" [@overlayAnimation]>
     <div class="custom-overlay-content">
-      <h2>Welcome to AI Chat</h2>
-      <p>Choose a historical figure to inspire your conversation.</p>
+      <h2>{{ translatedTexts['Welcome to AI Chat'] || 'Welcome to AI Chat' }}</h2>
+      <p>{{ translatedTexts['Choose an mentor to inspire your conversation.'] || 'Choose a mentor to inspire your conversation.' }}</p>
 
       <!-- Container for Dropdown and Button -->
       <div class="selection-container">
+
+        <div class="form-group flex-row">
+          <!-- Note about customizing topics -->
+          <div class="topic-customization-note">
+            <i class="fas fa-info-circle"></i> 
+            {{ translatedTexts['Want more mentors? Add your "interested subjects" in "User Profile > Academic tab."'] || 'Want more mentors? Add your "interested subjects"  in "User Profile > Academic tab."' }}
+          </div>
+        <!-- Select Topic -->
+        <div class="flex-item">
         <!-- Dropdown for Selecting Historical Figure -->
         <mat-form-field appearance="fill" class="role-select">
-          <mat-label>Select Your Mentor</mat-label>
+          <mat-label>{{ translatedTexts['Select Your Mentor'] || 'Select Your Mentor' }}</mat-label>
           <mat-select [(value)]="selectedRole">
-            <mat-option
-              *ngFor="let figure of historicalFigures"
-              [value]="figure.value"
-            >
-              {{ figure.display }} - {{ figure.field }}
+            <mat-option *ngFor="let figure of roles" [value]="figure.value">
+              {{ translatedTexts[figure.display] || figure.display }} - {{ translatedTexts[figure.field] || figure.field }}
             </mat-option>
           </mat-select>
         </mat-form-field>
-
+      </div>
+      </div>
         <button
           mat-raised-button
           (click)="unlockAudio()"
@@ -33,7 +40,7 @@
           class="custom-start-conversation-button"
           [disabled]="!selectedRole"
         >
-          Start Conversation
+          {{ translatedTexts['Start Conversation'] || 'Start Conversation' }}
         </button>
       </div>
     </div>
