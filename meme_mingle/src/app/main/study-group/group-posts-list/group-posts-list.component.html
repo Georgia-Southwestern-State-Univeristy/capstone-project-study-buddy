@@ -1,7 +1,7 @@
 <div class="group-posts-container">
   <!-- Header -->
   <div class="group-posts-header">
-    <h2>Group Posts</h2>
+    <h2>{{ group.name ? group.name + ' Posts' : 'Group Posts' }}</h2>
     <button class="add-post-btn" (click)="onCreatePost()">
       <i class="bi bi-plus-circle-fill"></i> Create Post
     </button>

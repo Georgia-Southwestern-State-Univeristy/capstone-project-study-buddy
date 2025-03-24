@@ -22,6 +22,7 @@ import { Subscription } from 'rxjs';
 })
 export class GroupPostsListComponent implements OnInit, OnDestroy {
   groupId!: string;
+  group: any = {};
   userId!: string;
   posts: any[] = [];
   loading = false;
@@ -55,6 +56,7 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
     this.route.paramMap.subscribe(params => {
       this.groupId = params.get('groupId') as string;
       this.fetchGroupPosts();
+      this.fetchGroupDetails();
       
       // Join the group room for real-time updates
       if (this.userId) {
@@ -372,4 +374,22 @@ toggleCommentsVisibility(postId: string): void {
 // Check if comments are visible for a post
 areCommentsVisible(postId: string): boolean {
   return this.commentsVisiblePostIds.has(postId);
-}}
+}
+
+fetchGroupDetails(): void {
+  this.appService.getGroups().subscribe({
+    next: (response: { data: any[] }) => {
+      const foundGroup = response.data.find(g => g.id === this.groupId);
+      if (foundGroup) {
+        this.group = foundGroup;
+        console.log('Group details:', this.group);
+      } else {
+        console.error('Group not found with ID:', this.groupId);
+      }
+    },
+    error: (error) => {
+      console.error('Error fetching group details:', error);
+    }
+  });
+}
+}

@@ -18,6 +18,7 @@ export class StudyGroupCreateComponent implements OnInit {
   errorMessage: string = '';
   inviteLink: string = '';
   groupId: string = '';
+  selectedFile: File | null = null;
 
   constructor(private fb: FormBuilder, private appService: AppService) {}
 
@@ -32,6 +33,18 @@ export class StudyGroupCreateComponent implements OnInit {
       image_url: [''],
       members: ['']  // Optional field for inviting members at creation time
     });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+      
+      // Clear the image_url field when a file is selected
+      if (this.selectedFile) {
+        this.groupForm.patchValue({ image_url: '' });
+      }
+    }
   }
 
   onSubmit() {
@@ -61,25 +74,33 @@ export class StudyGroupCreateComponent implements OnInit {
     // Retrieve the current user's ID (assumed stored in localStorage)
     const createdBy = localStorage.getItem('user_id') || 'default_user';
 
-    // Build the payload matching the StudyGroup model
-    const payload = {
-      name: formValues.name,
-      description: formValues.description,
-      topics: topicsArray,
-      privacy: formValues.privacy,
-      rules: rulesArray,
-      image_url: formValues.image_url,
-      created_by: createdBy,
-      members: membersArray
-    };
+    // Create a FormData object for file upload support
+    const formData = new FormData();
+    formData.append('name', formValues.name);
+    formData.append('description', formValues.description || '');
+    formData.append('privacy', formValues.privacy);
+    formData.append('created_by', createdBy);
+    
+    // Append arrays as JSON strings
+    formData.append('topics', JSON.stringify(topicsArray));
+    formData.append('rules', JSON.stringify(rulesArray));
+    formData.append('members', JSON.stringify(membersArray));
+    
+    // Add either the image URL or the file, not both
+    if (formValues.image_url) {
+      formData.append('image_url', formValues.image_url);
+    } else if (this.selectedFile) {
+      formData.append('group_image', this.selectedFile, this.selectedFile.name);
+    }
 
-    // Call the createGroup method in the AppService
-    this.appService.createGroup(payload).subscribe({
+    // Call the createGroup method in the AppService with FormData
+    this.appService.createGroup(formData).subscribe({
       next: (response) => {
         this.successMessage = response.message || 'Group created successfully!';
         // Reset the form (reinitialize privacy to "public")
         this.groupForm.reset();
         this.groupForm.patchValue({ privacy: 'public' });
+        this.selectedFile = null;
         this.loading = false;
         // If the response contains a group ID, store it and generate the invite link.
         if (response.group && response.group._id) {

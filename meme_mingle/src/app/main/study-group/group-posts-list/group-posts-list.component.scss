@@ -17,8 +17,12 @@ $transition-standard: all 0.2s ease-in-out;
 .group-posts-container {
   width: 100%;
   max-width: 650px;
-  margin: 20px auto;
+  margin: 10px auto;
   background-color: transparent;
+  height: 98.4vh;
+  overflow-y: auto;
+  position: relative;
+  padding-top: 80px; /* Add padding to make space for fixed header */
   
   /* Header */
   .group-posts-header {
@@ -31,6 +35,11 @@ $transition-standard: all 0.2s ease-in-out;
     padding: 1rem 1.5rem;
     margin-bottom: 1.5rem;
     box-shadow: $card-shadow;
+    position: fixed; /* Change to fixed position */
+    top: 10px; /* Position from top of viewport */
+    width: calc(100% - 20px); /* Full width minus margins */
+    max-width: 650px;
+    z-index: 1000; /* Ensure it stays on top */
     
     h2 {
       margin: 0;
@@ -490,6 +499,7 @@ $transition-standard: all 0.2s ease-in-out;
     
     .group-posts-header {
       border-radius: 8px;
+      width: calc(100% - 20px);
       
       h2 {
         font-size: 1.3rem;

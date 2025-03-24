@@ -3,14 +3,43 @@ from pydantic import ValidationError
 from models.study_group import StudyGroup
 from models.user import User  # <-- Import your User model
 from services.azure_mongodb import MongoDBClient
+from services.azure_blob_service import AzureBlobService
+import json
 from bson import ObjectId
+import os
 groups_routes = Blueprint("groups", __name__)
 
 @groups_routes.route("/groups/create", methods=["POST"])
 def create_group():
     try:
-        # 1. Get JSON payload
-        payload = request.get_json(force=True)
+        # Check if the request has form data (for file uploads) or JSON
+        has_form_data = request.content_type and 'multipart/form-data' in request.content_type
+        
+        if has_form_data:
+            # 1. Extract form data fields
+            payload = {}
+            payload["name"] = request.form.get("name")
+            payload["description"] = request.form.get("description", "")
+            payload["privacy"] = request.form.get("privacy", "public")
+            payload["created_by"] = request.form.get("created_by")
+            
+            # Handle arrays sent as JSON strings
+            payload["topics"] = json.loads(request.form.get("topics", "[]"))
+            payload["rules"] = json.loads(request.form.get("rules", "[]"))
+            payload["members"] = json.loads(request.form.get("members", "[]"))
+            
+            # Handle image URL or file upload
+            if "image_url" in request.form and request.form.get("image_url"):
+                payload["image_url"] = request.form.get("image_url")
+            elif "group_image" in request.files:
+                # Upload the image file to Azure Blob Storage
+                file = request.files["group_image"]
+                blob_service = AzureBlobService.get_group_images_service()
+                blob_url = blob_service.upload_file(file, file.filename)
+                payload["image_url"] = blob_url
+        else:
+            # Get JSON payload for non-multipart requests
+            payload = request.get_json(force=True)
 
         # 2. If payload has a 'created_by' field and we want them as an admin:
         if payload.get("created_by"):

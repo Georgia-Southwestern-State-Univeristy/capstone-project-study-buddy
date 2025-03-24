@@ -5,7 +5,7 @@
       <h2>Create a New Study Group</h2>
     </div>
     <div class="card-body">
-      <form [formGroup]="groupForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="groupForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
         <!-- Group Name -->
         <div class="mb-3">
           <label for="name" class="form-label">Group Name</label>
@@ -64,15 +64,31 @@
             placeholder="Enter rules separated by commas">
         </div>
 
-        <!-- Group Image URL -->
+        <!-- Group Image -->
         <div class="mb-3">
-          <label for="image_url" class="form-label">Group Image URL</label>
-          <input
-            type="url"
-            id="image_url"
-            formControlName="image_url"
-            class="form-control"
-            placeholder="Enter image URL (optional)">
+          <label class="form-label">Group Image</label>
+          <div class="row">
+            <div class="col-md-6">
+              <label for="image_url" class="form-label">Image URL</label>
+              <input
+                type="url"
+                id="image_url"
+                formControlName="image_url"
+                class="form-control"
+                placeholder="Enter image URL (optional)">
+              <small class="text-muted">Or upload an image file below</small>
+            </div>
+            <div class="col-md-6">
+              <label for="group_image" class="form-label">Upload Image</label>
+              <input
+                type="file"
+                id="group_image"
+                (change)="onFileSelected($event)"
+                class="form-control"
+                accept="image/*">
+              <small class="text-muted">Max size: 5MB</small>
+            </div>
+          </div>
         </div>
 
         <!-- Optional: Invite Members (comma separated) -->

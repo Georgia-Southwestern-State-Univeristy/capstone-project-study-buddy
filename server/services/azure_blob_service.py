@@ -9,9 +9,10 @@ class AzureBlobService:
     Utility class to handle Azure Blob Storage operations.
     """
 
-    def __init__(self):
+    def __init__(self, container_name=None):
         self.connection_string = os.getenv('AZURE_BLOB_CONNECTION_STRING')
-        self.container_name = os.getenv('AZURE_BLOB_CONTAINER_NAME', "profile-pics")
+        # Use the provided container_name or default to "profile-pics"
+        self.container_name = container_name or os.getenv('AZURE_BLOB_CONTAINER_NAME', "profile-pics")
 
         self.blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
         self.container_client = self.blob_service_client.get_container_client(self.container_name)
@@ -70,3 +71,10 @@ class AzureBlobService:
         
         # This will succeed silently if the blob does not exist
         blob_client.delete_blob()
+    
+    @staticmethod
+    def get_group_images_service():
+        """
+        Returns an instance of AzureBlobService configured for group images.
+        """
+        return AzureBlobService(container_name="group-images")

@@ -432,7 +432,7 @@ def get_group_posts(group_id):
                 post["user_profile"] = user_profiles[user_id]
             else:
                 post["user_profile"] = {
-                    "username": "Unknown",
+                    "username": "Anonymous",
                     "name": "",
                     "profile_picture": ""
                 }
