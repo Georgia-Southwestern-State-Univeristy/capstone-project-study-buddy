@@ -25,16 +25,15 @@
     <!-- Post Header: avatar, username, timestamp, etc. -->
     <div class="post-header">
       <img
-        [src]="userProfilePicture"
+        [src]="getProfilePicture(post)"
         alt="User Avatar"
         class="user-avatar"
-        (error)="userProfilePicture = '/assets/img/user_avatar.jpg'"
+        (error)="handleProfilePictureError($event)"
       />
       <div class="post-user-info">
-        <span class="user-name">{{ post.user_id || 'Anonymous' }}</span>
-        <span class="post-time">{{ post.created_at }}</span>
+        <span class="user-name">{{ getDisplayName(post) }}</span>
+        <span class="post-time">{{ post.created_at | date:'medium' }}</span>
       </div>
-      <!-- Replaced the FA ellipsis with Bootstrap Icons three-dots -->
       <div class="post-options">
         <i class="bi bi-three-dots"></i>
       </div>
@@ -43,25 +42,42 @@
     <!-- Post Body -->
     <div class="post-content">
       <p>{{ post.content }}</p>
-      <!-- If there is an image property, optionally display it here:
-      <img *ngIf="post.imageUrl" [src]="post.imageUrl" alt="Post Image" />
-      -->
+      <img *ngIf="post.image_url" [src]="post.image_url" alt="Post Image" />
     </div>
 
     <!-- Post Footer: actions like like/comment/share -->
     <div class="post-footer">
       <div class="actions">
-        <button>
+        <button (click)="likePost(post._id)">
           <i class="bi bi-heart"></i>
           <span class="action-label">{{ post.likes || 0 }}</span>
         </button>
-        <button>
+        <button (click)="showCommentInput(post._id)">
           <i class="bi bi-chat"></i>
           <span class="action-label">{{ post.comments || 0 }}</span>
         </button>
         <button>
           <i class="bi bi-share"></i>
         </button>
+      </div>
+      
+      <!-- Comment Input Section -->
+      <div class="comment-section" *ngIf="activeCommentPostId === post._id">
+        <div class="comment-input-container">
+          <input 
+            type="text" 
+            [(ngModel)]="commentText" 
+            placeholder="Write a comment..." 
+            class="comment-input"
+          />
+          <button 
+            class="comment-submit-btn" 
+            [disabled]="!commentText.trim()" 
+            (click)="submitComment(post._id)"
+          >
+            Send
+          </button>
+        </div>
       </div>
     </div>
   </div>

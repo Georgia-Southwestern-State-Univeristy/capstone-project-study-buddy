@@ -45,7 +45,10 @@ class GroupPost(BaseModel):
     )
 
     class Config:
-        json_encoders = {ObjectId: str}
+        json_encoders = {
+            ObjectId: str,
+            datetime: lambda dt: dt.isoformat()
+        }
         schema_extra = {
             "example": {
                 "_id": "611d2a2a2a2a2a2a2a2a2a2a",

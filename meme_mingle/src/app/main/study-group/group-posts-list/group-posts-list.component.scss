@@ -50,6 +50,48 @@ $error-color: #c0392b;
       }
     }
   }
+  .comment-section {
+    margin-top: 0.75rem;
+    border-top: 1px solid $gsw-border;
+    padding-top: 0.75rem;
+    
+    .comment-input-container {
+      display: flex;
+      gap: 0.5rem;
+      
+      .comment-input {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid $gsw-border;
+        border-radius: 1.5rem;
+        outline: none;
+        font-size: 0.875rem;
+        
+        &:focus {
+          border-color: $gsw-primary;
+        }
+      }
+      
+      .comment-submit-btn {
+        background-color: $gsw-primary;
+        color: white;
+        border: none;
+        border-radius: 1.5rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-weight: 500;
+        
+        &:disabled {
+          background-color: lighten($gsw-primary, 30%);
+          cursor: not-allowed;
+        }
+        
+        &:hover:not(:disabled) {
+          background-color: darken($gsw-primary, 10%);
+        }
+      }
+    }
+  }
 
   /* Alerts */
   .alert {
