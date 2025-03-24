@@ -321,6 +321,7 @@ def get_topic_scores(user_id):
             return jsonify({
                 "topic_scores": [],
                 "total_score": total_score,
+                "quiz_count": 0,
                 "message": "User has not completed any quizzes yet."
             }), 200
         

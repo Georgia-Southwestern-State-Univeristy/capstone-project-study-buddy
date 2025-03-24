@@ -1,0 +1,103 @@
+.chart-container {
+    margin: 20px 0;
+    min-height: 400px;
+  
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+  
+      p {
+        margin-top: 20px;
+        color: #ffffff;
+        font-size: 1rem;
+      }
+    }
+  
+    .charts-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+  
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
+  
+      .chart-card {
+        flex: 1;
+        min-width: 300px;
+        background-color: #003366;
+        border: 1px solid #ffb84d;
+        border-radius: 15px;
+  
+        mat-card-header {
+          padding: 16px;
+          display: flex;
+          align-items: center;
+  
+          .card-header-icon {
+            margin-right: 10px;
+  
+            mat-icon {
+              font-size: 2rem;
+              height: auto;
+              width: auto;
+              color: #ffb84d; /* primary color */
+            }
+          }
+  
+          mat-card-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin: 0;
+          }
+        }
+  
+        mat-card-content {
+          padding: 0 16px 16px;
+  
+          .chart-wrapper {
+            /* This ensures the chart can stretch and remain responsive */
+            height: 300px;
+            position: relative;
+          }
+        }
+      }
+    }
+  
+    .no-data-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #003366;
+      border: 1px solid #ffb84d;
+      border-radius: 15px;
+      padding: 40px 20px;
+      text-align: center;
+  
+      .no-data-icon {
+        font-size: 3rem;
+        height: auto;
+        width: auto;
+        color: #ffb84d;
+        margin-bottom: 20px;
+      }
+  
+      h3 {
+        color: #ffffff;
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+      }
+  
+      p {
+        color: #ffffff;
+        opacity: 0.8;
+        max-width: 500px;
+        line-height: 1.5;
+      }
+    }
+  }
+  

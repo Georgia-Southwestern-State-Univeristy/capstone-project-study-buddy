@@ -18,6 +18,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { LeaderboardComponent } from './leaderboard/leaderboard.component';
 import { MatTabsModule } from '@angular/material/tabs';
+import { PerformanceChartComponent } from './performance-chart/performance-chart.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Pipe({
   name: 'fileSize',
@@ -64,6 +66,12 @@ interface FeedbackItem {
   sanitizedFeedback?: SafeHtml;
 }
 
+interface TopicScore {
+  topic: string;
+  score: number;
+  quiz_count: number;
+}
+
 @Component({
   selector: 'app-quiz-ai',
   standalone: true,
@@ -81,7 +89,9 @@ interface FeedbackItem {
     MatTooltipModule,
     MatExpansionModule,
     MatTabsModule,
+    MatProgressSpinnerModule,
     LeaderboardComponent,
+    PerformanceChartComponent,
     FileSizePipe
   ],
   templateUrl: './quiz-ai.component.html',
@@ -119,6 +129,11 @@ export class QuizAiComponent implements OnInit, OnDestroy {
     'Medium',
     'Hard',
   ];
+
+  // Add properties for topic scores
+  topicScores: TopicScore[] = [];
+  isLoadingTopicScores: boolean = true;
+
   constructor(
     private fb: FormBuilder,
     private appService: AppService,
@@ -142,6 +157,7 @@ export class QuizAiComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.fetchTotalScore();
     this.fetchUserProfile();
+    this.fetchTopicScores(); // Add this line to fetch topic scores
     this.preferredLanguage = localStorage.getItem('preferredLanguage') || 'en';
 
     if (this.preferredLanguage !== 'en') {
@@ -366,7 +382,7 @@ addUserInterestsToTopics(interests: string[]): void {
           this.totalScore = response.total_score;
           this.isProcessing = false;
           this.snackBar.open('Answers submitted successfully!', 'Close', { duration: 3000 });
-          this.fetchTotalScore();
+          this.refreshPerformanceData(); // Add this line to refresh performance data
           this.currentStep = 'feedback';
         },
         error: (error: any) => {
@@ -391,6 +407,36 @@ addUserInterestsToTopics(interests: string[]): void {
         },
       })
     );
+  }
+
+  // Fetch topic scores for the performance chart
+  fetchTopicScores(): void {
+    const userId = localStorage.getItem('user_id') || 'default_user';
+    this.isLoadingTopicScores = true;
+    
+    this.subscriptions.add(
+      this.appService.getTopicScores(userId).subscribe({
+        next: (response: any) => {
+          console.log("Topic scores response:", response); // Add debug logging
+          this.topicScores = response.topic_scores || [];
+          this.totalScore = response.total_score || 0;
+          this.isLoadingTopicScores = false;
+        },
+        error: (error: any) => {
+          console.error('Error fetching topic scores:', error);
+          this.isLoadingTopicScores = false;
+          this.snackBar.open('Failed to load performance data', 'Close', {
+            duration: 3000
+          });
+        }
+      })
+    );
+  }
+
+  // Add this method to refresh topic scores after submitting a quiz
+  refreshPerformanceData(): void {
+    this.fetchTopicScores();
+    this.fetchTotalScore();
   }
 
   // Helper to get answers FormArray

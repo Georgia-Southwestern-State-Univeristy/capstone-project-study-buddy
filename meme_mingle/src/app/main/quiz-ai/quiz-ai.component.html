@@ -301,6 +301,24 @@
       </div>
     </mat-tab>
 
+    <!-- Performance Tab - NEW -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div class="tab-label">
+          <mat-icon>insights</mat-icon>
+          <span>{{ translatedTexts['Performance'] || 'Performance' }}</span>
+        </div>
+      </ng-template>
+      
+      <div class="performance-container">
+        <app-performance-chart 
+          [topicScores]="topicScores"
+          [isLoading]="isLoadingTopicScores"
+          [translatedTexts]="translatedTexts">
+        </app-performance-chart>
+      </div>
+    </mat-tab>
+
     <!-- Leaderboard Tab -->
     <mat-tab>
       <ng-template mat-tab-label>

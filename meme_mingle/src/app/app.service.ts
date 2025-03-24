@@ -147,6 +147,11 @@ export class AppService {
     return this.http.get(`${this.baseUrl}/ai/user/${userId}/total_score`);
   }
 
+  // Get topic scores for performance chart
+  getTopicScores(userId: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/ai/${userId}/topic_scores`);
+  }
+
   // Optional: Method to check if user is authenticated
   isAuthenticated(): boolean {
     return !!localStorage.getItem('access_token');
