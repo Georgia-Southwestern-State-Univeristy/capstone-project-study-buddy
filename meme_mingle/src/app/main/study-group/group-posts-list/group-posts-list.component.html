@@ -1,82 +1,143 @@
 <div class="group-posts-container">
   <!-- Header -->
   <div class="group-posts-header">
-    <h2>Group Posts for {{ groupId }}</h2>
-    <button class="add-post-btn" (click)="onCreatePost()">+ Create Post</button>
+    <h2>Group Posts</h2>
+    <button class="add-post-btn" (click)="onCreatePost()">
+      <i class="bi bi-plus-circle-fill"></i> Create Post
+    </button>
   </div>
 
   <!-- Loading Indicator -->
-  <div class="loading" *ngIf="loading">
+  <div class="loading-container" *ngIf="loading">
+    <div class="loading-spinner"></div>
     <p>Loading posts...</p>
   </div>
 
   <!-- Error Message -->
   <div *ngIf="errorMessage" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle-fill"></i>
     {{ errorMessage }}
   </div>
 
   <!-- No Posts Found -->
   <div *ngIf="!loading && posts?.length === 0 && !errorMessage" class="alert alert-info">
-    No posts found for this group.
+    <i class="bi bi-info-circle-fill"></i>
+    No posts found for this group. Be the first to create one!
   </div>
 
   <!-- Posts List -->
-  <div class="post" *ngFor="let post of posts">
-    <!-- Post Header: avatar, username, timestamp, etc. -->
-    <div class="post-header">
-      <img
-        [src]="getProfilePicture(post)"
-        alt="User Avatar"
-        class="user-avatar"
-        (error)="handleProfilePictureError($event)"
-      />
-      <div class="post-user-info">
-        <span class="user-name">{{ getDisplayName(post) }}</span>
-        <span class="post-time">{{ post.created_at | date:'medium' }}</span>
-      </div>
-      <div class="post-options">
-        <i class="bi bi-three-dots"></i>
-      </div>
-    </div>
-
-    <!-- Post Body -->
-    <div class="post-content">
-      <p>{{ post.content }}</p>
-      <img *ngIf="post.image_url" [src]="post.image_url" alt="Post Image" />
-    </div>
-
-    <!-- Post Footer: actions like like/comment/share -->
-    <div class="post-footer">
-      <div class="actions">
-        <button (click)="likePost(post._id)" [class.liked]="isPostLiked(post._id)">
-          <i class="bi" [ngClass]="isPostLiked(post._id) ? 'bi-heart-fill' : 'bi-heart'"></i>
-          <span class="action-label">{{ post.likes || 0 }}</span>
-        </button>
-        <button (click)="showCommentInput(post._id)">
-          <i class="bi bi-chat"></i>
-          <span class="action-label">{{ post.comments || 0 }}</span>
-        </button>
-        <button>
-          <i class="bi bi-share"></i>
-        </button>
-      </div>
-      
-      <!-- Comment Input Section -->
-      <div class="comment-section" *ngIf="activeCommentPostId === post._id">
-        <div class="comment-input-container">
-          <input 
-            type="text" 
-            [(ngModel)]="commentText" 
-            placeholder="Write a comment..." 
-            class="comment-input"
+  <div class="posts-list">
+    <div class="post" *ngFor="let post of posts">
+      <!-- Post Header: avatar, username, timestamp, etc. -->
+      <div class="post-header">
+        <div class="user-info">
+          <img
+            [src]="getProfilePicture(post)"
+            alt="User Avatar"
+            class="user-avatar"
+            (error)="handleProfilePictureError($event)"
           />
-          <button 
-            class="comment-submit-btn" 
-            [disabled]="!commentText.trim()" 
-            (click)="submitComment(post._id)"
-          >
-            Send
+          <div class="post-user-info">
+            <span class="user-name">{{ getDisplayName(post) }}</span>
+            <span class="post-time">{{ post.created_at | date:'medium' }}</span>
+          </div>
+        </div>
+        <div class="post-options">
+          <i class="bi bi-three-dots"></i>
+        </div>
+      </div>
+
+      <!-- Post Body -->
+      <div class="post-content">
+        <p>{{ post.content }}</p>
+        <img *ngIf="post.image_url" [src]="post.image_url" alt="Post Image" class="post-image" />
+      </div>
+
+      <!-- Post Stats -->
+      <div class="post-stats">
+        <div *ngIf="post.likes > 0" class="likes-count">
+          <i class="bi bi-heart-fill"></i> {{ post.likes }}
+        </div>
+        <div *ngIf="post.comments > 0" class="comments-count">
+          {{ post.comments }} {{ post.comments === 1 ? 'comment' : 'comments' }}
+        </div>
+      </div>
+
+      <!-- Post Footer: actions like like/comment/share -->
+      <div class="post-footer">
+        <div class="actions">
+          <button (click)="likePost(post._id)" [class.liked]="isPostLiked(post._id)" class="action-btn">
+            <i class="bi" [ngClass]="isPostLiked(post._id) ? 'bi-heart-fill' : 'bi-heart'"></i>
+            <span class="action-label">Like</span>
           </button>
+          <button (click)="toggleCommentsVisibility(post._id)" class="action-btn">
+            <i class="bi bi-chat"></i>
+            <span class="action-label">{{ areCommentsVisible(post._id) ? 'Hide Comments' : 'Comments' }}</span>
+          </button>
+          <button class="action-btn">
+            <i class="bi bi-share"></i>
+            <span class="action-label">Share</span>
+          </button>
+        </div>
+        
+        <!-- Comments Display Section - Only show when comments are toggled visible -->
+        <div class="comments-display" *ngIf="areCommentsVisible(post._id) && post.comment_list && post.comment_list.length > 0">
+          <div class="comment-count" *ngIf="post.comment_list.length > 3" (click)="toggleComments(post._id)">
+            <i class="bi" [ngClass]="expandedCommentPostIds.has(post._id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            {{ expandedCommentPostIds.has(post._id) ? 'Hide' : 'View all' }} {{ post.comments }} comments
+          </div>
+          <div class="comments-list" [class.expanded]="expandedCommentPostIds.has(post._id)">
+            <div class="comment-item" *ngFor="let comment of getDisplayComments(post)">
+              <img 
+                [src]="userProfilePicture" 
+                alt="Commenter Avatar" 
+                class="commenter-avatar"
+                (error)="handleProfilePictureError($event)"
+              />
+              <div class="comment-content">
+                <div class="comment-header">
+                  <span class="commenter-name">{{ getUserDisplayName(comment.user_id) }}</span>
+                  <span class="comment-time">{{ comment.created_at | date:'shortTime' }}</span>
+                </div>
+                <p class="comment-text">{{ comment.content }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Add Comment Button - Show only when comments are visible but input isn't -->
+        <div class="add-comment-button" *ngIf="areCommentsVisible(post._id) && activeCommentPostId !== post._id">
+          <button (click)="showCommentInput(post._id)" class="add-comment-btn">
+            <i class="bi bi-plus-circle"></i> Add a comment
+          </button>
+        </div>
+        
+        <!-- Comment Input Section -->
+        <div class="comment-section" *ngIf="activeCommentPostId === post._id">
+          <div class="comment-input-container">
+            <img 
+              [src]="userProfilePicture" 
+              alt="Your Avatar" 
+              class="commenter-avatar"
+              (error)="handleProfilePictureError($event)"
+            />
+            <div class="input-wrapper">
+              <input 
+                type="text" 
+                [(ngModel)]="commentText" 
+                placeholder="Write a comment..." 
+                class="comment-input"
+                (keyup.enter)="commentText.trim() && submitComment(post._id)"
+              />
+              <button 
+                class="comment-submit-btn" 
+                [disabled]="!commentText.trim()" 
+                (click)="submitComment(post._id)"
+              >
+                <i class="bi bi-send-fill"></i>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,23 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 from bson import ObjectId
+
+class Comment(BaseModel):
+    user_id: str = Field(
+        ...,
+        description="The user ID of the person who wrote the comment."
+    )
+    content: str = Field(
+        ...,
+        min_length=1,
+        max_length=1000,
+        description="Text content of the comment."
+    )
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        description="Timestamp when the comment was created."
+    )
 
 class GroupPost(BaseModel):
     id: str = Field(
@@ -39,6 +55,10 @@ class GroupPost(BaseModel):
         default=0,
         description="The number of comments on the post."
     )
+    comment_list: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="List of comments on this post."
+    )
     created_at: datetime = Field(
         default_factory=datetime.utcnow,
         description="Timestamp when the post was created."
@@ -55,7 +75,7 @@ class GroupPost(BaseModel):
         }
         schema_extra = {
             "example": {
-                "_id": "611d2a2a2a2a2a2a2a2a2a2a",
+                "_id": "611d2a2a2a2a2a2a2a2a2a",
                 "group_id": "611d1f1f1f1f1f1f1f1f1f1f",
                 "user_id": "user_67890",
                 "content": "Does anyone have tips on solving integrals using substitution?",
@@ -63,6 +83,18 @@ class GroupPost(BaseModel):
                 "likes": 5,
                 "liked_by": ["user_12345", "user_67890", "user_24680"],
                 "comments": 2,
+                "comment_list": [
+                    {
+                        "user_id": "user_12345",
+                        "content": "I found using U-substitution really helpful!",
+                        "created_at": "2023-10-02T15:30:00Z"
+                    },
+                    {
+                        "user_id": "user_24680",
+                        "content": "Check out Khan Academy's videos on integration techniques.",
+                        "created_at": "2023-10-02T16:15:00Z"
+                    }
+                ],
                 "created_at": "2023-10-02T15:00:00Z",
                 "updated_at": "2023-10-02T16:00:00Z"
             }

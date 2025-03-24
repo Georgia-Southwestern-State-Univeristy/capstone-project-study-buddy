@@ -32,6 +32,9 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
   // For comments
   commentText: string = '';
   activeCommentPostId: string | null = null;
+  expandedCommentPostIds: Set<string> = new Set<string>();
+  userCache: Map<string, any> = new Map<string, any>();
+  commentsVisiblePostIds: Set<string> = new Set<string>();
   
   // Socket subscriptions
   private postLikedSubscription?: Subscription;
@@ -48,7 +51,7 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
   
   ngOnInit(): void {
     this.userId = localStorage.getItem('user_id') || '';
-    
+    this.fetchUserProfile();
     this.route.paramMap.subscribe(params => {
       this.groupId = params.get('groupId') as string;
       this.fetchGroupPosts();
@@ -196,10 +199,15 @@ likePost(postId: string): void {
   }
   // Show comment input for a specific post
   showCommentInput(postId: string): void {
+    // Make comments visible if they're not already (but don't hide them if they are)
+    if (!this.commentsVisiblePostIds.has(postId)) {
+      this.commentsVisiblePostIds.add(postId);
+    }
+    
+    // Then toggle comment input if necessary
     this.activeCommentPostId = this.activeCommentPostId === postId ? null : postId;
     this.commentText = '';
   }
-  
   
   // Update your submitComment method:
   submitComment(postId: string): void {
@@ -274,4 +282,94 @@ formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleString();
 }
+
+// Toggle showing all comments for a post
+toggleComments(postId: string): void {
+  if (this.expandedCommentPostIds.has(postId)) {
+    this.expandedCommentPostIds.delete(postId);
+  } else {
+    this.expandedCommentPostIds.add(postId);
+  }
 }
+
+// Get comments to display (all if expanded, otherwise just the latest 3)
+getDisplayComments(post: any): any[] {
+  if (!post.comment_list || !Array.isArray(post.comment_list)) {
+    return [];
+  }
+  
+  // Sort comments by date, newest first
+  const sortedComments = [...post.comment_list].sort((a, b) => {
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+  
+  // If expanded or less than 3 comments, show all
+  if (this.expandedCommentPostIds.has(post._id) || sortedComments.length <= 3) {
+    return sortedComments;
+  }
+  
+  // Otherwise show only the latest 3
+  return sortedComments.slice(0, 3);
+}
+
+// Get profile picture for a commenter
+fetchUserProfile(): void {
+  this.appService.getUserProfile().subscribe({
+    next: (response) => {
+      
+      // Construct the full URL for the profile picture
+      if (response.profile_picture) {
+        this.userProfilePicture = response.profile_picture.startsWith('http') 
+          ? response.profile_picture 
+          : `${this.backendUrl}${response.profile_picture}`;
+        console.log('User profile picture:', this.userProfilePicture);
+      } else {
+        this.userProfilePicture = '/assets/img/user_avtar.jpg'; // Fallback image
+      }
+
+    },
+    error: (error) => {
+      console.error('Error fetching user profile:', error);
+      this.userProfilePicture = '/assets/img/user_avtar.jpg'; // Fallback image
+    },
+  });
+}
+
+// Get display name for a commenter
+getUserDisplayName(userId: string): string {
+  // Try to get from cache first
+  if (this.userCache.has(userId)) {
+    const user = this.userCache.get(userId);
+    return user.name || user.username || userId;
+  }
+  
+  // For each post, check if we can find this user
+  for (const post of this.posts) {
+    if (post.user_id === userId && post.user_profile) {
+      // Cache this user's info
+      this.userCache.set(userId, post.user_profile);
+      return post.user_profile.name || post.user_profile.username || userId;
+    }
+  }
+  
+  return userId;
+}
+
+// Toggle visibility of comments section
+toggleCommentsVisibility(postId: string): void {
+  if (this.commentsVisiblePostIds.has(postId)) {
+    this.commentsVisiblePostIds.delete(postId);
+    
+    // Also hide the comment input if it's currently active for this post
+    if (this.activeCommentPostId === postId) {
+      this.activeCommentPostId = null;
+    }
+  } else {
+    this.commentsVisiblePostIds.add(postId);
+  }
+}
+
+// Check if comments are visible for a post
+areCommentsVisible(postId: string): boolean {
+  return this.commentsVisiblePostIds.has(postId);
+}}
