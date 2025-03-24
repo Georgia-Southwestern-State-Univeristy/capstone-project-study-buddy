@@ -12,6 +12,7 @@ from models.user import User
 from services.azure_mongodb import MongoDBClient
 from utils.socketIo import socketio  
 from datetime import datetime
+import traceback
 
 group_posts_routes = Blueprint("group_posts", __name__)
 
@@ -73,65 +74,163 @@ def handle_leave_group_room(data):
     except Exception as e:
         emit("error", {"message": str(e)})
 
-@socketio.on("like_post")
-def handle_like_post(data):
+
+
+@socketio.on("toggle_like_post")
+def handle_toggle_like_post(data):
     """
-    Handles real-time post likes.
+    Handles toggling post likes (like/unlike).
+    Expected data:
+    {
+        "post_id": "<post_id>",
+        "user_id": "<user_id>",
+        "is_liking": true|false  # optional - used as a hint but we'll check the actual state
+    }
     """
     try:
         post_id = data.get("post_id")
-        print(f"Like request received for post ID: {post_id}")
+        user_id = data.get("user_id")
         
-        if not post_id:
-            print("Missing post_id in like_post data")
-            return emit("error", {"message": "Missing post_id"})
+        print(f"Toggle like request received for post ID: {post_id} by user: {user_id}")
+        
+        if not post_id or not user_id:
+            print("Missing post_id or user_id in toggle_like_post data")
+            return emit("error", {"message": "Missing post_id or user_id"})
 
         db_client = MongoDBClient.get_client()
         db = db_client[MongoDBClient.get_db_name()]
 
-        # Convert post_id to ObjectId and ensure it's valid
-        try:
-            post_obj_id = ObjectId(post_id)
-        except Exception as e:
-            print(f"Invalid post_id format: {post_id}, error: {str(e)}")
-            return emit("error", {"message": f"Invalid post_id format: {str(e)}"})
-
-        # First check if the post exists
-        post = db["group_posts"].find_one({"_id": post_obj_id})
+        # Try multiple approaches to find the post
+        post = None
+        post_db_id = None
+        
+        # First try: direct string match (in case _id is stored as string)
+        post = db["group_posts"].find_one({"_id": post_id})
+        if post:
+            post_db_id = post["_id"]
+            print(f"Found post with string ID: {post_id}")
+        
+        # Second try: ObjectId conversion
         if not post:
-            # Try to find by string ID as a fallback
-            post = db["group_posts"].find_one({"_id": post_id})
-            if not post:
-                print(f"Post with ID {post_id} not found in database")
-                # List all posts in the collection for debugging
-                all_posts = list(db["group_posts"].find({}, {"_id": 1}))
-                print(f"Available post IDs: {[str(p['_id']) for p in all_posts]}")
-                return emit("error", {"message": f"Post with ID {post_id} not found"})
+            try:
+                post_obj_id = ObjectId(post_id)
+                post = db["group_posts"].find_one({"_id": post_obj_id})
+                if post:
+                    post_db_id = post["_id"]
+                    print(f"Found post with ObjectId: {post_obj_id}")
+            except Exception as e:
+                print(f"Error converting to ObjectId: {str(e)}")
+        
+        # Debug: List some posts from the collection
+        if not post:
+            print("Post not found. Checking collection for sample posts...")
+            sample_posts = list(db["group_posts"].find().limit(3))
+            if sample_posts:
+                print(f"Sample post IDs in collection: {[str(p.get('_id')) for p in sample_posts]}")
+                print(f"Sample post types: {[type(p.get('_id')).__name__ for p in sample_posts]}")
             else:
-                # If found by string ID, use that
-                post_obj_id = post_id
-
-        # Update likes count with upsert=True to ensure field exists
-        result = db["group_posts"].update_one(
-            {"_id": post_obj_id}, 
-            {"$inc": {"likes": 1}},
-            upsert=True
-        )
-
-        if result.modified_count == 0 and result.upserted_id is None:
-            print(f"Failed to update likes for post {post_id}")
-            return emit("error", {"message": f"Failed to update likes for post {post_id}"})
-
-        # Get updated post to confirm likes count
-        updated_post = db["group_posts"].find_one({"_id": post_obj_id})
-        likes_count = updated_post.get("likes", 0)
-        print(f"Post {post_id} liked successfully. New count: {likes_count}")
-
-        emit("post_liked", {"post_id": post_id, "likes": likes_count}, broadcast=True)
-
+                print("No posts found in collection")
+            
+            return emit("error", {"message": f"Post with ID {post_id} not found in database"})
+        
+        # Check if user has already liked this post
+        already_liked = False
+        if "liked_by" in post and post["liked_by"] is not None:
+            already_liked = user_id in post["liked_by"]
+        
+        print(f"User {user_id} already liked post: {already_liked}")
+        
+        if already_liked:
+            # User already liked the post, so unlike it
+            result = db["group_posts"].update_one(
+                {"_id": post_db_id}, 
+                {
+                    "$pull": {"liked_by": user_id},
+                    "$inc": {"likes": -1}
+                }
+            )
+            
+            print(f"Unlike operation result: {result.modified_count} document(s) modified")
+            
+            if result.modified_count == 0:
+                print(f"Failed to unlike post {post_id}")
+                # Try a find_and_modify approach as alternative
+                updated_post = db["group_posts"].find_one_and_update(
+                    {"_id": post_db_id},
+                    {
+                        "$pull": {"liked_by": user_id},
+                        "$inc": {"likes": -1}
+                    },
+                    return_document=True  # Return the updated document
+                )
+                
+                if not updated_post:
+                    return emit("error", {"message": f"Failed to unlike post {post_id}"})
+                likes_count = updated_post.get("likes", 0)
+            else:
+                # Get updated post
+                updated_post = db["group_posts"].find_one({"_id": post_db_id})
+                likes_count = updated_post.get("likes", 0)
+            
+            print(f"Post {post_id} unliked by {user_id}. New count: {likes_count}")
+            
+            # Emit unlike event
+            emit("post_unliked", {
+                "post_id": post_id, 
+                "user_id": user_id,
+                "likes": likes_count
+            }, broadcast=True)
+            
+        else:
+            # Initialize liked_by if it doesn't exist
+            if "liked_by" not in post or post["liked_by"] is None:
+                db["group_posts"].update_one(
+                    {"_id": post_db_id},
+                    {"$set": {"liked_by": []}}
+                )
+            
+            # User hasn't liked the post yet, so like it
+            result = db["group_posts"].update_one(
+                {"_id": post_db_id}, 
+                {
+                    "$addToSet": {"liked_by": user_id},
+                    "$inc": {"likes": 1}
+                }
+            )
+            
+            print(f"Like operation result: {result.modified_count} document(s) modified")
+            
+            if result.modified_count == 0:
+                print(f"Failed to like post {post_id}")
+                # Try a find_and_modify approach as alternative
+                updated_post = db["group_posts"].find_one_and_update(
+                    {"_id": post_db_id},
+                    {
+                        "$addToSet": {"liked_by": user_id},
+                        "$inc": {"likes": 1}
+                    },
+                    return_document=True  # Return the updated document
+                )
+                
+                if not updated_post:
+                    return emit("error", {"message": f"Failed to like post {post_id}"})
+                likes_count = updated_post.get("likes", 0)
+            else:
+                # Get updated post
+                updated_post = db["group_posts"].find_one({"_id": post_db_id})
+                likes_count = updated_post.get("likes", 0)
+            
+            print(f"Post {post_id} liked by {user_id}. New count: {likes_count}")
+            
+            # Emit like event
+            emit("post_liked", {
+                "post_id": post_id, 
+                "user_id": user_id,
+                "likes": likes_count
+            }, broadcast=True)
+            
     except Exception as e:
-        import traceback
-        print(f"Error in like_post: {str(e)}")
+        print(f"Error in toggle_like_post: {str(e)}")
         print(traceback.format_exc())
         emit("error", {"message": str(e)})
 
@@ -322,6 +421,10 @@ def get_group_posts(group_id):
                 
             if "comment_list" not in post:
                 post["comment_list"] = []
+                
+            # Ensure liked_by exists
+            if "liked_by" not in post:
+                post["liked_by"] = []
             
             # Add user profile information
             user_id = post.get("user_id")
@@ -329,12 +432,10 @@ def get_group_posts(group_id):
                 post["user_profile"] = user_profiles[user_id]
             else:
                 post["user_profile"] = {
-                    "username": "Anonymous",
+                    "username": "Unknown",
                     "name": "",
                     "profile_picture": ""
                 }
-            
-            print(f"Post ID: {post['_id']}, User: {post.get('user_profile', {}).get('username', 'Unknown')}, Likes: {post['likes']}, Comments: {post['comments']}")
         
         return jsonify({
             "message": "Posts retrieved successfully", 
@@ -342,7 +443,6 @@ def get_group_posts(group_id):
         }), 200
 
     except Exception as e:
-        import traceback
         print(f"Error retrieving posts: {str(e)}")
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500

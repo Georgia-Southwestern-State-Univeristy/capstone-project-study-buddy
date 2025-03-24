@@ -48,8 +48,8 @@
     <!-- Post Footer: actions like like/comment/share -->
     <div class="post-footer">
       <div class="actions">
-        <button (click)="likePost(post._id)">
-          <i class="bi bi-heart"></i>
+        <button (click)="likePost(post._id)" [class.liked]="isPostLiked(post._id)">
+          <i class="bi" [ngClass]="isPostLiked(post._id) ? 'bi-heart-fill' : 'bi-heart'"></i>
           <span class="action-label">{{ post.likes || 0 }}</span>
         </button>
         <button (click)="showCommentInput(post._id)">

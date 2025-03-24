@@ -9,8 +9,7 @@ import * as io from 'socket.io-client';
 export class SocketService {
   private socket: any;
 
-    // Add this to your existing SocketService
-    constructor() {
+  constructor() {
     this.socket = io.connect(environment.baseUrl);
     
     // Add error logging
@@ -27,10 +26,13 @@ export class SocketService {
     this.socket = io.connect(environment.baseUrl);
   }
 
-
-  // Method to emit like_post event
-  likePost(postId: string) {
-    this.socket.emit('like_post', { post_id: postId });
+  // Updated method to toggle post likes with userId
+  likePost(postId: string, userId: string, isLiking: boolean) {
+    this.socket.emit('toggle_like_post', { 
+      post_id: postId,
+      user_id: userId,
+      is_liking: isLiking
+    });
   }
 
   // Method to emit comment_post event
@@ -46,6 +48,15 @@ export class SocketService {
   onPostLiked(): Observable<any> {
     return new Observable(observer => {
       this.socket.on('post_liked', (data: any) => {
+        observer.next(data);
+      });
+    });
+  }
+  
+  // Listen for post_unliked events
+  onPostUnliked(): Observable<any> {
+    return new Observable(observer => {
+      this.socket.on('post_unliked', (data: any) => {
         observer.next(data);
       });
     });

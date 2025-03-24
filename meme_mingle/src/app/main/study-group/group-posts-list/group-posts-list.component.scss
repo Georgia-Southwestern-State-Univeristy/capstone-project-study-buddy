@@ -213,6 +213,15 @@ $error-color: #c0392b;
           &:hover {
             color: darken(#666, 15%);
           }
+          &.liked {
+            color: #e74c3c; // Red color for liked state
+            
+            i.bi-heart-fill {
+              color: #e74c3c;
+            }
+          }
+          // Transition effect for color change
+          transition: color 0.2s ease;
         }
       }
     }

@@ -28,13 +28,14 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   userProfilePicture: string = '/assets/img/user_avtar.jpg';
   backendUrl = environment.baseUrl;
-  
+  likedPosts: Set<string> = new Set<string>();
   // For comments
   commentText: string = '';
   activeCommentPostId: string | null = null;
   
   // Socket subscriptions
   private postLikedSubscription?: Subscription;
+  private postUnlikedSubscription?: Subscription;
   private postCommentedSubscription?: Subscription;
   private errorSubscription?: Subscription;
 
@@ -52,7 +53,6 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
       this.groupId = params.get('groupId') as string;
       this.fetchGroupPosts();
       
-      
       // Join the group room for real-time updates
       if (this.userId) {
         this.socketService.joinGroupRoom(this.groupId, this.userId);
@@ -62,6 +62,10 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
     // Subscribe to socket events
     this.postLikedSubscription = this.socketService.onPostLiked().subscribe(data => {
       this.handlePostLiked(data);
+    });
+    
+    this.postUnlikedSubscription = this.socketService.onPostUnliked().subscribe(data => {
+      this.handlePostUnliked(data);
     });
     
     this.postCommentedSubscription = this.socketService.onPostCommented().subscribe(data => {
@@ -77,6 +81,7 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // Clean up subscriptions
     this.postLikedSubscription?.unsubscribe();
+    this.postUnlikedSubscription?.unsubscribe();
     this.postCommentedSubscription?.unsubscribe();
     this.errorSubscription?.unsubscribe();
   }
@@ -87,46 +92,108 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Update the fetchGroupPosts method
-fetchGroupPosts(): void {
-  this.loading = true;
-  this.errorMessage = null;
+  // When fetching posts, update the likedPosts set
+  fetchGroupPosts(): void {
+    this.loading = true;
+    this.errorMessage = null;
 
-  this.appService.getGroupPosts(this.groupId)
-    .subscribe({
-      next: (response) => {
-        this.posts = response.data || [];
-        console.log('Fetched posts:', this.posts);
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error fetching posts:', err);
-        this.errorMessage = err?.error?.error || 'An error occurred while fetching group posts.';
-        this.loading = false;
-      }
-    });
-}
+    this.appService.getGroupPosts(this.groupId)
+      .subscribe({
+        next: (response) => {
+          this.posts = response.data || [];
+          
+          // Initialize liked posts set
+          this.likedPosts.clear();
+          this.posts.forEach(post => {
+            if (post.liked_by && post.liked_by.includes(this.userId)) {
+              this.likedPosts.add(post._id);
+            }
+          });
+          
+          console.log('Fetched posts:', this.posts);
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error fetching posts:', err);
+          this.errorMessage = err?.error?.error || 'An error occurred while fetching group posts.';
+          this.loading = false;
+        }
+      });
+  }
 
 // Update the likePost method to add logging
 likePost(postId: string): void {
-  console.log('Attempting to like post with ID:', postId);
-  this.socketService.likePost(postId);
-}
+  const isCurrentlyLiked = this.likedPosts.has(postId);
   
+  if (isCurrentlyLiked) {
+    // Unlike the post
+    this.likedPosts.delete(postId);
+    this.socketService.likePost(postId, this.userId, false);
+  } else {
+    // Like the post
+    this.likedPosts.add(postId);
+    this.socketService.likePost(postId, this.userId, true);
+  }
+}
+  // Check if post is liked by current user
+  isPostLiked(postId: string): boolean {
+    return this.likedPosts.has(postId);
+  }
+
   // Handle post liked event
   handlePostLiked(data: any): void {
     const postIndex = this.posts.findIndex(post => post._id === data.post_id);
+    
+    // Update the likedPosts set if this user liked the post
+    if (data.user_id === this.userId) {
+      this.likedPosts.add(data.post_id);
+    }
+    
     if (postIndex !== -1) {
-      // Use the updated count from the server if available
+      // Use the updated count from the server
       if (data.likes !== undefined) {
         this.posts[postIndex].likes = data.likes;
       } else {
         // Fallback to incrementing
         this.posts[postIndex].likes = (this.posts[postIndex].likes || 0) + 1;
       }
+      
+      // Add user to liked_by array if not present
+      if (!this.posts[postIndex].liked_by) {
+        this.posts[postIndex].liked_by = [];
+      }
+      if (!this.posts[postIndex].liked_by.includes(data.user_id)) {
+        this.posts[postIndex].liked_by.push(data.user_id);
+      }
     }
   }
-  
+  // Handle post unliked event
+  handlePostUnliked(data: any): void {
+    const postIndex = this.posts.findIndex(post => post._id === data.post_id);
+    
+    // Update the likedPosts set if this user unliked the post
+    if (data.user_id === this.userId) {
+      this.likedPosts.delete(data.post_id);
+    }
+    
+    if (postIndex !== -1) {
+      // Use the updated count from the server
+      if (data.likes !== undefined) {
+        this.posts[postIndex].likes = data.likes;
+      } else {
+        // Fallback to decrementing
+        this.posts[postIndex].likes = Math.max(0, (this.posts[postIndex].likes || 0) - 1);
+      }
+      
+      // Remove user from liked_by array
+      if (this.posts[postIndex].liked_by && data.user_id) {
+        const userIndex = this.posts[postIndex].liked_by.indexOf(data.user_id);
+        if (userIndex !== -1) {
+          this.posts[postIndex].liked_by.splice(userIndex, 1);
+        }
+      }
+    }
+  }
   // Show comment input for a specific post
   showCommentInput(postId: string): void {
     this.activeCommentPostId = this.activeCommentPostId === postId ? null : postId;

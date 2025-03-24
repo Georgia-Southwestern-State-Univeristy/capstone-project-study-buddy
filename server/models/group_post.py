@@ -31,6 +31,10 @@ class GroupPost(BaseModel):
         default=0,
         description="The number of likes the post has received."
     )
+    liked_by: List[str] = Field(
+        default_factory=list,
+        description="List of user IDs who have liked this post."
+    )
     comments: int = Field(
         default=0,
         description="The number of comments on the post."
@@ -57,6 +61,7 @@ class GroupPost(BaseModel):
                 "content": "Does anyone have tips on solving integrals using substitution?",
                 "attachments": [],
                 "likes": 5,
+                "liked_by": ["user_12345", "user_67890", "user_24680"],
                 "comments": 2,
                 "created_at": "2023-10-02T15:00:00Z",
                 "updated_at": "2023-10-02T16:00:00Z"
