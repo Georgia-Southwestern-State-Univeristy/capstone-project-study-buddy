@@ -7,71 +7,204 @@ $gsw-secondary-muted: lighten($gsw-secondary, 40%); // Muted gold for gradient
 $gsw-bg: #f7f7f7;                   // Light background for contrast
 $gsw-border: #e0e0e0;               // Border color
 
+/* -----------------------------------------------
+  GSW College Theme Variables
+------------------------------------------------ */
+$gsw-primary: #003366;
+$gsw-secondary: #ffcc00;
+$gsw-secondary-light: lighten($gsw-secondary, 25%);
+$gsw-secondary-muted: lighten($gsw-secondary, 40%);
+$gsw-bg: #f7f7f7;
+$gsw-border: #e0e0e0;
+$error-color: #c0392b;
+$success-color: #27ae60;
+$card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+$transition-standard: all 0.2s ease-in-out;
+
 // Container styling
 .container {
-  max-width: 600px;
-  margin-top: 2rem;
-  
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 0 15px;
 }
 
-// Card styling to give a modern, collegiate look
+// Card styling with modern look
 .gsw-card {
-  border: 1px solid $gsw-border;
-  border-radius: 0.6rem;
+  border-radius: 12px;
   background: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  border: 2px solid darken($gsw-primary, 10%);
+  box-shadow: $card-shadow;
+  border: none;
+  overflow: hidden;
+  transition: $transition-standard;
   
+  &:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
 }
 
-// Card header with a gradient background that matches the sidebar design
+// Card header with gradient background
 .gsw-card-header {
-  background-image: linear-gradient(180deg, $gsw-primary, $gsw-secondary-muted);
+  background-image: linear-gradient(135deg, $gsw-primary, darken($gsw-primary, 15%));
   color: #fff;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
-  padding: 1rem;
+  padding: 1.5rem;
+  border-bottom: none;
+  
   h2 {
     margin: 0;
     font-weight: 700;
     font-size: 1.5rem;
+    letter-spacing: 0.5px;
   }
 }
 
-// Primary button styling using the GSW theme colors
+// Form styling
+.card-body {
+  padding: 1.75rem;
+  
+  .form-label {
+    font-weight: 600;
+    color: $gsw-primary;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid $gsw-border;
+    padding: 0.65rem 1rem;
+    transition: $transition-standard;
+    background-color: #fff;
+    
+    &:focus {
+      border-color: $gsw-secondary;
+      box-shadow: 0 0 0 0.2rem rgba($gsw-secondary, 0.25);
+    }
+    
+    &::placeholder {
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+  }
+  
+  textarea.form-control {
+    min-height: 100px;
+  }
+  
+  .text-muted {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+  
+  .text-danger {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+  }
+  
+  .mb-3 {
+    margin-bottom: 1.5rem;
+  }
+}
+
+// Button styling
 .gsw-btn-primary {
-  background-color: $gsw-primary;
-  border: none;
-  color: #fff;
-  padding: 0.75rem;
-  font-size: 1rem;
-  border-radius: 0.25rem;
-  transition: background-color 0.3s ease;
-  &:hover {
-    background-color: darken($gsw-primary, 10%);
-  }
-  &:disabled {
-    background-color: lighten($gsw-primary, 20%);
-    cursor: not-allowed;
-  }
-}
-
-// Form element styling for consistency
-.form-label {
-  font-weight: 600;
+  background-color: $gsw-secondary;
   color: $gsw-primary;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: $transition-standard;
+  
+  &:hover {
+    background-color: darken($gsw-secondary, 5%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    background-color: lighten($gsw-secondary, 20%);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
 }
 
-input.form-control,
-textarea.form-control,
-select.form-select {
-  border-radius: 0.25rem;
-  border: 1px solid $gsw-border;
-}
-
-// Alert styling (further customization is possible)
+// Alert styling
 .alert {
-  border-radius: 0.25rem;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-top: 1.5rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  &.alert-success {
+    background-color: rgba($success-color, 0.1);
+    border-left: 4px solid $success-color;
+    color: $success-color;
+  }
+  
+  &.alert-danger {
+    background-color: rgba($error-color, 0.1);
+    border-left: 4px solid $error-color;
+    color: $error-color;
+  }
+}
+
+// Invite link section
+.input-group {
+  display: flex;
+  
+  .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+  }
+  
+  .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: $gsw-primary;
+    color: white;
+    border: none;
+    padding: 0.65rem 1rem;
+    transition: $transition-standard;
+    
+    &:hover {
+      background-color: darken($gsw-primary, 10%);
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .container {
+    padding: 0 10px;
+  }
+  
+  .gsw-card {
+    border-radius: 8px;
+  }
+  
+  .gsw-card-header {
+    padding: 1.25rem;
+    
+    h2 {
+      font-size: 1.3rem;
+    }
+  }
+  
+  .card-body {
+    padding: 1.25rem;
+  }
 }
 
 // Global body background (if desired, applied in a higher level file)

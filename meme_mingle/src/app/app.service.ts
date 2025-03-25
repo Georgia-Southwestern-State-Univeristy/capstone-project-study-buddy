@@ -159,7 +159,12 @@ export class AppService {
 
   // Create Group
   createGroup(groupData: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/groups/create`, groupData);
+    // Check if groupData is FormData and use appropriate headers
+    const headers = groupData instanceof FormData 
+      ? new HttpHeaders({ 'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}` })
+      : this.getAuthHeaders();
+    
+    return this.http.post(`${this.baseUrl}/groups/create`, groupData, { headers });
   }
 
   // Join an existing group

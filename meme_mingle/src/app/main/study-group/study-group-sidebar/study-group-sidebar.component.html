@@ -1,14 +1,14 @@
 <!-- src/app/main/study-group/study-group-sidebar/study-group-sidebar.component.html -->
 
 <div class="group-sidebar" [ngClass]="{ 'collapsed': !sidebarVisible }">
-  <!-- Row 1: Header Text -->
+  <!-- Header Section -->
   <div class="header">
     <h3>Study Groups</h3>
   </div>
 
-  <!-- Row 2: Icons -->
+  <!-- Action Buttons -->
   <div class="header-actions">
-    <!-- Collapse / Expand Button -->
+    <!-- Collapse/Expand Button -->
     <button
       type="button"
       class="collapse-btn"
@@ -16,31 +16,64 @@
       (click)="toggleSidebar()"
       title="Toggle Sidebar"
     >
-      {{ toggleIcon }} <!-- "<" when expanded, ">" when collapsed -->
+      <i class="bi" [ngClass]="sidebarVisible ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
     </button>
 
     <!-- Create New Group Button -->
     <button
-      class="icon-button create-button"
+      class="create-button"
       routerLink="/main/study-group/create-group"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: true }"
+      title="Create New Group"
     >
       <i class="bi bi-plus-lg"></i>
     </button>
   </div>
 
-  <!-- Content / Group List -->
-  <div class="group-list">
-    <div *ngIf="loading" class="loading">Loading groups...</div>
-    <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
-    <ul>
-      <li
-      *ngFor="let group of groups"
-      class="group-item"
-      [ngClass]="{ 'active': group.id === selectedGroupId }"
-      (click)="openGroupPosts(group)"
+  <!-- Search Container -->
+  <div class="search-container">
+    <input 
+      type="text" 
+      placeholder="Search groups..." 
+      [(ngModel)]="searchTerm"
+      (input)="filterGroups()"
     >
+  </div>
+
+  <!-- Groups List -->
+  <div class="group-list">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <span>Loading groups...</span>
+    </div>
+    
+    <!-- Error State -->
+    <div *ngIf="errorMessage" class="error">
+      <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+    </div>
+    
+    <!-- Empty State -->
+    <div *ngIf="groups && groups.length === 0 && !loading && !errorMessage" class="empty-state">
+      <div class="empty-icon">
+        <i class="bi bi-people"></i>
+      </div>
+      <p>No study groups found. Create a new group or join existing ones!</p>
+      <button routerLink="/main/study-group/create-group">
+        <i class="bi bi-plus-circle"></i> Create Group
+      </button>
+    </div>
+    
+    <!-- Groups List -->
+    <ul *ngIf="groups && groups.length > 0 && !loading">
+      <li
+        *ngFor="let group of filteredGroups || groups"
+        class="group-item"
+        [ngClass]="{ 'active': group.id === selectedGroupId }"
+        (click)="openGroupPosts(group)"
+      >
+        <!-- Group Icon -->
         <div class="group-icon">
           <img
             *ngIf="group.image_url; else defaultImage"
@@ -53,10 +86,15 @@
             </div>
           </ng-template>
         </div>
+        
+        
+        <!-- Group Info -->
         <div class="group-info">
           <h4 class="group-name">{{ group.name }}</h4>
           <p class="group-description">{{ group.description }}</p>
         </div>
+        
+        <!-- Join Button -->
         <button 
           class="join-button" 
           *ngIf="!group.members?.includes(userId)"
