@@ -5,7 +5,7 @@ from models.user import User  # <-- Import your User model
 from services.azure_mongodb import MongoDBClient
 from services.azure_blob_service import AzureBlobService
 import json
-from bson import ObjectId
+
 import os
 groups_routes = Blueprint("groups", __name__)
 
