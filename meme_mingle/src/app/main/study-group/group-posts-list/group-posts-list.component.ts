@@ -392,4 +392,82 @@ fetchGroupDetails(): void {
     }
   });
 }
+
+// Check if the attachment is an image file
+isImageFile(url: string): boolean {
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+  return imageExtensions.some(ext => url.toLowerCase().endsWith(ext));
+}
+
+// Get icon based on file type
+getFileIcon(url: string): string {
+  const fileName = this.getFileName(url).toLowerCase();
+  
+  if (fileName.endsWith('.pdf')) {
+    return 'bi-file-earmark-pdf';
+  } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+    return 'bi-file-earmark-word';
+  } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
+    return 'bi-file-earmark-excel';
+  } else if (fileName.endsWith('.ppt') || fileName.endsWith('.pptx')) {
+    return 'bi-file-earmark-slides';
+  } else if (fileName.endsWith('.zip') || fileName.endsWith('.rar')) {
+    return 'bi-file-earmark-zip';
+  } else if (this.isImageFile(fileName)) {
+    return 'bi-file-earmark-image';
+  } else {
+    return 'bi-file-earmark-text';
+  }
+}
+
+// Extract filename from URL
+getFileName(url: string): string {
+  // First try with URL parser
+  try {
+    const parsedUrl = new URL(url);
+    const pathSegments = parsedUrl.pathname.split('/');
+    const filename = pathSegments[pathSegments.length - 1];
+    // Decode URI components to handle special characters
+    return decodeURIComponent(filename);
+  } catch (error) {
+    // If URL parsing fails, fallback to simple string operations
+    const segments = url.split('/');
+    const filename = segments[segments.length - 1];
+    // Split on query parameters if they exist
+    return filename.split('?')[0];
+  }
+}
+
+// Get human-readable file type
+getFileType(url: string): string {
+  const fileName = this.getFileName(url).toLowerCase();
+  
+  if (fileName.endsWith('.pdf')) {
+    return 'PDF Document';
+  } else if (fileName.endsWith('.doc')) {
+    return 'Word Document';
+  } else if (fileName.endsWith('.docx')) {
+    return 'Word Document';
+  } else if (fileName.endsWith('.xls')) {
+    return 'Excel Spreadsheet';
+  } else if (fileName.endsWith('.xlsx')) {
+    return 'Excel Spreadsheet';
+  } else if (fileName.endsWith('.ppt')) {
+    return 'PowerPoint Presentation';
+  } else if (fileName.endsWith('.pptx')) {
+    return 'PowerPoint Presentation';
+  } else if (fileName.endsWith('.zip')) {
+    return 'ZIP Archive';
+  } else if (fileName.endsWith('.rar')) {
+    return 'RAR Archive';
+  } else if (fileName.endsWith('.txt')) {
+    return 'Text Document';
+  } else if (this.isImageFile(fileName)) {
+    return 'Image';
+  } else {
+    // Extract extension
+    const extension = fileName.split('.').pop() || '';
+    return extension.toUpperCase() + ' File';
+  }
+}
 }

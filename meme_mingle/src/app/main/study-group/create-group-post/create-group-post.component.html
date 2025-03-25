@@ -1,67 +1,99 @@
-<!-- create-group-post.component.html -->
-<div class="post-container">
-    <!-- Gradient header for consistent style -->
-    <div class="post-header">
-      <button class="back-btn" (click)="onBack()">←</button>
-      <h2>Create a New Group Post</h2>
-    </div>
-  
-    <!-- Success Message -->
-    <div *ngIf="successMessage" class="alert alert-success">
-      {{ successMessage }}
-    </div>
-  
-    <!-- Error Message -->
-    <div *ngIf="errorMessage" class="alert alert-danger">
-      {{ errorMessage }}
-    </div>
-  
-    <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="user_id">User ID</label>
-        <input
-          id="user_id"
-          type="text"
-          formControlName="user_id"
-          class="form-control"
-          placeholder="Enter User ID"
-        />
-        <div class="error" *ngIf="postForm.get('user_id')?.invalid && postForm.get('user_id')?.touched">
-          User ID is required.
-        </div>
-      </div>
-  
-      <div class="form-group">
-        <label for="group_id">Group ID</label>
-        <input
-          id="group_id"
-          type="text"
-          formControlName="group_id"
-          class="form-control"
-          placeholder="Enter Group ID"
-        />
-        <div class="error" *ngIf="postForm.get('group_id')?.invalid && postForm.get('group_id')?.touched">
-          Group ID is required.
-        </div>
-      </div>
-  
-      <div class="form-group">
-        <label for="content">Content</label>
-        <textarea
-          id="content"
-          rows="4"
-          formControlName="content"
-          class="form-control"
-          placeholder="Write your post content here..."
-        ></textarea>
-        <div class="error" *ngIf="postForm.get('content')?.invalid && postForm.get('content')?.touched">
-          Content is required.
-        </div>
-      </div>
-  
-      <button type="submit" class="btn-submit" [disabled]="postForm.invalid">
-        Create Post
+<div class="container">
+  <div class="gsw-card">
+    <div class="gsw-card-header">
+      <button class="back-btn" (click)="onBack()">
+        <i class="bi bi-arrow-left"></i>
       </button>
-    </form>
+      <h2>Create New Post</h2>
+    </div>
+    
+    <div class="card-body">
+      <!-- Success Message -->
+      <div *ngIf="successMessage" class="alert alert-success">
+        <i class="bi bi-check-circle-fill"></i>
+        {{ successMessage }}
+      </div>
+    
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        {{ errorMessage }}
+      </div>
+    
+      <form [formGroup]="postForm" (ngSubmit)="onSubmit()">
+        <!-- Hidden fields -->
+        <input type="hidden" formControlName="user_id">
+        <input type="hidden" formControlName="group_id">
+    
+        <!-- Post Content -->
+        <div class="mb-3">
+          <label for="content" class="form-label">What's on your mind?</label>
+          <textarea
+            id="content"
+            rows="4"
+            formControlName="content"
+            class="form-control"
+            placeholder="Share your thoughts, questions, or insights with the group..."
+          ></textarea>
+          <div *ngIf="postForm.get('content')?.touched && postForm.get('content')?.invalid" class="text-danger">
+            <small *ngIf="postForm.get('content')?.errors?.['required']">Please add some content to your post.</small>
+          </div>
+        </div>
+    
+        <!-- File Upload Section -->
+        <div class="mb-3">
+          <label class="form-label">Add Photos or Files (Optional)</label>
+          
+          <div class="file-upload-container">
+            <input
+              type="file"
+              id="files"
+              multiple
+              (change)="onFilesSelected($event)"
+              class="file-input"
+              accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx"
+            >
+            <label for="files" class="file-upload-label">
+              <div class="upload-icon">
+                <i class="bi bi-cloud-arrow-up"></i>
+              </div>
+              <div class="upload-text">
+                <span class="primary-text">Drop files here or click to browse</span>
+                <span class="secondary-text">Supports images, PDFs, and office documents</span>
+              </div>
+            </label>
+          </div>
+          
+          <!-- Selected Files Preview -->
+          <div class="selected-files-container" *ngIf="previewUrls.length > 0">
+            <div class="selected-file" *ngFor="let url of previewUrls; let i = index">
+              <!-- Image Preview -->
+              <div class="file-preview" [ngClass]="{'is-image': selectedFiles[i].type.startsWith('image/')}">
+                <img *ngIf="selectedFiles[i].type.startsWith('image/')" [src]="url" alt="Preview">
+                <i *ngIf="!selectedFiles[i].type.startsWith('image/')" class="bi bi-file-earmark-text file-icon"></i>
+              </div>
+              
+              <!-- File Info -->
+              <div class="file-info">
+                <div class="file-name">{{ selectedFiles[i].name }}</div>
+                <div class="file-size">{{ (selectedFiles[i].size / 1024).toFixed(0) }} KB</div>
+              </div>
+              
+              <!-- Remove Button -->
+              <button type="button" class="remove-file" (click)="removeFile(i)" title="Remove file">
+                <i class="bi bi-x"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+    
+        <!-- Submit Button -->
+        <div class="d-grid">
+          <button type="submit" class="gsw-btn-primary" [disabled]="postForm.invalid || isSubmitting">
+            <i class="bi bi-send-fill me-2"></i>{{ isSubmitting ? 'Posting...' : 'Share Post' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-  
+</div>

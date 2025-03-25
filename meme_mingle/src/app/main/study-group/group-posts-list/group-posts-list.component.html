@@ -50,6 +50,34 @@
       <!-- Post Body -->
       <div class="post-content">
         <p>{{ post.content }}</p>
+        
+        <!-- Display post attachments if available -->
+        <div class="post-attachments" *ngIf="post.attachments && post.attachments.length > 0">
+          <h4 class="attachments-title">Attachments</h4>
+          <div class="attachments-list">
+            <div class="attachment-item" *ngFor="let attachment of post.attachments">
+              <!-- Image attachments -->
+              <div class="attachment-preview" *ngIf="isImageFile(attachment)">
+                <img [src]="attachment" alt="Post Attachment" class="attachment-image" />
+              </div>
+              
+              <!-- Document attachments -->
+              <div class="attachment-file" *ngIf="!isImageFile(attachment)">
+                <div class="file-icon">
+                  <i class="bi" [ngClass]="getFileIcon(attachment)"></i>
+                </div>
+                <div class="file-info">
+                  <div class="file-name">{{ getFileName(attachment) }}</div>
+                  <div class="file-type">{{ getFileType(attachment) }}</div>
+                </div>
+                <a [href]="attachment" download class="download-btn" target="_blank">
+                  <i class="bi bi-download"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
         <img *ngIf="post.image_url" [src]="post.image_url" alt="Post Image" class="post-image" />
       </div>
 

@@ -19,6 +19,12 @@ export class StudyGroupCreateComponent implements OnInit {
   inviteLink: string = '';
   groupId: string = '';
   selectedFile: File | null = null;
+  
+  // New properties for user dropdown
+  users: any[] = [];
+  filteredUsers: any[] = [];
+  searchTerm: string = '';
+  selectedMembers: any[] = [];
 
   constructor(private fb: FormBuilder, private appService: AppService) {}
 
@@ -31,8 +37,60 @@ export class StudyGroupCreateComponent implements OnInit {
       privacy: ['public', Validators.required],
       rules: [''],
       image_url: [''],
-      members: ['']  // Optional field for inviting members at creation time
+      members: ['']  // We'll still use this control but populate it differently
     });
+    
+    // Fetch users for the dropdown
+    this.loadUsers();
+  }
+
+  loadUsers(search: string = '') {
+    this.appService.getUsersList(search).subscribe({
+      next: (response) => {
+        this.users = response.data;
+        this.filteredUsers = [...this.users];
+      },
+      error: (error) => {
+        console.error('Error fetching users:', error);
+        this.errorMessage = 'Failed to load users for invitation';
+      }
+    });
+  }
+
+  // Filter users based on search input
+  filterUsers(event: any) {
+    const searchTerm = event.target.value.toLowerCase();
+    this.searchTerm = searchTerm;
+    
+    if (searchTerm) {
+      this.filteredUsers = this.users.filter(user => 
+        user.username.toLowerCase().includes(searchTerm) || 
+        (user.name && user.name.toLowerCase().includes(searchTerm))
+      );
+    } else {
+      this.filteredUsers = [...this.users];
+    }
+  }
+
+  // Toggle user selection
+  toggleUserSelection(user: any) {
+    const index = this.selectedMembers.findIndex(m => m.id === user.id);
+    
+    if (index === -1) {
+      // Add user to selected members
+      this.selectedMembers.push(user);
+    } else {
+      // Remove user from selected members
+      this.selectedMembers.splice(index, 1);
+    }
+    
+    // Update the form control with selected user IDs
+    const memberIds = this.selectedMembers.map(member => member.id);
+    this.groupForm.patchValue({ members: memberIds.join(',') });
+  }
+
+  isSelected(user: any): boolean {
+    return this.selectedMembers.some(m => m.id === user.id);
   }
 
   onFileSelected(event: Event): void {
@@ -67,9 +125,9 @@ export class StudyGroupCreateComponent implements OnInit {
     const rulesArray = formValues.rules
       ? formValues.rules.split(',').map((r: string) => r.trim()).filter((r: string) => r !== '')
       : [];
-    const membersArray = formValues.members
-      ? formValues.members.split(',').map((m: string) => m.trim()).filter((m: string) => m !== '')
-      : [];
+      
+    // Use selected member IDs from our array
+    const membersArray = this.selectedMembers.map(member => member.id);
 
     // Retrieve the current user's ID (assumed stored in localStorage)
     const createdBy = localStorage.getItem('user_id') || 'default_user';
@@ -101,6 +159,7 @@ export class StudyGroupCreateComponent implements OnInit {
         this.groupForm.reset();
         this.groupForm.patchValue({ privacy: 'public' });
         this.selectedFile = null;
+        this.selectedMembers = []; // Clear selected members
         this.loading = false;
         // If the response contains a group ID, store it and generate the invite link.
         if (response.group && response.group._id) {

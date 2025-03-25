@@ -4,6 +4,7 @@ group posts in study groups.
 """
 
 from flask import Blueprint, request, jsonify
+from werkzeug.utils import secure_filename
 from pydantic import ValidationError
 from flask_socketio import emit, join_room, leave_room
 from bson import ObjectId
@@ -13,6 +14,7 @@ from services.azure_mongodb import MongoDBClient
 from utils.socketIo import socketio  
 from datetime import datetime
 import traceback
+from services.azure_blob_service import AzureBlobService
 
 group_posts_routes = Blueprint("group_posts", __name__)
 
@@ -332,8 +334,37 @@ def create_group_post():
     Creates a new group post and broadcasts it in real-time.
     """
     try:
-        data = request.get_json(force=True)
-        new_post = GroupPost(**data)
+        # Check if the request has files
+        files = []
+        if 'files[]' in request.files:
+            uploaded_files = request.files.getlist('files[]')
+            
+            # Initialize Azure Blob Service for post attachments
+            blob_service = AzureBlobService(container_name="post-attachments")
+            
+            # Upload each file and collect URLs
+            for file in uploaded_files:
+                if file and file.filename:
+                    # Create a unique filename with timestamp
+                    filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{secure_filename(file.filename)}"
+                    blob_url = blob_service.upload_file(file, filename)
+                    files.append(blob_url)
+        
+        # Get form data or JSON data depending on content type
+        if request.files:
+            # If files were uploaded, other data is in form fields
+            post_data = {
+                "user_id": request.form.get("user_id"),
+                "group_id": request.form.get("group_id"),
+                "content": request.form.get("content"),
+                "attachments": files
+            }
+        else:
+            # Otherwise, it's just JSON data
+            post_data = request.get_json(force=True)
+            
+        # Create new post with the data
+        new_post = GroupPost(**post_data)
 
         user = User.find_by_id(new_post.user_id)
         if not user:

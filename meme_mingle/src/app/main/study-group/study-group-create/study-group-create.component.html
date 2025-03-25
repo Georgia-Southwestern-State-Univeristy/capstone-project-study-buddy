@@ -92,15 +92,48 @@
           </div>
         </div>
 
-        <!-- Optional: Invite Members (comma separated) -->
+        <!-- Invite Members (Dropdown) -->
         <div class="mb-3">
           <label for="members" class="form-label">Invite Members</label>
-          <input
-            type="text"
-            id="members"
-            formControlName="members"
-            class="form-control"
-            placeholder="Enter user IDs separated by commas">
+          <div class="input-group mb-2">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search for users by username..."
+              (input)="filterUsers($event)">
+            <button class="btn" type="button" (click)="loadUsers(searchTerm)">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+          
+          <div class="user-dropdown" *ngIf="filteredUsers.length > 0">
+            <div class="user-list">
+              <div 
+                *ngFor="let user of filteredUsers" 
+                class="user-item" 
+                [class.selected]="isSelected(user)"
+                (click)="toggleUserSelection(user)">
+                <div class="user-avatar">
+                  <img [src]="user.profile_picture || 'assets/images/default-avatar.png'" alt="User Avatar">
+                </div>
+                <div class="user-info">
+                  <div class="username">{{ user.username }}</div>
+                  <div class="name" *ngIf="user.name">{{ user.name }}</div>
+                </div>
+                <div class="selection-indicator">
+                  <i class="bi" [ngClass]="isSelected(user) ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="selected-members mt-2" *ngIf="selectedMembers.length > 0">
+            <div class="member-chip" *ngFor="let member of selectedMembers">
+              {{ member.username }}
+              <button type="button" class="btn-close btn-close-sm" (click)="toggleUserSelection(member)"></button>
+            </div>
+          </div>
+          
           <small class="text-muted">Share your group with classmates right away</small>
         </div>
 

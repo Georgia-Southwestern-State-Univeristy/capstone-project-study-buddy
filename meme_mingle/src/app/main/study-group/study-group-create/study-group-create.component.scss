@@ -184,6 +184,92 @@ $transition-standard: all 0.2s ease-in-out;
   }
 }
 
+// User dropdown styling
+.user-dropdown {
+  border: 1px solid $gsw-border;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  background-color: #fff;
+}
+
+.user-list {
+  .user-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: $transition-standard;
+    border-bottom: 1px solid $gsw-border;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    &:hover {
+      background-color: rgba($gsw-secondary-muted, 0.5);
+    }
+    
+    &.selected {
+      background-color: rgba($gsw-secondary, 0.15);
+    }
+    
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-right: 12px;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+    
+    .user-info {
+      flex: 1;
+      
+      .username {
+        font-weight: 600;
+        color: $gsw-primary;
+      }
+      
+      .name {
+        font-size: 0.8rem;
+        color: #666;
+      }
+    }
+    
+    .selection-indicator {
+      color: $gsw-secondary;
+    }
+  }
+}
+
+.selected-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  
+  .member-chip {
+    background-color: rgba($gsw-secondary, 0.15);
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .btn-close-sm {
+      font-size: 0.7rem;
+      padding: 2px;
+    }
+  }
+}
+
 // Responsive adjustments
 @media (max-width: 768px) {
   .container {

@@ -194,6 +194,16 @@ export class AppService {
   improveResume(resumeId: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/resumes/${resumeId}/improve`, {});
   }
+
+  // Get list of users for dropdown
+  getUsersList(search?: string): Observable<any> {
+    let url = `${this.baseUrl}/users/list`;
+    if (search) {
+      url += `?search=${encodeURIComponent(search)}`;
+    }
+    return this.http.get(url, { headers: this.getAuthHeaders() });
+  }
+
   // Optional: Method to log out the user
   signOut() {
     localStorage.removeItem('access_token');

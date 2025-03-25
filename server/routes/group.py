@@ -215,3 +215,48 @@ def retrieve_groups():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@groups_routes.route("/users/list", methods=["GET"])
+def list_users():
+    """
+    Retrieve a list of users for dropdown selection.
+    
+    Query Parameters:
+      - search: (str) Optional search string to filter users by username
+    """
+    try:
+        # 1. Connect to the database
+        client = MongoDBClient.get_client()
+        db = client[MongoDBClient.get_db_name()]
+        
+        # 2. Build the query filter from URL query parameters
+        query = {}
+        search = request.args.get("search")
+        if search:
+            # Use a case-insensitive regex for partial username matching
+            query["username"] = {"$regex": search, "$options": "i"}
+        
+        # 3. Query the database for users matching the filter
+        # Project only necessary fields for dropdown (username, _id, profile_picture)
+        users_cursor = db["users"].find(
+            query, 
+            {"_id": 1, "username": 1, "name": 1, "profile_picture": 1}
+        ).limit(50)  # Limit to 50 results for performance
+        
+        users_list = []
+        for user in users_cursor:
+            users_list.append({
+                "id": str(user["_id"]),
+                "username": user["username"],
+                "name": user.get("name", ""),
+                "profile_picture": user.get("profile_picture", "")
+            })
+        
+        return jsonify({
+            "message": "Users retrieved successfully",
+            "data": users_list
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
