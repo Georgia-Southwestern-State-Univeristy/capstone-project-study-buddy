@@ -477,3 +477,168 @@ def get_group_posts(group_id):
         print(f"Error retrieving posts: {str(e)}")
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
+
+
+# Modify the existing route to explicitly print the post_id
+@group_posts_routes.route("/group_posts/<post_id>", methods=["DELETE"])
+def delete_group_post(post_id):
+    """
+    Deletes a group post. Only the creator of the post can delete it.
+    """
+    try:
+        print(f"DELETE request received for post_id: {post_id}")
+        # Get the user_id from request
+        request_data = request.get_json(force=True)
+        user_id = request_data.get("user_id")
+        print(f"Received user_id: {user_id}")
+        
+        if not user_id:
+            return jsonify({"error": "User ID is required"}), 400
+            
+        client = MongoDBClient.get_client()
+        db = client[MongoDBClient.get_db_name()]
+        
+        # Try to find the post - add more debugging
+        post = None
+        post_db_id = None
+        
+        print(f"Searching for post with ID: {post_id}")
+        
+        # First try with ObjectId
+        try:
+            post_obj_id = ObjectId(post_id)
+            post = db["group_posts"].find_one({"_id": post_obj_id})
+            if post:
+                post_db_id = post_obj_id
+                print(f"Found post with ObjectId: {post_id}")
+        except Exception as e:
+            print(f"Error converting to ObjectId: {str(e)}")
+            
+        # Fallback to string ID if needed
+        if not post:
+            try:
+                post = db["group_posts"].find_one({"_id": post_id})
+                if post:
+                    post_db_id = post_id
+                    print(f"Found post with string ID: {post_id}")
+            except Exception as e:
+                print(f"Error finding post with string ID: {str(e)}")
+                
+        if not post:
+            print(f"Post not found with ID: {post_id}")
+            return jsonify({"error": "Post not found"}), 404
+            
+        # Check if the user is the creator of the post
+        if post.get("user_id") != user_id:
+            return jsonify({"error": "Unauthorized. Only the creator can delete this post"}), 403
+            
+        # Get the group_id before deleting the post (for notification)
+        group_id = post.get("group_id")
+        
+        # Delete the post
+        print(f"Attempting to delete post with _id: {post_db_id}")
+        result = db["group_posts"].delete_one({"_id": post_db_id})
+        
+        if result.deleted_count == 0:
+            print(f"Delete operation failed, deleted_count: 0")
+            return jsonify({"error": "Failed to delete post"}), 500
+            
+        print(f"Post deleted successfully, deleted_count: {result.deleted_count}")
+            
+        # Notify users in the group about the deletion
+        socketio.emit(
+            "post_deleted",
+            {"post_id": post_id, "user_id": user_id},
+            room=f"group_{group_id}"
+        )
+        
+        return jsonify({"message": "Post deleted successfully"}), 200
+        
+    except Exception as e:
+        print(f"Error in delete_group_post: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
+
+@group_posts_routes.route("/group_posts/<post_id>", methods=["PUT"])
+def edit_group_post(post_id):
+    """
+    Edits a group post. Only the creator of the post can edit it.
+    """
+    try:
+        # Get request data
+        request_data = request.get_json(force=True)
+        user_id = request_data.get("user_id")
+        content = request_data.get("content")
+        
+        if not user_id or not content:
+            return jsonify({"error": "User ID and content are required"}), 400
+            
+        client = MongoDBClient.get_client()
+        db = client[MongoDBClient.get_db_name()]
+        
+        # Try to find the post
+        post = None
+        try:
+            post_obj_id = ObjectId(post_id)
+            post = db["group_posts"].find_one({"_id": post_obj_id})
+            if post:
+                post_db_id = post_obj_id
+        except:
+            # Fallback to string ID
+            post = db["group_posts"].find_one({"_id": post_id})
+            if post:
+                post_db_id = post_id
+                
+        if not post:
+            return jsonify({"error": "Post not found"}), 404
+            
+        # Check if the user is the creator of the post
+        if post.get("user_id") != user_id:
+            return jsonify({"error": "Unauthorized. Only the creator can edit this post"}), 403
+            
+        # Update the post with new content and updated timestamp
+        result = db["group_posts"].update_one(
+            {"_id": post_db_id},
+            {
+                "$set": {
+                    "content": content,
+                    "updated_at": datetime.utcnow()
+                }
+            }
+        )
+        
+        if result.modified_count == 0:
+            return jsonify({"error": "Failed to update post"}), 500
+            
+        # Get the updated post
+        updated_post = db["group_posts"].find_one({"_id": post_db_id})
+        
+        # Ensure the updated_at field is serializable
+        if isinstance(updated_post.get("updated_at"), datetime):
+            updated_post["updated_at"] = updated_post["updated_at"].isoformat()
+            
+        # Ensure the _id field is a string
+        if isinstance(updated_post.get("_id"), ObjectId):
+            updated_post["_id"] = str(updated_post["_id"])
+            
+        # Notify users in the group about the edit
+        socketio.emit(
+            "post_updated",
+            {
+                "post_id": post_id,
+                "user_id": user_id,
+                "content": content,
+                "updated_at": updated_post.get("updated_at")
+            },
+            room=f"group_{post.get('group_id')}"
+        )
+        
+        return jsonify({
+            "message": "Post updated successfully",
+            "post": updated_post
+        }), 200
+        
+    except Exception as e:
+        print(f"Error in edit_group_post: {str(e)}")
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500

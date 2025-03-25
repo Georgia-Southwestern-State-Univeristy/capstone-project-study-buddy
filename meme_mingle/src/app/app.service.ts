@@ -183,6 +183,13 @@ export class AppService {
     return this.http.get<any>(url);
   }
 
+  //delete group post
+  deleteGroupPost(postId: string, userId: string): Observable<any> {
+    const url = `${this.baseUrl}/group_posts/${postId}`;
+    const body = { user_id: userId };
+    return this.http.delete(url, { body });
+  }
+
   createResume(resumeData: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/resumes`, resumeData);
   }

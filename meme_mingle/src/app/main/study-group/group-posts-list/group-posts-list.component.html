@@ -42,8 +42,28 @@
             <span class="post-time">{{ post.created_at | date:'medium' }}</span>
           </div>
         </div>
-        <div class="post-options">
+        <div class="post-options" (click)="togglePostOptions(post._id, $event)">
           <i class="bi bi-three-dots"></i>
+          
+          <!-- Dropdown Menu -->
+          <div class="post-options-dropdown" *ngIf="activeOptionsPostId === post._id">
+            <!-- Owner-only options -->
+            <div *ngIf="isPostOwner(post)">
+              <button class="option-btn" (click)="editPost(post)">
+                <i class="bi bi-pencil-fill"></i> Edit Post
+              </button>
+              <button class="option-btn delete-option" (click)="confirmDeletePost(post._id)">
+                <i class="bi bi-trash-fill"></i> Delete Post
+              </button>
+            </div>
+            
+            <!-- Non-owner options -->
+            <div *ngIf="!isPostOwner(post)">
+              <button class="option-btn" (click)="hidePost(post._id)">
+                <i class="bi bi-eye-slash-fill"></i> Hide Post
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

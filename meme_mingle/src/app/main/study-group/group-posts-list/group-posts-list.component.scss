@@ -198,6 +198,7 @@ $transition-standard: all 0.2s ease-in-out;
         padding: 5px;
         border-radius: 50%;
         transition: $transition-standard;
+        position: relative;
         
         i {
           font-size: 1.25rem;
@@ -206,6 +207,55 @@ $transition-standard: all 0.2s ease-in-out;
         
         &:hover {
           background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Dropdown menu styling */
+        .post-options-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          width: 200px;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          z-index: 1000;
+          overflow: hidden;
+          
+          .option-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 0.9rem;
+            color: $gsw-primary;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            
+            i {
+              font-size: 1rem;
+              color: $gsw-primary;
+            }
+            
+            &:hover {
+              background-color: rgba(0, 0, 0, 0.05);
+            }
+            
+            &.delete-option {
+              color: $error-color;
+              
+              i {
+                color: $error-color;
+              }
+              
+              &:hover {
+                background-color: rgba($error-color, 0.1);
+              }
+            }
+          }
         }
       }
     }

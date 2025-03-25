@@ -37,6 +37,10 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
   userCache: Map<string, any> = new Map<string, any>();
   commentsVisiblePostIds: Set<string> = new Set<string>();
   
+  // For post options dropdown
+  activeOptionsPostId: string | null = null;
+  hiddenPostIds: Set<string> = new Set<string>();
+  
   // Socket subscriptions
   private postLikedSubscription?: Subscription;
   private postUnlikedSubscription?: Subscription;
@@ -53,6 +57,7 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.userId = localStorage.getItem('user_id') || '';
     this.fetchUserProfile();
+    this.loadHiddenPosts(); // Load hidden posts from local storage
     this.route.paramMap.subscribe(params => {
       this.groupId = params.get('groupId') as string;
       this.fetchGroupPosts();
@@ -105,7 +110,10 @@ export class GroupPostsListComponent implements OnInit, OnDestroy {
     this.appService.getGroupPosts(this.groupId)
       .subscribe({
         next: (response) => {
-          this.posts = response.data || [];
+          // Filter out hidden posts
+          this.posts = (response.data || []).filter((post: any) => 
+            !this.hiddenPostIds.has(post._id)
+          );
           
           // Initialize liked posts set
           this.likedPosts.clear();
@@ -468,6 +476,91 @@ getFileType(url: string): string {
     // Extract extension
     const extension = fileName.split('.').pop() || '';
     return extension.toUpperCase() + ' File';
+  }
+}
+
+// Toggle post options menu
+togglePostOptions(postId: string, event: Event): void {
+  event.stopPropagation(); // Prevent event bubbling
+  this.activeOptionsPostId = this.activeOptionsPostId === postId ? null : postId;
+  
+  // Close dropdown when clicking outside
+  if (this.activeOptionsPostId) {
+    const closeDropdown = (e: any) => {
+      if (!e.target.closest('.post-options')) {
+        this.activeOptionsPostId = null;
+        document.removeEventListener('click', closeDropdown);
+      }
+    };
+    
+    setTimeout(() => {
+      document.addEventListener('click', closeDropdown);
+    }, 0);
+  }
+}
+
+// Check if current user is the post owner
+isPostOwner(post: any): boolean {
+  return post.user_id === this.userId;
+}
+
+// Edit post
+editPost(post: any): void {
+  // Navigate to edit post page or open modal
+  this.router.navigate(['/main/study-group/edit-group-post'], {
+    queryParams: { 
+      groupId: this.groupId,
+      postId: post._id 
+    },
+  });
+}
+
+// Confirm delete post
+confirmDeletePost(postId: string): void {
+  if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+    this.deletePost(postId);
+  }
+}
+
+// Delete post
+deletePost(postId: string): void {
+  this.appService.deleteGroupPost(postId, this.userId).subscribe({
+    next: (response) => {
+      console.log('Post deleted successfully:', response);
+      // Remove post from UI
+      this.posts = this.posts.filter(post => post._id !== postId);
+      this.activeOptionsPostId = null;
+    },
+    error: (error) => {
+      console.error('Error deleting post:', error);
+      this.errorMessage = error?.error?.error || 'Failed to delete post. Please try again.';
+      setTimeout(() => this.errorMessage = null, 3000);
+    }
+  });
+}
+
+// Hide post for current user
+hidePost(postId: string): void {
+  this.hiddenPostIds.add(postId);
+  this.activeOptionsPostId = null;
+  
+  // Optimistically remove post from UI
+  this.posts = this.posts.filter(post => !this.hiddenPostIds.has(post._id));
+  
+  // Store hidden posts in local storage for persistence
+  localStorage.setItem('hidden_posts', JSON.stringify([...this.hiddenPostIds]));
+}
+
+// Load hidden posts from local storage
+loadHiddenPosts(): void {
+  const hiddenPosts = localStorage.getItem('hidden_posts');
+  if (hiddenPosts) {
+    try {
+      const parsedIds = JSON.parse(hiddenPosts);
+      this.hiddenPostIds = new Set(parsedIds);
+    } catch (e) {
+      console.error('Error parsing hidden posts:', e);
+    }
   }
 }
 }
