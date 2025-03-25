@@ -30,6 +30,11 @@ export const StudyGroup_routes: Routes = [
                 loadComponent: () =>
                   import('./join-group/join-group.component').then((m) => m.JoinGroupComponent),
               },
+              {
+                path:'edit-group-post',
+                loadComponent: () =>
+                    import('./edit-group-post/edit-group-post.component').then((m) => m.EditGroupPostComponent),
+              }
            
         ]
     }

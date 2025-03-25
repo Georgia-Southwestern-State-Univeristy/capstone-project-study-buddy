@@ -563,50 +563,151 @@ def delete_group_post(post_id):
 def edit_group_post(post_id):
     """
     Edits a group post. Only the creator of the post can edit it.
+    Supports updating content and attachments (adding new ones and removing existing ones).
     """
     try:
-        # Get request data
-        request_data = request.get_json(force=True)
-        user_id = request_data.get("user_id")
-        content = request_data.get("content")
-        
-        if not user_id or not content:
-            return jsonify({"error": "User ID and content are required"}), 400
-            
         client = MongoDBClient.get_client()
         db = client[MongoDBClient.get_db_name()]
         
-        # Try to find the post
+        # Check if the post exists
         post = None
+        post_db_id = None
+        
+        print(f"Searching for post with ID: {post_id}")
+        
+        # First try with ObjectId
         try:
             post_obj_id = ObjectId(post_id)
             post = db["group_posts"].find_one({"_id": post_obj_id})
             if post:
                 post_db_id = post_obj_id
-        except:
-            # Fallback to string ID
-            post = db["group_posts"].find_one({"_id": post_id})
-            if post:
-                post_db_id = post_id
+                print(f"Found post with ObjectId: {post_id}")
+        except Exception as e:
+            print(f"Error converting to ObjectId: {str(e)}")
+            
+        # Fallback to string ID if needed
+        if not post:
+            try:
+                post = db["group_posts"].find_one({"_id": post_id})
+                if post:
+                    post_db_id = post_id
+                    print(f"Found post with string ID: {post_id}")
+            except Exception as e:
+                print(f"Error finding post with string ID: {str(e)}")
                 
         if not post:
+            print(f"Post not found with ID: {post_id}")
             return jsonify({"error": "Post not found"}), 404
-            
-        # Check if the user is the creator of the post
-        if post.get("user_id") != user_id:
-            return jsonify({"error": "Unauthorized. Only the creator can edit this post"}), 403
-            
-        # Update the post with new content and updated timestamp
-        result = db["group_posts"].update_one(
-            {"_id": post_db_id},
-            {
-                "$set": {
-                    "content": content,
-                    "updated_at": datetime.utcnow()
-                }
-            }
-        )
         
+        # Handle different request types (FormData or JSON)
+        if request.content_type and request.content_type.startswith('multipart/form-data'):
+            # FormData request
+            user_id = request.form.get("user_id")
+            content = request.form.get("content")
+            keep_attachments_json = request.form.get("keep_attachments")
+            deleted_attachments_json = request.form.get("deleted_attachments")
+            
+            if not user_id or not content:
+                return jsonify({"error": "User ID and content are required"}), 400
+            
+            # Check if the user is authorized to edit
+            if post.get("user_id") != user_id:
+                return jsonify({"error": "Unauthorized. Only the creator can edit this post"}), 403
+            
+            # Process attachments
+            current_attachments = post.get("attachments", [])
+            
+            # Process attachments to keep
+            keep_attachments = []
+            if keep_attachments_json:
+                import json
+                try:
+                    keep_attachments = json.loads(keep_attachments_json)
+                except Exception as e:
+                    print(f"Error parsing keep_attachments JSON: {str(e)}")
+            
+            # Process deleted attachments
+            deleted_attachments = []
+            if deleted_attachments_json:
+                import json
+                try:
+                    deleted_attachments = json.loads(deleted_attachments_json)
+                    # Delete blobs from storage
+                    try:
+                        blob_service = AzureBlobService(container_name="post-attachments")
+                        for url in deleted_attachments:
+                            blob_service.delete_blob(url)
+                    except Exception as e:
+                        print(f"Warning: Could not delete blobs: {str(e)}")
+                except Exception as e:
+                    print(f"Error parsing deleted_attachments JSON: {str(e)}")
+            
+            # If keep_attachments is provided, use it as the base
+            # Otherwise, keep all attachments that aren't in deleted_attachments
+            final_attachments = []
+            if keep_attachments:
+                final_attachments = keep_attachments
+            else:
+                final_attachments = [url for url in current_attachments if url not in deleted_attachments]
+            
+            # Process new file uploads
+            new_files = []
+            if 'files[]' in request.files:
+                uploaded_files = request.files.getlist('files[]')
+                
+                # Initialize Azure Blob Service for post attachments
+                blob_service = AzureBlobService(container_name="post-attachments")
+                
+                # Upload each file and collect URLs
+                for file in uploaded_files:
+                    if file and file.filename:
+                        # Create a unique filename with timestamp
+                        filename = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{secure_filename(file.filename)}"
+                        try:
+                            blob_url = blob_service.upload_file(file, filename)
+                            new_files.append(blob_url)
+                        except Exception as e:
+                            print(f"Error uploading file {filename}: {str(e)}")
+            
+            # Combine kept attachments and new files
+            updated_attachments = final_attachments + new_files
+            
+            # Update the post
+            result = db["group_posts"].update_one(
+                {"_id": post_db_id},
+                {
+                    "$set": {
+                        "content": content,
+                        "attachments": updated_attachments,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+            
+        else:
+            # JSON request for simple content update
+            request_data = request.get_json(force=True)
+            user_id = request_data.get("user_id")
+            content = request_data.get("content")
+            
+            if not user_id or not content:
+                return jsonify({"error": "User ID and content are required"}), 400
+                
+            # Check if the user is the creator of the post
+            if post.get("user_id") != user_id:
+                return jsonify({"error": "Unauthorized. Only the creator can edit this post"}), 403
+                
+            # Update the post with new content and updated timestamp
+            result = db["group_posts"].update_one(
+                {"_id": post_db_id},
+                {
+                    "$set": {
+                        "content": content,
+                        "updated_at": datetime.utcnow()
+                    }
+                }
+            )
+            
         if result.modified_count == 0:
             return jsonify({"error": "Failed to update post"}), 500
             
@@ -628,7 +729,8 @@ def edit_group_post(post_id):
                 "post_id": post_id,
                 "user_id": user_id,
                 "content": content,
-                "updated_at": updated_post.get("updated_at")
+                "updated_at": updated_post.get("updated_at"),
+                "attachments": updated_post.get("attachments", [])
             },
             room=f"group_{post.get('group_id')}"
         )

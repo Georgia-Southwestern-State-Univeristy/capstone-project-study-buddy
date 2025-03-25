@@ -506,7 +506,10 @@ isPostOwner(post: any): boolean {
 
 // Edit post
 editPost(post: any): void {
-  // Navigate to edit post page or open modal
+  // Close the options menu before navigating
+  this.activeOptionsPostId = null;
+  
+  // Navigate to edit post page with post information
   this.router.navigate(['/main/study-group/edit-group-post'], {
     queryParams: { 
       groupId: this.groupId,

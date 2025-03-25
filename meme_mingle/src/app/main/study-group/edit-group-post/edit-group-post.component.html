@@ -1,0 +1,168 @@
+<div class="edit-post-container">
+    <!-- Header -->
+    <div class="edit-post-header">
+      <div class="header-left">
+        <button class="back-btn" (click)="navigateBack()">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <h2>Edit Post</h2>
+      </div>
+      <button 
+        class="update-btn" 
+        [disabled]="updating || !postContent.trim() || (!isFormDirty())" 
+        (click)="updatePost()"
+      >
+        <span *ngIf="!updating">Update</span>
+        <span *ngIf="updating" class="updating-spinner"></span>
+      </button>
+    </div>
+  
+    <!-- Loading indicator -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="loading-spinner"></div>
+      <p>Loading post...</p>
+    </div>
+  
+    <!-- Error message -->
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      {{ errorMessage }}
+    </div>
+  
+    <!-- Success message -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      <i class="bi bi-check-circle-fill"></i>
+      {{ successMessage }}
+    </div>
+  
+    <!-- Edit form -->
+    <div class="edit-post-form" *ngIf="!loading && !errorMessage && post">
+      <div class="post-content-area">
+        <textarea 
+          [(ngModel)]="postContent" 
+          placeholder="What do you want to share with your group?" 
+          class="content-textarea"
+          [disabled]="updating"
+        ></textarea>
+      </div>
+  
+      <!-- Attachments section -->
+      <div class="post-attachments">
+        <!-- Current Attachments -->
+        <div *ngIf="post.attachments && post.attachments.length > 0">
+          <h4 class="attachments-title">Current Attachments</h4>
+          <div class="attachments-preview">
+            <div *ngFor="let attachment of post.attachments" class="attachment-item" 
+                [ngClass]="{'deleted': isMarkedForDeletion(attachment)}">
+              <!-- Image attachments -->
+              <div *ngIf="isImageFile(attachment)" class="attachment-preview-item">
+                <img [src]="attachment" alt="Attachment" class="attachment-image">
+                <span class="attachment-name">{{ getFileName(attachment) }}</span>
+                
+                <!-- Delete/Restore Controls -->
+                <div class="attachment-controls">
+                  <button *ngIf="!isMarkedForDeletion(attachment)" class="delete-btn" 
+                          (click)="deleteAttachment(attachment)" [disabled]="updating">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  <button *ngIf="isMarkedForDeletion(attachment)" class="restore-btn" 
+                          (click)="undoDeleteAttachment(attachment)" [disabled]="updating">
+                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Document attachments -->
+              <div *ngIf="!isImageFile(attachment)" class="attachment-preview-item document">
+                <i class="bi" [ngClass]="getFileIcon(attachment)"></i>
+                <span class="attachment-name">{{ getFileName(attachment) }}</span>
+                
+                <!-- Delete/Restore Controls -->
+                <div class="attachment-controls">
+                  <button *ngIf="!isMarkedForDeletion(attachment)" class="delete-btn" 
+                          (click)="deleteAttachment(attachment)" [disabled]="updating">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  <button *ngIf="isMarkedForDeletion(attachment)" class="restore-btn" 
+                          (click)="undoDeleteAttachment(attachment)" [disabled]="updating">
+                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- New Attachments -->
+        <div *ngIf="newAttachments.length > 0" class="new-attachments">
+          <h4 class="attachments-title">New Attachments</h4>
+          <div class="attachments-preview">
+            <div *ngFor="let file of newAttachments; let i = index" class="attachment-item">
+              <!-- Image Preview -->
+              <div *ngIf="getFileType(file) === 'image'" class="attachment-preview-item">
+                <img [src]="getObjectUrl(file)" alt="New Image" class="attachment-image">
+                <span class="attachment-name">{{ file.name }}</span>
+                <div class="attachment-controls">
+                  <button class="delete-btn" (click)="removeNewAttachment(i)" [disabled]="updating">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Document Preview -->
+              <div *ngIf="getFileType(file) !== 'image'" class="attachment-preview-item document">
+                <i class="bi" [ngClass]="'bi-file-earmark-' + (
+                  getFileType(file) === 'pdf' ? 'pdf' : 
+                  getFileType(file) === 'word' ? 'word' :
+                  getFileType(file) === 'excel' ? 'excel' :
+                  getFileType(file) === 'powerpoint' ? 'slides' :
+                  getFileType(file) === 'archive' ? 'zip' : 'text'
+                )"></i>
+                <span class="attachment-name">{{ file.name }}</span>
+                <div class="attachment-controls">
+                  <button class="delete-btn" (click)="removeNewAttachment(i)" [disabled]="updating">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Upload Error -->
+        <div *ngIf="uploadError" class="alert alert-danger attachment-error">
+          <i class="bi bi-exclamation-triangle-fill"></i> {{ uploadError }}
+        </div>
+        
+        <!-- File Upload Input -->
+        <div class="file-upload-section">
+          <input 
+            type="file" 
+            id="attachment-upload" 
+            multiple 
+            (change)="onFileSelected($event)"
+            [disabled]="updating"
+            style="display: none;"
+          >
+          <label for="attachment-upload" class="attachment-upload-btn" [class.disabled]="updating">
+            <i class="bi bi-paperclip"></i> Add Attachments
+          </label>
+        </div>
+      </div>
+      
+      <!-- Action buttons -->
+      <div class="action-buttons">
+        <button class="cancel-btn" (click)="navigateBack()" [disabled]="updating">Cancel</button>
+        <button 
+          class="save-btn" 
+          [disabled]="updating || !postContent.trim() || (!isFormDirty())" 
+          (click)="updatePost()"
+        >
+          <span *ngIf="!updating">Update Post</span>
+          <span *ngIf="updating">
+            <i class="bi bi-arrow-repeat updating-icon"></i> Updating...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>

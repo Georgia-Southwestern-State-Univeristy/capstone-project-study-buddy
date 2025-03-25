@@ -177,6 +177,21 @@ export class AppService {
     return this.http.get(`${this.baseUrl}/groups/retrieve`);
   }
 
+  // Update group post
+  updateGroupPost(postId: string, updateData: any): Observable<any> {
+    // If updateData is FormData, omit Content-Type to let browser set it
+    if (updateData instanceof FormData) {
+      const token = localStorage.getItem('access_token') || '';
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${token}`
+      });
+      return this.http.put(`${this.baseUrl}/group_posts/${postId}`, updateData, { headers });
+    } else {
+      // Otherwise, use default headers
+      return this.http.put(`${this.baseUrl}/group_posts/${postId}`, updateData);
+    }
+  }
+
   //get group post by group id
   getGroupPosts(groupId: string): Observable<any> {
     const url = `${this.baseUrl}/group_posts/${groupId}`;
