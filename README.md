@@ -121,7 +121,7 @@ We welcome contributions to Study-Buddy! Here’s a quick guide to help you get 
 2. **Clone Your Fork:**
    - Clone your fork to your local machine using:
      ```bash
-     git clone https://github.com/your-username/capstone-project-study-buddy.git
+     git clone https://github.com/Georgia-Southwestern-State-Univeristy/capstone-project-study-buddy.git
      ```
 
 3. **Create a Branch:**
