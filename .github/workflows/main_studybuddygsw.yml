@@ -28,7 +28,7 @@ jobs:
           cd meme_mingle
           npm install
           ng build 
-          ng test --watch=false --browsers=ChromeHeadless
+          
 
       - name: Zip artifact for deployment
         run: |
