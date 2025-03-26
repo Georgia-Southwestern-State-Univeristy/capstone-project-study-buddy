@@ -76,3 +76,100 @@ If you've successfully located the `bin` folder now:
 2. **Verify FFmpeg Installation:**
    - Open a new command prompt or PowerShell window (make sure to open it after updating the PATH).
    - Type `ffmpeg -version` and press Enter. This command should now return the version of FFmpeg, confirming it's installed correctly and recognized by the system.
+
+
+---
+# Deploying the Flask Backend to Azure
+
+This guide will help you create an Azure Container Registry (ACR), build your Docker image, push it to your registry, and deploy your Flask application using Azure Container Apps.
+
+## Prerequisites
+
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) installed and logged in (`az login`).
+- Docker Desktop installed with [Buildx enabled](https://docs.docker.com/build/buildx/).
+- A working Flask application (with a proper `Dockerfile`).
+
+## 1. Create an Azure Container Registry (ACR)
+
+Create a resource group (if you don’t have one):
+
+```bash
+az group create --name MyResourceGroup --location eastus
+```
+
+Create the container registry:
+
+```bash
+az acr create --resource-group MyResourceGroup \
+  --name <your-registry-name> \
+  --sku Basic \
+  --admin-enabled true
+```
+
+> Replace `<your-registry-name>` with a unique name (e.g., `myappregistry`).
+
+## 2. Log In to Your Container Registry
+
+Log in to your registry so that Docker can push images to it:
+
+```bash
+az acr login --name <your-registry-name>
+```
+
+## 3. Build and Push Your Docker Image
+
+Make sure you’re in the root folder of your project (where the `Dockerfile` is located) and run:
+
+```bash
+docker buildx build --platform linux/amd64 \
+  -t <your-registry-name>.azurecr.io/meme-mingle:latest \
+  --push .
+```
+
+This command uses Buildx to build the image for the `linux/amd64` platform, tags it appropriately, and pushes it directly to your ACR.
+
+> **Tip:** If you need to support multiple platforms (e.g., linux/arm64), add them to the `--platform` flag as a comma-separated list.
+
+## 4. Create an Azure Container App
+
+Now that your image is in ACR, deploy it as a container app. First, create a Container Apps environment:
+
+```bash
+az containerapp env create --resource-group MyResourceGroup \
+  --name MyContainerAppEnv --location eastus
+```
+
+Then, create the container app:
+
+```bash
+az containerapp create --resource-group MyResourceGroup \
+  --name my-flask-app \
+  --environment MyContainerAppEnv \
+  --image <your-registry-name>.azurecr.io/meme-mingle:latest \
+  --target-port 80 \
+  --ingress 'external'
+```
+
+> This command creates a container app named `my-flask-app` that exposes port 80 publicly. Adjust the target port and ingress settings if needed.
+
+## 5. Verify Your Deployment
+
+After the deployment is complete, get the container app’s URL:
+
+```bash
+az containerapp show --name my-flask-app --resource-group MyResourceGroup --query properties.configuration.ingress.fqdn -o tsv
+```
+
+Visit the URL in your browser to confirm that your Flask application is running.
+
+---
+
+By following these steps, you have successfully:
+
+1. Created an Azure Container Registry.
+2. Logged into ACR.
+3. Built and pushed your Docker image using Buildx.
+4. Deployed your Flask backend as an Azure Container App.
+
+For more details on each command, refer to the [Azure CLI documentation](https://docs.microsoft.com/en-us/cli/azure/).
+
