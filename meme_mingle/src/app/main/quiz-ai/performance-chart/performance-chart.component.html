@@ -3,7 +3,7 @@
     <!-- If we're still loading data, show a spinner -->
     <div *ngIf="isLoading" class="loading-container">
       <mat-spinner diameter="50" color="accent"></mat-spinner>
-      <p>{{ translatedTexts['Loading your performance data...'] || 'Loading your performance data...' }}</p>
+      <p data-translate>Loading your performance data...</p>
     </div>
   
     <!-- Otherwise, either show the charts or a "no data" message -->
@@ -16,9 +16,7 @@
             <div class="card-header-icon">
               <mat-icon color="primary">bar_chart</mat-icon>
             </div>
-            <mat-card-title>
-              {{ translatedTexts['Score by Subject'] || 'Score by Subject' }}
-            </mat-card-title>
+            <mat-card-title data-translate>{{translatedTexts['Score by Subject'||'Score by Subject']}}</mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="chart-wrapper">
@@ -34,9 +32,7 @@
             <div class="card-header-icon">
               <mat-icon color="primary">pie_chart</mat-icon>
             </div>
-            <mat-card-title>
-              {{ translatedTexts['Score Distribution'] || 'Score Distribution' }}
-            </mat-card-title>
+            <mat-card-title>{{translatedTexts['Score Distribution'||'Score Distribution']}} </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <div class="chart-wrapper">
@@ -50,12 +46,8 @@
       <!-- If topicScores is empty, show "no data" message -->
       <div *ngIf="topicScores.length === 0" class="no-data-container">
         <mat-icon color="primary" class="no-data-icon">info</mat-icon>
-        <h3>{{ translatedTexts['No Performance Data Available'] || 'No Performance Data Available' }}</h3>
-        <p>
-          {{ translatedTexts['Complete some quizzes to see your performance across different subjects.'] 
-             || 'Complete some quizzes to see your performance across different subjects.' }}
-        </p>
+        <h3 data-translate>No Performance Data Available</h3>
+        <p data-translate>Complete some quizzes to see your performance across different subjects.</p>
       </div>
     </div>
   </div>
-  

@@ -65,7 +65,7 @@
         >
       </button>
       <!-- My Groups -->
-      <button class="menu-btn" title="My Groups" routerLink="/main/study-group" routerLinkActive="active" 
+      <button class="menu-btn" title="{{ translatedTexts['My Groups'] || 'My Groups' }}" routerLink="/main/study-group" routerLinkActive="active" 
       [routerLinkActiveOptions]="{ exact: false }">
         <i class="bi bi-people"></i>
         <span data-translate>My Groups</span>

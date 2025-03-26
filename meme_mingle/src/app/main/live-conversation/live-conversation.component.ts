@@ -207,37 +207,21 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
     // Include additional texts that are not in data-translate attributes
     const additionalTexts = [
     'Welcome to AI Chat',
-    'Choose a historical figure to inspire your conversation.',
+    'Choose a mentor to inspire your conversation.',
     'Select Your Mentor',
     'Start Conversation',
-    'Ada Lovelace', 
-    'Albert Einstein',
-    'Aryabhatta',
-    'Galileo Galilei', 
-    'Isaac Newton', 
-    'Leonardo da Vinci', 
-    'Marie Curie', 
-    'Nikola Tesla', 
-    'Thomas Edison', 
-    'Astronomy',
-    'Art and Science',
-    'Electrical Engineering',
-    'Inventing',
-    'mathematician',
     'Type your message here...',
     'Pause Listening',
     'Resume Listening',
     'File upload',
     'New Conversation',
+    'send message',
     'Unmute',
     'Mute',
     'Replay Audio',
-    'Mathematics',
-    'Physics',
-    'Chemistry',
-    'Computer Science',
     'AI is speaking...',
     'AI is listening...',
+    'Want more mentors? Add your "interested subjects" in "User Profile > Academic tab."',
   ];
     const allTextsToTranslate = [...textsToTranslate, ...additionalTexts];
 
@@ -475,6 +459,34 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
     });
   }
 
+  updateFigureTranslations(): void {
+    if (this.preferredLanguage !== 'en' && this.roles.length > 0) {
+      // Collect all texts that need translation
+      const textsToTranslate: string[] = [];
+      
+      // Add display names, fields and values
+      this.roles.forEach(figure => {
+        textsToTranslate.push(figure.display);
+        textsToTranslate.push(figure.field);
+        textsToTranslate.push(figure.value);
+      });
+      
+      // Request translations
+      this.appService.translateTexts(textsToTranslate, this.preferredLanguage)
+        .subscribe({
+          next: (response) => {
+            const translations = response.translations;
+            
+            // Update the translated texts dictionary
+            for (let i = 0; i < textsToTranslate.length; i++) {
+              this.translatedTexts[textsToTranslate[i]] = translations[i];
+            }
+          },
+          error: (err) => console.error('Error translating figure texts:', err)
+        });
+    }
+  }
+
   addUserInterestsToFigures(interests: string[]): void {
     if (!interests || interests.length === 0) return;
     // Create historical figure entries from user interests
@@ -486,6 +498,11 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
     
     // Add to the beginning of the array to show user interests first
     this.roles = [...interestFigures, ...this.roles];
+
+    // Translate the new figures if needed
+    if (this.preferredLanguage !== 'en') {
+      this.updateFigureTranslations();
+    }
   }
   // New method to handle file selection
   onFileSelected(event: Event): void {

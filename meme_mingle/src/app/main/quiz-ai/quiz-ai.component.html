@@ -236,7 +236,7 @@
               <div class="total-score-box">
                 <mat-icon class="score-icon" color="accent">star</mat-icon>
                 <div>
-                  <p class="score-text">Total Score</p>
+                  <p class="score-text" data-translate>Total Score</p>
                   <h2>{{ feedback.total_score }}</h2>
                 </div>
               </div>
@@ -329,7 +329,7 @@
       </ng-template>
       
       <div class="leaderboard-container">
-        <app-leaderboard></app-leaderboard>
+        <app-leaderboard [translatedTexts]="translatedTexts"></app-leaderboard>
       </div>
     </mat-tab>
   </mat-tab-group>

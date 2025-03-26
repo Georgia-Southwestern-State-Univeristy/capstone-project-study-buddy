@@ -169,6 +169,7 @@ export class ChatUIComponent implements OnInit, OnDestroy {
   latestMessage: string | null = null;
   translatedTexts: { [key: string]: string } = {};
   roles: HistoricalFigure[] = [];
+  preferredLanguage: string = 'en';
 
   @ViewChild('messagesContainer') private messagesContainer!: ElementRef;
 
@@ -185,6 +186,10 @@ export class ChatUIComponent implements OnInit, OnDestroy {
     // Setup IDs from local storage or chat service
     this.userId = localStorage.getItem('user_id') || 'default_user';
     this.chatId = this.chatService.getChatId() || this.chatService.generateChatId();
+    this.preferredLanguage = localStorage.getItem('preferredLanguage') || 'en';
+    if (this.preferredLanguage !== 'en') {
+      this.translateContent(this.preferredLanguage);
+    }
 
     // Speech Recognition Setup
     const windowObj = window as unknown as IWindow;
@@ -407,39 +412,23 @@ processUserInput(transcript: string, file?: File): void {
 
     // Include additional texts that are not in data-translate attributes
     const additionalTexts = [
-    'Welcome to AI Chat',
-    'Choose a historical figure to inspire your conversation.',
-    'Select Your Mentor',
-    'Start Conversation',
-    'Ada Lovelace', 
-    'Albert Einstein',
-    'Aryabhatta',
-    'Galileo Galilei', 
-    'Isaac Newton', 
-    'Leonardo da Vinci', 
-    'Marie Curie', 
-    'Nikola Tesla', 
-    'Thomas Edison', 
-    'Astronomy',
-    'Art and Science',
-    'Electrical Engineering',
-    'Inventing',
-    'mathematician',
-    'Type your message here...',
-    'Pause Listening',
-    'Resume Listening',
-    'File upload',
-    'New Conversation',
-    'Unmute',
-    'Mute',
-    'Replay Audio',
-    'Mathematics',
-    'Physics',
-    'Chemistry',
-    'Computer Science',
-    'AI is speaking...',
-    'AI is listening...',
-  ];
+      'Welcome to AI Chat',
+      'Choose a mentor to inspire your conversation.',
+      'Select Your Mentor',
+      'Start Conversation',
+      'Type your message here...',
+      'Pause Listening',
+      'Resume Listening',
+      'File upload',
+      'New Conversation',
+      'send message',
+      'Unmute',
+      'Mute',
+      'Replay Audio',
+      'AI is speaking...',
+      'AI is listening...',
+      'Want more mentors? Add your "interested subjects" in "User Profile > Academic tab."',
+    ];
     const allTextsToTranslate = [...textsToTranslate, ...additionalTexts];
 
     this.appService
@@ -504,33 +493,6 @@ processUserInput(transcript: string, file?: File): void {
     this.audio.muted = this.isMuted;
   }
 
-  // playAudio(url: string): void {
-  //   if (!url) return;
-  //   this.isPlaying = true;
-  //   this.audio.src = url;
-  //   this.audio.load();
-  //   this.audio.muted = this.isMuted;
-
-  //   this.audio
-  //     .play()
-  //     .then(() => {
-  //       if (this.isListening) {
-  //         this.recognition.stop();
-  //         this.isListening = false;
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       console.error('Audio Playback Error:', err);
-  //       this.isPlaying = false;
-  //     });
-
-  //   this.audio.onended = () => {
-  //     this.isPlaying = false;
-  //     if (!this.isMuted) {
-  //       this.startListening();
-  //     }
-  //   };
-  // }
 
   // -------------------------
   // Handling Messages
@@ -551,7 +513,7 @@ processUserInput(transcript: string, file?: File): void {
       this.latestMessage = message;
     }
 
-    if (message) { // Ensure message is not undefined or null
+    if (message) { 
       // Convert markdown to HTML
       const rawHtml = marked(message);
 
@@ -690,6 +652,34 @@ processUserInput(transcript: string, file?: File): void {
     });
   }
 
+  updateFigureTranslations(): void {
+    if (this.preferredLanguage !== 'en' && this.roles.length > 0) {
+      // Collect all texts that need translation
+      const textsToTranslate: string[] = [];
+      
+      // Add display names, fields and values
+      this.roles.forEach(figure => {
+        textsToTranslate.push(figure.display);
+        textsToTranslate.push(figure.field);
+        textsToTranslate.push(figure.value);
+      });
+      
+      // Request translations
+      this.appService.translateTexts(textsToTranslate, this.preferredLanguage)
+        .subscribe({
+          next: (response) => {
+            const translations = response.translations;
+            
+            // Update the translated texts dictionary
+            for (let i = 0; i < textsToTranslate.length; i++) {
+              this.translatedTexts[textsToTranslate[i]] = translations[i];
+            }
+          },
+          error: (err) => console.error('Error translating figure texts:', err)
+        });
+    }
+  }
+
   addUserInterestsToFigures(interests: string[]): void {
     if (!interests || interests.length === 0) return;
     // Create historical figure entries from user interests
@@ -701,6 +691,11 @@ processUserInput(transcript: string, file?: File): void {
     
     // Add to the beginning of the array to show user interests first
     this.roles = [...interestFigures, ...this.roles];
+
+    // Translate the new figures if needed
+    if (this.preferredLanguage !== 'en') {
+      this.updateFigureTranslations();
+    }
   }
 
 get latestMentorMessage(): ConversationMessage | null {

@@ -190,6 +190,9 @@ addUserInterestsToTopics(interests: string[]): void {
   
   // Add user interests to the beginning of the topics array
   this.topics = [...newTopics, ...this.topics];
+
+  // Also update translations for the new topics
+  this.updateTopicTranslations();
 }
 
   ngOnDestroy(): void {
@@ -197,14 +200,15 @@ addUserInterestsToTopics(interests: string[]): void {
   }
 
   // Translate content to the target language
-  private translateContent(targetLanguage: string) {
-    const elementsToTranslate = document.querySelectorAll('[data-translate]');
-    const textsToTranslate = Array.from(elementsToTranslate).map(
-      (el) => el.textContent?.trim() || ''
-    );
+private translateContent(targetLanguage: string) {
+  const elementsToTranslate = document.querySelectorAll('[data-translate]');
+  const textsToTranslate = Array.from(elementsToTranslate).map(
+    (el) => el.textContent?.trim() || ''
+  );
 
-    // Include additional texts that are not in data-translate attributes
-    const additionalTexts = [
+  // Include additional texts that are not in data-translate attributes
+  const additionalTexts = [
+    // Quiz Generation
     'Generate Your Quiz',
     'Select Topic',
     'Select Level',
@@ -215,10 +219,14 @@ addUserInterestsToTopics(interests: string[]): void {
     'Please select a topic or upload a file to generate a quiz.',
     'Quiz generated successfully!',
     'Failed to generate quiz. Please try again.',
+    
+    // Quiz Form
     'Your Answer',
     'Submit Answers',
     'Please answer all questions before submitting.',
     'No quiz to submit.',
+    
+    // Feedback
     'Quiz Feedback',
     'Your Score',
     'Total Score',
@@ -226,23 +234,43 @@ addUserInterestsToTopics(interests: string[]): void {
     'Generate New Quiz',
     'Ready to generate a new quiz!',
     'Go back to quiz generation',
-    'Mathematics',
-    'Physics',
-    'Chemistry',
-    'Computer Science',
-    'History',
-    'Geography',
-    'Biology',
-    'Literature',
+    'Correct Answer',
+    'Feedback',
+    
+    // Topics & Levels
     'Easy',
     'Medium',
     'Hard',
-    'Quiz'];
-    const allTextsToTranslate = [...textsToTranslate, ...additionalTexts];
+    
+    // UI Elements
+    'Quiz',
+    'Performance',
+    'Leaderboard',
+    'AI-Powered Quiz',
+    'Quiz Properties',
+    'Upload Study Material',
+    'Optionally upload a document to generate questions from',
+    'Drag & drop files here or click to browse',
+    'Sub-topic',
+    'Enter a specific sub-topic',
+    'Want more topics? Add your "interested subjects" in "User Profile > Academic tab."',
+    'Answers submitted successfully!',
+    'Failed to submit answers. Please try again.',
+    'Failed to load performance data',
+    
+    // Performance Chart Translations
+    'Score by Subject',
+    'Score Distribution',
+    'Score',
+    'Quizzes Taken',
+    'Performance'
+  ];
+  const allTextsToTranslate = [...textsToTranslate, ...additionalTexts];
 
-    this.appService
-      .translateTexts(allTextsToTranslate, targetLanguage)
-      .subscribe((response) => {
+  this.appService
+    .translateTexts(allTextsToTranslate, targetLanguage)
+    .subscribe({
+      next: (response) => {
         const translations = response.translations;
 
         // Translate texts from data-translate elements
@@ -261,8 +289,42 @@ addUserInterestsToTopics(interests: string[]): void {
           const translatedText = translations[textsToTranslate.length + index];
           this.translatedTexts[text] = translatedText;
         });
+        
+        // Also translate topic names from this.topics array
+        if (this.topics.length > 0) {
+          const topicTexts = [...this.topics];
+          this.appService.translateTexts(topicTexts, targetLanguage)
+            .subscribe({
+              next: (topicResponse) => {
+                topicResponse.translations.forEach((translation: string, idx: number) => {
+                  this.translatedTexts[this.topics[idx]] = translation;
+                });
+              },
+              error: (err) => console.error('Error translating topics:', err)
+            });
+        }
+      },
+      error: (error) => {
+        console.error('Error translating texts:', error);
+      }
+    });
+}
+
+// Add this method to update translations when topics change
+updateTopicTranslations(): void {
+  if (this.preferredLanguage !== 'en' && this.topics.length > 0) {
+    const topicTexts = [...this.topics];
+    this.appService.translateTexts(topicTexts, this.preferredLanguage)
+      .subscribe({
+        next: (topicResponse) => {
+          topicResponse.translations.forEach((translation: string, idx: number) => {
+            this.translatedTexts[this.topics[idx]] = translation;
+          });
+        },
+        error: (err) => console.error('Error translating topics:', err)
       });
   }
+}
   // Handle file selection
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -347,13 +409,51 @@ addUserInterestsToTopics(interests: string[]): void {
     });
   }
 
+  // Translate dynamic content
+  translateDynamicContent(): void {
+    if (this.preferredLanguage === 'en') return;
+    
+    // Find all data-translate elements that might have been dynamically added
+    const elementsToTranslate = document.querySelectorAll('[data-translate]');
+    const textsToTranslate = Array.from(elementsToTranslate).map(
+      (el) => el.textContent?.trim() || ''
+    );
+    
+    // Filter out texts that are already translated
+    const untranslatedTexts = textsToTranslate.filter(
+      text => !this.translatedTexts[text] && text !== ''
+    );
+    
+    if (untranslatedTexts.length === 0) return;
+    
+    this.appService.translateTexts(untranslatedTexts, this.preferredLanguage)
+      .subscribe({
+        next: (response) => {
+          const translations = response.translations;
+          
+          untranslatedTexts.forEach((text, idx) => {
+            this.translatedTexts[text] = translations[idx];
+          });
+          
+          // Update the DOM elements
+          elementsToTranslate.forEach(element => {
+            const text = element.textContent?.trim() || '';
+            if (this.translatedTexts[text] && !(element.tagName.startsWith('MAT-'))) {
+              element.textContent = this.translatedTexts[text];
+            }
+          });
+        },
+        error: (err) => console.error('Error translating dynamic content:', err)
+      });
+  }
+  
   // Submit Answers
   submitAnswers(): void {
     if (this.answerForm.invalid) {
       this.snackBar.open('Please answer all questions before submitting.', 'Close', { duration: 3000 });
       return;
     }
-
+  
     if (!this.quiz) {
       this.snackBar.open('No quiz to submit.', 'Close', { duration: 3000 });
       return;
@@ -364,7 +464,7 @@ addUserInterestsToTopics(interests: string[]): void {
       question_id: question.question_id,
       user_answer: this.answerForm.value.answers[index],
     }));
-
+  
     this.subscriptions.add(
       this.appService.submitQuizAnswers(this.quiz.quiz_id, userId, answers).subscribe({
         next: (response: any) => {
@@ -382,8 +482,11 @@ addUserInterestsToTopics(interests: string[]): void {
           this.totalScore = response.total_score;
           this.isProcessing = false;
           this.snackBar.open('Answers submitted successfully!', 'Close', { duration: 3000 });
-          this.refreshPerformanceData(); // Add this line to refresh performance data
+          this.refreshPerformanceData();
           this.currentStep = 'feedback';
+          
+          // Add this line to translate dynamic content after feedback is displayed
+          setTimeout(() => this.translateDynamicContent(), 100);
         },
         error: (error: any) => {
           console.error('Error submitting answers:', error);
@@ -417,10 +520,15 @@ addUserInterestsToTopics(interests: string[]): void {
     this.subscriptions.add(
       this.appService.getTopicScores(userId).subscribe({
         next: (response: any) => {
-          console.log("Topic scores response:", response); // Add debug logging
+          console.log("Topic scores response:", response);
           this.topicScores = response.topic_scores || [];
           this.totalScore = response.total_score || 0;
           this.isLoadingTopicScores = false;
+          
+          // Translate topic names if necessary
+          if (this.preferredLanguage !== 'en' && this.topicScores.length > 0) {
+            this.translateTopicNames();
+          }
         },
         error: (error: any) => {
           console.error('Error fetching topic scores:', error);
@@ -432,11 +540,42 @@ addUserInterestsToTopics(interests: string[]): void {
       })
     );
   }
+  
+  // Add a separate method to translate topic names
+  translateTopicNames(): void {
+    // Extract all topic names that need translation
+    const topicNames = this.topicScores.map(t => t.topic);
+    
+    // Only translate if we have topics and a non-English language
+    if (topicNames.length > 0 && this.preferredLanguage !== 'en') {
+      console.log('Translating topic names:', topicNames);
+      
+      this.appService.translateTexts(topicNames, this.preferredLanguage)
+        .subscribe({
+          next: (response) => {
+            console.log('Topic name translations:', response);
+            // Store translations in the translatedTexts object
+            topicNames.forEach((topic, index) => {
+              this.translatedTexts[topic] = response.translations[index];
+            });
+            
+            console.log('Updated translatedTexts with topic names:', this.translatedTexts);
+          },
+          error: (err) => console.error('Error translating topic names:', err)
+        });
+    }
+  }
 
   // Add this method to refresh topic scores after submitting a quiz
   refreshPerformanceData(): void {
     this.fetchTopicScores();
     this.fetchTotalScore();
+    
+    // After fetching performance data, ensure translations
+    if (this.preferredLanguage !== 'en') {
+      // Add a small delay to ensure the DOM has updated
+      setTimeout(() => this.translateDynamicContent(), 300);
+    }
   }
 
   // Helper to get answers FormArray

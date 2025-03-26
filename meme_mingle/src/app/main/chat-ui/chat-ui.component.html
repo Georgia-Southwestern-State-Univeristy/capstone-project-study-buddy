@@ -1,15 +1,10 @@
-<!-- chat-ui.component.html -->
-
-<!-- Optional Navbar -->
-<!-- <app-navbar-main></app-navbar-main> -->
-
 <div class="conversation-container" [@fadeInOut]>
 
   <!-- Initial Overlay -->
   <div *ngIf="showOverlay" class="custom-overlay" [@overlayAnimation]>
     <div class="custom-overlay-content">
       <h2>{{ translatedTexts['Welcome to AI Chat'] || 'Welcome to AI Chat' }}</h2>
-      <p>{{ translatedTexts['Choose an mentor to inspire your conversation.'] || 'Choose a mentor to inspire your conversation.' }}</p>
+      <p>{{ translatedTexts['Choose a mentor to inspire your conversation.'] || 'Choose a mentor to inspire your conversation.' }}</p>
 
       <!-- Container for Dropdown and Button -->
       <div class="selection-container">
@@ -70,7 +65,7 @@
         mat-icon-button
         class="cancel-button"
         color="warn"
-        matTooltip="Remove File"
+        matTooltip="{{ translatedTexts['Remove File'] || 'Remove File' }}"
         (click)="removeSelectedFile()"
       >
         <mat-icon>close</mat-icon>
@@ -81,7 +76,7 @@
     <div class="input-container">
       <textarea
         [(ngModel)]="userInputText"
-        placeholder="Type your message here..."
+        placeholder="{{ translatedTexts['Type your message here...'] || 'Type your message here...' }}"
         (keydown.enter)="sendTextInput()"
       ></textarea>
 
@@ -97,7 +92,7 @@
         <button
           mat-mini-fab
           color="primary"
-          matTooltip="File upload"
+          matTooltip="{{ translatedTexts['File upload'] || 'File upload' }}"
           [@buttonClick]
           (click)="fileInput.click()"
         >
@@ -108,6 +103,7 @@
       <button
         mat-mini-fab
         color="primary"
+        matTooltip="{{ translatedTexts['send message'] || 'send message' }}"
         (click)="sendTextInput()"
         [@buttonClick]
       >
@@ -125,11 +121,11 @@
     ></mat-progress-bar>
 
     <div *ngIf="isListening" class="status-message listening" [@statusAnimation]>
-      <mat-icon>mic</mat-icon> Listening...
+      <mat-icon>mic</mat-icon> {{ translatedTexts['AI is listening...'] || 'AI is listening...' }}
     </div>
 
     <!-- <div *ngIf="isPlaying" class="status-message speaking" [@statusAnimation]>
-      <mat-icon>volume_up</mat-icon> AI is speaking...
+      <mat-icon>volume_up</mat-icon> {{ translatedTexts['AI is speaking...'] || 'AI is speaking...' }}
     </div> -->
   </div>
 
@@ -139,7 +135,7 @@
       mat-mini-fab
       color="warn"
       (click)="finalizeChat()"
-      matTooltip="New Conversation"
+      matTooltip="{{ translatedTexts['New Conversation'] || 'New Conversation' }}"
       [@buttonClick]
     >
       <i class="bi bi-plus-square-fill" style="color: white;"></i>
@@ -148,7 +144,7 @@
       mat-mini-fab
       color="primary"
       (click)="toggleListening()"
-      matTooltip="{{ isListening ? 'Pause Listening' : 'Resume Listening' }}"
+      [matTooltip]="isListening ? (translatedTexts['Pause Listening'] || 'Pause Listening') : (translatedTexts['Resume Listening'] || 'Resume Listening')"
       [@buttonClick]
     >
       <mat-icon>{{ isListening ? 'mic' : 'mic_off' }}</mat-icon>
@@ -156,7 +152,7 @@
     <!-- <button
       mat-mini-fab
       (click)="toggleMute()"
-      matTooltip="{{ isMuted ? 'Unmute' : 'Mute' }}"
+      [matTooltip]="isMuted ? (translatedTexts['Unmute'] || 'Unmute') : (translatedTexts['Mute'] || 'Mute')"
       [@buttonClick]
     >
       <mat-icon>{{ isMuted ? 'volume_off' : 'volume_up' }}</mat-icon>

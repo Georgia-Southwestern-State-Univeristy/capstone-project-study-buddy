@@ -54,6 +54,12 @@ export class PerformanceChartComponent implements OnInit, AfterViewInit, OnChang
 
   // 3) If @Input data changes, re-render when topicScores arrives
   ngOnChanges(changes: SimpleChanges): void {
+    // When translatedTexts changes, we need to update the charts if they exist
+    if (changes['translatedTexts'] && this.barChart) {
+      console.log('translatedTexts changed, updating charts');
+      this.renderCharts();
+    }
+    
     if (changes['topicScores']?.currentValue) {
       console.log('ngOnChanges - Topic scores changed:', changes['topicScores'].currentValue);
       this.isLoading = false;
@@ -114,7 +120,13 @@ export class PerformanceChartComponent implements OnInit, AfterViewInit, OnChang
     console.log('Bar chart canvas found, width/height:', canvas.width, canvas.height);
 
     try {
-      const labels = this.topicScores.map(t => t.topic);
+      // Make sure we're properly translating the topic labels
+      const labels = this.topicScores.map(t => {
+        // Try to get translation for this topic
+        const translated = this.translatedTexts[t.topic];
+        console.log(`Translating topic "${t.topic}" to "${translated || '(not found)'}"`);
+        return translated || t.topic;
+      });
       const data = this.topicScores.map(t => t.score);
       const quizCounts = this.topicScores.map(t => t.quiz_count);
 
@@ -192,7 +204,13 @@ export class PerformanceChartComponent implements OnInit, AfterViewInit, OnChang
     console.log('Doughnut chart canvas found, width/height:', canvas.width, canvas.height);
 
     try {
-      const labels = this.topicScores.map(t => t.topic);
+      // Make sure we're properly translating the topic labels
+      const labels = this.topicScores.map(t => {
+        // Try to get translation for this topic
+        const translated = this.translatedTexts[t.topic];
+        console.log(`Translating topic "${t.topic}" to "${translated || '(not found)'}"`);
+        return translated || t.topic;
+      });
       const data = this.topicScores.map(t => t.score);
 
       // Generate dynamic colors

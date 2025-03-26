@@ -5,7 +5,7 @@
   <div *ngIf="showOverlay" class="custom-overlay" [@overlayAnimation]>
     <div class="custom-overlay-content">
       <h2>{{ translatedTexts['Welcome to AI Chat'] || 'Welcome to AI Chat' }}</h2>
-      <p>{{ translatedTexts['Choose an mentor to inspire your conversation.'] || 'Choose a mentor to inspire your conversation.' }}</p>
+      <p>{{ translatedTexts['Choose a mentor to inspire your conversation.'] || 'Choose a mentor to inspire your conversation.' }}</p>
 
       <!-- Container for Dropdown and Button -->
       <div class="selection-container">
@@ -140,6 +140,7 @@
         <button
           mat-mini-fab
           color="warn"
+          matTooltip="{{ translatedTexts['send message'] || 'send message' }}"
           (click)="sendTextInput()"
           [@buttonClick]
         >

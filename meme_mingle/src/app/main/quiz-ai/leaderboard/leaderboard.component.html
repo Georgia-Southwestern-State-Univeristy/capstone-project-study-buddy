@@ -1,17 +1,17 @@
 <mat-card class="leaderboard-card">
     <mat-card-title class="leaderboard-title">
       <mat-icon class="leaderboard-icon">leaderboard</mat-icon>
-      Leaderboard
+      <span data-translate>{{ translatedTexts['Leaderboard'] || 'Leaderboard' }}</span>
     </mat-card-title>
     <mat-card-content>
       <div class="leaderboard-content" *ngIf="leaderboardData.length > 0; else noData">
         <table class="leaderboard-table">
           <thead>
             <tr>
-              <th>Rank</th>
-              <th>User</th>
-              <th>Quizzes</th>
-              <th>Score</th>
+              <th>{{ translatedTexts['Rank'] || 'Rank' }}</th>
+              <th>{{ translatedTexts['User'] || 'User' }}</th>
+              <th>{{ translatedTexts['Quizzes'] || 'Quizzes' }}</th>
+              <th>{{ translatedTexts['Score'] || 'Score' }}</th>
             </tr>
           </thead>
           <tbody>
@@ -34,7 +34,7 @@
       <ng-template #noData>
         <div class="no-data">
           <mat-icon>quiz</mat-icon>
-          <p>No quiz results yet. Be the first to take a quiz!</p>
+          <p>{{ translatedTexts['No quiz results yet. Be the first to take a quiz!'] || 'No quiz results yet. Be the first to take a quiz!' }}</p>
         </div>
       </ng-template>
     </mat-card-content>
