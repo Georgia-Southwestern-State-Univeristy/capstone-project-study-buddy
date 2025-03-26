@@ -3,26 +3,26 @@
   <div class="progress-tracker">
     <div class="step" [ngClass]="{'active': currentStep >= 1, 'completed': currentStep > 1}">
       <div class="step-icon">1</div>
-      <div class="step-label">Create Resume</div>
+      <div class="step-label" data-translate>{{ translatedTexts['Create Resume'] || 'Create Resume' }}</div>
     </div>
     <div class="step" [ngClass]="{'active': currentStep >= 2, 'completed': currentStep > 2}">
       <div class="step-icon">2</div>
-      <div class="step-label">Save</div>
+      <div class="step-label" data-translate>{{ translatedTexts['Save'] || 'Save' }}</div>
     </div>
     <div class="step" [ngClass]="{'active': currentStep >= 3, 'completed': currentStep > 3}">
       <div class="step-icon">3</div>
-      <div class="step-label">Enhance</div>
+      <div class="step-label" data-translate>{{ translatedTexts['Enhance'] || 'Enhance' }}</div>
     </div>
     <div class="step" [ngClass]="{'active': currentStep >= 4}">
       <div class="step-icon">4</div>
-      <div class="step-label">Download</div>
+      <div class="step-label" data-translate>{{ translatedTexts['Download'] || 'Download' }}</div>
     </div>
   </div>
 
   <div class="card gsw-card">
     <div class="card-header gsw-card-header">
-      <h2><i class="fas fa-file-alt"></i> Resume Builder</h2>
-      <p class="header-subtitle">Create a professional resume in minutes with AI enhancement</p>
+      <h2 data-translate><i class="fas fa-file-alt"></i> {{ translatedTexts['Resume Builder'] || 'Resume Builder' }}</h2>
+      <p class="header-subtitle" data-translate>{{ translatedTexts['Create a professional resume in minutes with AI enhancement'] || 'Create a professional resume in minutes with AI enhancement' }}</p>
     </div>
 
     <!-- Main Form -->
@@ -30,19 +30,19 @@
       <!-- Navigation Tabs -->
       <div class="form-nav-tabs">
         <div class="nav-tab" (click)="setActiveTab('personal')" [ngClass]="{'active': activeTab === 'personal'}">
-          <i class="fas fa-user"></i> Personal
+          <i class="fas fa-user"></i> {{ translatedTexts['Personal'] || 'Personal' }}
         </div>
         <div class="nav-tab" (click)="setActiveTab('education')" [ngClass]="{'active': activeTab === 'education'}">
-          <i class="fas fa-graduation-cap"></i> Education
+          <i class="fas fa-graduation-cap"></i> {{ translatedTexts['Education'] || 'Education' }}
         </div>
         <div class="nav-tab" (click)="setActiveTab('experience')" [ngClass]="{'active': activeTab === 'experience'}">
-          <i class="fas fa-briefcase"></i> Experience
+          <i class="fas fa-briefcase"></i> {{ translatedTexts['Experience'] || 'Experience' }}
         </div>
         <div class="nav-tab" (click)="setActiveTab('skills')" [ngClass]="{'active': activeTab === 'skills'}">
-          <i class="fas fa-star"></i> Skills
+          <i class="fas fa-star"></i> {{ translatedTexts['Skills'] || 'Skills' }}
         </div>
         <div class="nav-tab" (click)="setActiveTab('projects')" [ngClass]="{'active': activeTab === 'projects'}">
-          <i class="fas fa-code-branch"></i> Projects
+          <i class="fas fa-code-branch"></i> {{ translatedTexts['Projects'] || 'Projects' }}
         </div>
       </div>
 
@@ -52,24 +52,24 @@
         <div class="form-section">
           <div class="section-header">
             <i class="fas fa-user-circle"></i>
-            <h3>Personal Information</h3>
+            <h3 data-translate>{{ translatedTexts['Personal Information'] || 'Personal Information' }}</h3>
           </div>
           <div class="form-row">
             <div class="form-group half-width">
-              <label for="fName">First Name <span class="required">*</span></label>
-              <input id="fName" type="text" placeholder="First Name" formControlName="fName" />
-              <div class="form-hint">Your legal first name</div>
+              <label for="fName" data-translate>{{ translatedTexts['First Name'] || 'First Name' }} <span class="required">*</span></label>
+              <input id="fName" type="text" [placeholder]="translatedTexts['First Name'] || 'First Name'" formControlName="fName" />
+              <div class="form-hint" data-translate>{{ translatedTexts['Your legal first name'] || 'Your legal first name' }}</div>
             </div>
             <div class="form-group half-width">
-              <label for="lName">Last Name <span class="required">*</span></label>
-              <input id="lName" type="text" placeholder="Last Name" formControlName="lName" />
+              <label for="lName" data-translate>{{ translatedTexts['Last Name'] || 'Last Name' }} <span class="required">*</span></label>
+              <input id="lName" type="text" [placeholder]="translatedTexts['Last Name'] || 'Last Name'" formControlName="lName" />
             </div>
           </div>
           <div class="form-group">
-            <label for="description">Professional Summary</label>
+            <label for="description" data-translate>{{ translatedTexts['Professional Summary'] || 'Professional Summary' }}</label>
             <textarea
               id="description"
-              placeholder="Briefly describe your professional background and career goals"
+              [placeholder]="translatedTexts['Briefly describe your professional background and career goals'] || 'Briefly describe your professional background and career goals'"
               formControlName="description"
             ></textarea>
             <div class="character-counter">{{ getCharacterCount('description') }}/300 characters</div>
@@ -80,28 +80,28 @@
         <div class="form-section">
           <div class="section-header">
             <i class="fas fa-bullseye"></i>
-            <h3>Career Goals</h3>
+            <h3 data-translate>{{ translatedTexts['Career Goals'] || 'Career Goals' }}</h3>
           </div>
           <div class="form-group">
-            <label for="career">Primary Career Goal <span class="required">*</span></label>
-            <input id="career" type="text" placeholder="e.g. Software Engineer" formControlName="career" />
+            <label for="career" data-translate>{{ translatedTexts['Primary Career Goal'] || 'Primary Career Goal' }} <span class="required">*</span></label>
+            <input id="career" type="text" [placeholder]="translatedTexts['e.g. Software Engineer'] || 'e.g. Software Engineer'" formControlName="career" />
           </div>
           <div class="form-row">
             <div class="form-group half-width">
-              <label for="career2">Alternate Career</label>
+              <label for="career2" data-translate>{{ translatedTexts['Alternate Career'] || 'Alternate Career' }}</label>
               <input
                 id="career2"
                 type="text"
-                placeholder="e.g. Data Scientist"
+                [placeholder]="translatedTexts['e.g. Data Scientist'] || 'e.g. Data Scientist'"
                 formControlName="career2"
               />
             </div>
             <div class="form-group half-width">
-              <label for="career3">Alternate Career</label>
+              <label for="career3" data-translate>{{ translatedTexts['Alternate Career'] || 'Alternate Career' }}</label>
               <input
                 id="career3"
                 type="text"
-                placeholder="e.g. Web Developer"
+                [placeholder]="translatedTexts['e.g. Web Developer'] || 'e.g. Web Developer'"
                 formControlName="career3"
               />
             </div>
@@ -112,11 +112,11 @@
         <div class="form-section">
           <div class="section-header">
             <i class="fas fa-address-card"></i>
-            <h3>Contact Information</h3>
+            <h3 data-translate>{{ translatedTexts['Contact Information'] || 'Contact Information' }}</h3>
           </div>
           <div class="form-row">
             <div class="form-group half-width">
-              <label for="phoneNum">Mobile Number <span class="required">*</span></label>
+              <label for="phoneNum" data-translate>{{ translatedTexts['Mobile Number'] || 'Mobile Number' }} <span class="required">*</span></label>
               <div class="input-with-icon">
                 <i class="fas fa-phone"></i>
                 <input
@@ -128,7 +128,7 @@
               </div>
             </div>
             <div class="form-group half-width">
-              <label for="email">E-mail <span class="required">*</span></label>
+              <label for="email" data-translate>{{ translatedTexts['E-mail'] || 'E-mail' }} <span class="required">*</span></label>
               <div class="input-with-icon">
                 <i class="fas fa-envelope"></i>
                 <input
@@ -141,7 +141,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="website">Personal Website</label>
+            <label for="website" data-translate>{{ translatedTexts['Personal Website'] || 'Personal Website' }}</label>
             <div class="input-with-icon">
               <i class="fas fa-globe"></i>
               <input
@@ -155,8 +155,8 @@
 
           <!-- MULTIPLE SOCIAL MEDIA ACCOUNTS -->
           <div class="subsection-header">
-            <h4>Social Media Accounts</h4>
-            <div class="tooltip-icon" title="Add your professional social media profiles">
+            <h4 data-translate>{{ translatedTexts['Social Media Accounts'] || 'Social Media Accounts' }}</h4>
+            <div class="tooltip-icon" [title]="translatedTexts['Add your professional social media profiles'] || 'Add your professional social media profiles'">
               <i class="fas fa-info-circle"></i>
             </div>
           </div>
@@ -177,32 +177,32 @@
 
               <div class="form-row">
                 <div class="form-group half-width">
-                  <label>Platform</label>
+                  <label data-translate>{{ translatedTexts['Platform'] || 'Platform' }}</label>
                   <select formControlName="platform" class="platform-select">
-                    <option value="">Select platform</option>
-                    <option value="LinkedIn">LinkedIn</option>
-                    <option value="GitHub">GitHub</option>
-                    <option value="Twitter">Twitter</option>
-                    <option value="Instagram">Instagram</option>
-                    <option value="Other">Other</option>
+                    <option value="">{{ translatedTexts['Select platform'] || 'Select platform' }}</option>
+                    <option value="LinkedIn">{{ translatedTexts['LinkedIn'] || 'LinkedIn' }}</option>
+                    <option value="GitHub">{{ translatedTexts['GitHub'] || 'GitHub' }}</option>
+                    <option value="Twitter">{{ translatedTexts['Twitter'] || 'Twitter' }}</option>
+                    <option value="Instagram">{{ translatedTexts['Instagram'] || 'Instagram' }}</option>
+                    <option value="Other">{{ translatedTexts['Other'] || 'Other' }}</option>
                   </select>
                 </div>
                 <div class="form-group half-width">
-                  <label>Handle</label>
+                  <label data-translate>{{ translatedTexts['Handle'] || 'Handle' }}</label>
                   <input
                     type="text"
-                    placeholder="e.g. @john_doe"
+                    [placeholder]="translatedTexts['e.g. @john_doe'] || 'e.g. @john_doe'"
                     formControlName="handle"
                   />
                 </div>
               </div>
               <div class="form-group">
-                <label>Profile URL</label>
+                <label data-translate>{{ translatedTexts['Profile URL'] || 'Profile URL' }}</label>
                 <div class="input-with-icon">
                   <i class="fas fa-link"></i>
                   <input
                     type="text"
-                    placeholder="e.g. https://www.linkedin.com/in/john-doe"
+                    [placeholder]="translatedTexts['e.g. https://www.linkedin.com/in/john-doe'] || 'e.g. https://www.linkedin.com/in/john-doe'"
                     formControlName="link"
                   />
                 </div>
@@ -215,7 +215,7 @@
               class="btn btn-secondary add-btn"
               (click)="addSocialAccount()"
             >
-               Add Social Media Profile
+               {{ translatedTexts['Add Social Media Profile'] || 'Add Social Media Profile' }}
             </button>
           </div>
         </div>
@@ -227,7 +227,7 @@
         <div class="form-section">
           <div class="section-header">
             <i class="fas fa-graduation-cap"></i>
-            <h3>Education</h3>
+            <h3 data-translate>{{ translatedTexts['Education'] || 'Education' }}</h3>
           </div>
           <div formArrayName="education" class="education-container">
             <div
@@ -243,31 +243,31 @@
                 &times;
               </button>
 
-              <div class="card-header-mini">Education #{{i + 1}}</div>
+              <div class="card-header-mini">{{ translatedTexts['Education'] || 'Education' }} #{{i + 1}}</div>
 
               <div class="form-group">
-                <label for="school">School/University Name <span class="required">*</span></label>
+                <label for="school" data-translate>{{ translatedTexts['School/University Name'] || 'School/University Name' }} <span class="required">*</span></label>
                 <div class="input-with-icon">
                   <i class="fas fa-university"></i>
                   <input
                     id="school"
                     type="text"
-                    placeholder="e.g. Georgia Southwestern University"
+                    [placeholder]="translatedTexts['e.g. Georgia Southwestern University'] || 'e.g. Georgia Southwestern University'"
                     formControlName="school"
                   />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group half-width">
-                  <label for="grad">Graduation Date</label>
+                  <label for="grad" data-translate>{{ translatedTexts['Graduation Date'] || 'Graduation Date' }}</label>
                   <input type="month" id="grad" formControlName="grad" />
                 </div>
                 <div class="form-group half-width">
-                  <label for="major">Degree/Major <span class="required">*</span></label>
+                  <label for="major" data-translate>{{ translatedTexts['Degree/Major'] || 'Degree/Major' }} <span class="required">*</span></label>
                   <input
                     type="text"
                     id="major"
-                    placeholder="e.g. B.S. in Computer Science"
+                    [placeholder]="translatedTexts['e.g. B.S. in Computer Science'] || 'e.g. B.S. in Computer Science'"
                     formControlName="major"
                   />
                 </div>
@@ -279,7 +279,7 @@
               class="btn btn-secondary add-btn"
               (click)="addEducation()"
             >
-               Add Education
+               {{ translatedTexts['Add Education'] || 'Add Education' }}
             </button>
           </div>
         </div>
@@ -291,7 +291,7 @@
         <div class="form-section">
           <div class="section-header">
             <i class="fas fa-briefcase"></i>
-            <h3>Work Experience</h3>
+            <h3 data-translate>{{ translatedTexts['Work Experience'] || 'Work Experience' }}</h3>
           </div>
           <div formArrayName="experience">
             <div
@@ -307,43 +307,43 @@
                 &times;
               </button>
 
-              <div class="card-header-mini">Experience #{{i + 1}}</div>
+              <div class="card-header-mini">{{ translatedTexts['Experience'] || 'Experience' }} #{{i + 1}}</div>
 
               <div class="form-row">
                 <div class="form-group half-width">
-                  <label for="exp_company">Company Name <span class="required">*</span></label>
+                  <label for="exp_company" data-translate>{{ translatedTexts['Company Name'] || 'Company Name' }} <span class="required">*</span></label>
                   <div class="input-with-icon">
                     <i class="fas fa-building"></i>
                     <input
                       type="text"
                       id="exp_company"
-                      placeholder="e.g. Google"
+                      [placeholder]="translatedTexts['e.g. Google'] || 'e.g. Google'"
                       formControlName="exp_company"
                     />
                   </div>
                 </div>
                 <div class="form-group half-width">
-                  <label for="exp_date">Employment Period <span class="required">*</span></label>
+                  <label for="exp_date" data-translate>{{ translatedTexts['Employment Period'] || 'Employment Period' }} <span class="required">*</span></label>
                   <div class="input-with-icon">
                     <i class="fas fa-calendar-alt"></i>
                     <input
                       type="text"
                       id="exp_date"
-                      placeholder="e.g. 2021 - 2023"
+                      [placeholder]="translatedTexts['e.g. 2021 - 2023'] || 'e.g. 2021 - 2023'"
                       formControlName="exp_date"
                     />
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <label for="exp_description">Description of Role <span class="required">*</span></label>
+                <label for="exp_description" data-translate>{{ translatedTexts['Description of Role'] || 'Description of Role' }} <span class="required">*</span></label>
                 <textarea
                   id="exp_description"
-                  placeholder="Describe your responsibilities, achievements, and technologies used"
+                  [placeholder]="translatedTexts['Describe your responsibilities, achievements, and technologies used'] || 'Describe your responsibilities, achievements, and technologies used'"
                   formControlName="exp_description"
                 ></textarea>
                 <div class="writing-tips">
-                  <i class="fas fa-lightbulb"></i> Pro tip: Use action verbs and quantify your achievements when possible
+                  <i class="fas fa-lightbulb"></i> {{ translatedTexts['Pro tip: Use action verbs and quantify your achievements when possible'] || 'Pro tip: Use action verbs and quantify your achievements when possible' }}
                 </div>
               </div>
             </div>
@@ -353,7 +353,7 @@
               class="btn btn-secondary add-btn"
               (click)="addExperience()"
             >
-               Add Work Experience
+               {{ translatedTexts['Add Work Experience'] || 'Add Work Experience' }}
             </button>
           </div>
         </div>
@@ -365,38 +365,38 @@
         <div class="form-section">
           <div class="section-header">
             <i class="fas fa-star"></i>
-            <h3>Skills & Achievements</h3>
+            <h3 data-translate>{{ translatedTexts['Skills & Achievements'] || 'Skills & Achievements' }}</h3>
           </div>
           <div class="form-group">
-            <label for="skills">Technical Skills <span class="required">*</span></label>
+            <label for="skills" data-translate>{{ translatedTexts['Technical Skills'] || 'Technical Skills' }} <span class="required">*</span></label>
             <div class="skills-chips-container">
               <textarea
                 id="skills"
-                placeholder="List your relevant skills (e.g. Java, React, Project Management)"
+                [placeholder]="translatedTexts['List your relevant skills (e.g. Java, React, Project Management)'] || 'List your relevant skills (e.g. Java, React, Project Management)'"
                 formControlName="skills"
               ></textarea>
               <div class="skills-suggestions">
-                <span class="skill-chip" (click)="addSkill('JavaScript')">JavaScript</span>
-                <span class="skill-chip" (click)="addSkill('Python')">Python</span>
-                <span class="skill-chip" (click)="addSkill('React')">React</span>
-                <span class="skill-chip" (click)="addSkill('Angular')">Angular</span>
-                <span class="skill-chip" (click)="addSkill('Node.js')">Node.js</span>
+                <span class="skill-chip" (click)="addSkill('JavaScript')">{{ translatedTexts['JavaScript'] || 'JavaScript' }}</span>
+                <span class="skill-chip" (click)="addSkill('Python')">{{ translatedTexts['Python'] || 'Python' }}</span>
+                <span class="skill-chip" (click)="addSkill('React')">{{ translatedTexts['React'] || 'React' }}</span>
+                <span class="skill-chip" (click)="addSkill('Angular')">{{ translatedTexts['Angular'] || 'Angular' }}</span>
+                <span class="skill-chip" (click)="addSkill('Node.js')">{{ translatedTexts['Node.js'] || 'Node.js' }}</span>
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label for="achievements">Achievements/Awards</label>
+            <label for="achievements" data-translate>{{ translatedTexts['Achievements/Awards'] || 'Achievements/Awards' }}</label>
             <textarea
               id="achievements"
-              placeholder="e.g. Dean's List, Hackathon Winner, etc."
+              [placeholder]="translatedTexts['e.g. Dean\'s List, Hackathon Winner, etc.'] || 'e.g. Dean\'s List, Hackathon Winner, etc.'"
               formControlName="achievements"
             ></textarea>
           </div>
           <div class="form-group">
-            <label for="certifications">Certifications</label>
+            <label for="certifications" data-translate>{{ translatedTexts['Certifications'] || 'Certifications' }}</label>
             <textarea
               id="certifications"
-              placeholder="e.g. AWS Certified, PMP, etc."
+              [placeholder]="translatedTexts['e.g. AWS Certified, PMP, etc.'] || 'e.g. AWS Certified, PMP, etc.'"
               formControlName="certifications"
             ></textarea>
           </div>
@@ -409,7 +409,7 @@
         <div class="form-section">
           <div class="section-header">
             <i class="fas fa-code-branch"></i>
-            <h3>Projects</h3>
+            <h3 data-translate>{{ translatedTexts['Projects'] || 'Projects' }}</h3>
           </div>
           <div formArrayName="projects">
             <div
@@ -425,36 +425,36 @@
                 &times;
               </button>
 
-              <div class="card-header-mini">Project #{{i + 1}}</div>
+              <div class="card-header-mini">{{ translatedTexts['Project'] || 'Project' }} #{{i + 1}}</div>
 
               <div class="form-row">
                 <div class="form-group half-width">
-                  <label for="projectName">Project Name <span class="required">*</span></label>
+                  <label for="projectName" data-translate>{{ translatedTexts['Project Name'] || 'Project Name' }} <span class="required">*</span></label>
                   <input
                     type="text"
                     id="projectName"
-                    placeholder="e.g. Personal Portfolio"
+                    [placeholder]="translatedTexts['e.g. Personal Portfolio'] || 'e.g. Personal Portfolio'"
                     formControlName="projectName"
                   />
                 </div>
                 <div class="form-group half-width">
-                  <label for="projectUrl">Project URL</label>
+                  <label for="projectUrl" data-translate>{{ translatedTexts['Project URL'] || 'Project URL' }}</label>
                   <div class="input-with-icon">
                     <i class="fas fa-link"></i>
                     <input
                       type="text"
                       id="projectUrl"
-                      placeholder="e.g. https://github.com/yourusername/project"
+                      [placeholder]="translatedTexts['e.g. https://github.com/yourusername/project'] || 'e.g. https://github.com/yourusername/project'"
                       formControlName="projectUrl"
                     />
                   </div>
                 </div>
               </div>
               <div class="form-group">
-                <label for="projectDesc">Project Description <span class="required">*</span></label>
+                <label for="projectDesc" data-translate>{{ translatedTexts['Project Description'] || 'Project Description' }} <span class="required">*</span></label>
                 <textarea
                   id="projectDesc"
-                  placeholder="Describe the project, your role, technologies used, and outcomes"
+                  [placeholder]="translatedTexts['Describe the project, your role, technologies used, and outcomes'] || 'Describe the project, your role, technologies used, and outcomes'"
                   formControlName="projectDesc"
                 ></textarea>
               </div>
@@ -465,7 +465,7 @@
               class="btn btn-secondary add-btn"
               (click)="addProject()"
             >
-               Add Project
+               {{ translatedTexts['Add Project'] || 'Add Project' }}
             </button>
           </div>
         </div>
@@ -474,7 +474,7 @@
         <div class="form-section">
           <div class="section-header">
             <i class="fas fa-user-check"></i>
-            <h3>References</h3>
+            <h3 data-translate>{{ translatedTexts['References'] || 'References' }}</h3>
           </div>
           <div formArrayName="references">
             <div
@@ -492,20 +492,20 @@
 
               <div class="form-row">
                 <div class="form-group half-width">
-                  <label for="refName">Reference Name</label>
+                  <label for="refName" data-translate>{{ translatedTexts['Reference Name'] || 'Reference Name' }}</label>
                   <input
                     type="text"
                     id="refName"
-                    placeholder="e.g. John Doe"
+                    [placeholder]="translatedTexts['e.g. John Doe'] || 'e.g. John Doe'"
                     formControlName="refName"
                   />
                 </div>
                 <div class="form-group half-width">
-                  <label for="refContact">Contact Info</label>
+                  <label for="refContact" data-translate>{{ translatedTexts['Contact Info'] || 'Contact Info' }}</label>
                   <input
                     type="text"
                     id="refContact"
-                    placeholder="Email or Phone"
+                    [placeholder]="translatedTexts['Email or Phone'] || 'Email or Phone'"
                     formControlName="refContact"
                   />
                 </div>
@@ -517,7 +517,7 @@
               class="btn btn-secondary add-btn"
               (click)="addReference()"
             >
-               Add Reference
+               {{ translatedTexts['Add Reference'] || 'Add Reference' }}
             </button>
           </div>
         </div>
@@ -533,7 +533,7 @@
             [disabled]="isPreviousTabDisabled()"
             (click)="goToPreviousTab()"
           >
-            <i class="fas fa-arrow-left"></i> Previous
+            <i class="fas fa-arrow-left"></i> {{ translatedTexts['Previous'] || 'Previous' }}
           </button>
           <button 
             type="button" 
@@ -541,7 +541,7 @@
             [disabled]="isNextTabDisabled()"
             (click)="goToNextTab()"
           >
-            Next <i class="fas fa-arrow-right"></i>
+            {{ translatedTexts['Next'] || 'Next' }} <i class="fas fa-arrow-right"></i>
           </button>
         </div>
         
@@ -553,7 +553,7 @@
             class="btn btn-primary"
             id="saveResumeBtn"
           >
-            <i class="fas fa-save"></i> Save Resume
+            <i class="fas fa-save"></i> {{ translatedTexts['Save Resume'] || 'Save Resume' }}
           </button>
 
           <!-- "Download Original" uses docxtemplater -->
@@ -562,7 +562,7 @@
             class="btn btn-secondary"
             (click)="downloadOriginalDocx()"
           >
-            <i class="fas fa-file-download"></i> Download Draft
+            <i class="fas fa-file-download"></i> {{ translatedTexts['Download Draft'] || 'Download Draft' }}
           </button>
         </div>
       </div>
@@ -572,7 +572,7 @@
     <div class="after-save" *ngIf="createdResumeId">
       <div class="success-indicator">
         <i class="fas fa-check-circle"></i>
-        <span class="resume-id-badge">Resume ID: {{ createdResumeId }}</span>
+        <span class="resume-id-badge">{{ translatedTexts['Resume ID:'] || 'Resume ID:' }} {{ createdResumeId }}</span>
       </div>
 
       <div class="enhancement-actions">
@@ -584,7 +584,7 @@
           [disabled]="isImproving"
         >
           <i class="fas" [ngClass]="isImproving ? 'fa-spinner fa-spin' : 'fa-magic'"></i>
-          {{ isImproving ? 'Enhancing Resume...' : 'Enhance with AI' }}
+          {{ isImproving ? (translatedTexts['Enhancing Resume...'] || 'Enhancing Resume...') : (translatedTexts['Enhance with AI'] || 'Enhance with AI') }}
         </button>
 
         <!-- 2) Download Enhanced => only if we have AI text -->
@@ -595,7 +595,7 @@
           [disabled]="!enhancedResumeText"
         >
           <i class="fas fa-file-download"></i>
-          Download Enhanced
+          {{ translatedTexts['Download Enhanced'] || 'Download Enhanced' }}
         </button>
       </div>
       
@@ -604,11 +604,11 @@
         <div class="preview-header">
           <div class="preview-title">
             <i class="fas fa-robot"></i>
-            <h3>AI-Enhanced Resume</h3>
+            <h3 data-translate>{{ translatedTexts['AI-Enhanced Resume'] || 'AI-Enhanced Resume' }}</h3>
           </div>
           
           <div class="ats-score-container">
-            <div class="ats-score-label">ATS Score</div>
+            <div class="ats-score-label" data-translate>{{ translatedTexts['ATS Score'] || 'ATS Score' }}</div>
             <div class="ats-score-circle" [ngStyle]="{ '--score': atsScore }">
               <span>{{ atsScore || 'N/A' }}</span>
             </div>
@@ -622,15 +622,15 @@
         <div class="enhancement-tips">
           <div class="tip-card">
             <i class="fas fa-lightbulb"></i>
-            <p>Keywords optimized for increased visibility by recruiters' automated systems.</p>
+            <p data-translate>{{ translatedTexts['Keywords optimized for increased visibility by recruiters\' automated systems.'] || 'Keywords optimized for increased visibility by recruiters\' automated systems.' }}</p>
           </div>
           <div class="tip-card">
             <i class="fas fa-chart-line"></i>
-            <p>Professional tone and language improved for better industry alignment.</p>
+            <p data-translate>{{ translatedTexts['Professional tone and language improved for better industry alignment.'] || 'Professional tone and language improved for better industry alignment.' }}</p>
           </div>
           <div class="tip-card">
             <i class="fas fa-check-circle"></i>
-            <p>Grammar and formatting perfected for professional appearance.</p>
+            <p data-translate>{{ translatedTexts['Grammar and formatting perfected for professional appearance.'] || 'Grammar and formatting perfected for professional appearance.' }}</p>
           </div>
         </div>
       </div>
@@ -643,15 +643,15 @@
   <div class="dialog-box dialog-success">
     <div class="dialog-header">
       <i class="fas fa-check-circle"></i>
-      <h3>{{ successDialogTitle }}</h3>
+      <h3>{{ translatedTexts[successDialogTitle] || successDialogTitle }}</h3>
       <button type="button" class="dialog-close" (click)="closeDialog()">×</button>
     </div>
     <div class="dialog-content">
-      <p>{{ successDialogMessage }}</p>
+      <p>{{ translatedTexts[successDialogMessage] || successDialogMessage }}</p>
       
       <!-- Resume ID (conditionally shown) -->
       <div *ngIf="createdResumeId && showResumeIdInDialog">
-        <p>Your resume has been saved successfully with ID:</p>
+        <p>{{ translatedTexts['Your resume has been saved successfully with ID:'] || 'Your resume has been saved successfully with ID:' }}</p>
         <div class="resume-id-highlight">{{ createdResumeId }}</div>
       </div>
       
@@ -661,14 +661,14 @@
           <span>{{ atsScore }}</span>
         </div>
         <div>
-          <p><strong>ATS Compatibility Score</strong></p>
-          <p>Your resume has been optimized for Applicant Tracking Systems</p>
+          <p><strong>{{ translatedTexts['ATS Score'] || 'ATS Score' }}</strong></p>
+          <p>{{ translatedTexts['Your resume has been optimized for Applicant Tracking Systems'] || 'Your resume has been optimized for Applicant Tracking Systems' }}</p>
         </div>
       </div>
     </div>
     <div class="dialog-footer">
       <button type="button" class="btn btn-success" (click)="closeDialog()">
-        <i class="fas fa-check"></i> Continue
+        <i class="fas fa-check"></i> {{ translatedTexts['Continue'] || 'Continue' }}
       </button>
     </div>
   </div>
@@ -679,19 +679,19 @@
   <div class="dialog-box dialog-error">
     <div class="dialog-header">
       <i class="fas fa-exclamation-triangle"></i>
-      <h3>{{ errorDialogTitle }}</h3>
+      <h3>{{ translatedTexts[errorDialogTitle] || errorDialogTitle }}</h3>
       <button type="button" class="dialog-close" (click)="closeDialog()">×</button>
     </div>
     <div class="dialog-content">
-      <p>{{ errorDialogMessage }}</p>
+      <p>{{ translatedTexts[errorDialogMessage] || errorDialogMessage }}</p>
       <p *ngIf="errorDetails" class="text-muted"><small>Technical details: {{ errorDetails }}</small></p>
     </div>
     <div class="dialog-footer">
       <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">
-        <i class="fas fa-times"></i> Close
+        <i class="fas fa-times"></i> {{ translatedTexts['Close'] || 'Close' }}
       </button>
       <button *ngIf="errorRetryAction" type="button" class="btn btn-danger" (click)="retryErrorAction()">
-        <i class="fas fa-redo"></i> Try Again
+        <i class="fas fa-redo"></i> {{ translatedTexts['Try Again'] || 'Try Again' }}
       </button>
     </div>
   </div>
@@ -702,18 +702,18 @@
   <div class="dialog-box dialog-info">
     <div class="dialog-header">
       <i class="fas fa-info-circle"></i>
-      <h3>{{ infoDialogTitle }}</h3>
+      <h3>{{ translatedTexts[infoDialogTitle] || infoDialogTitle }}</h3>
       <button type="button" class="dialog-close" (click)="closeDialog()">×</button>
     </div>
     <div class="dialog-content">
-      <p>{{ infoDialogMessage }}</p>
+      <p>{{ translatedTexts[infoDialogMessage] || infoDialogMessage }}</p>
     </div>
     <div class="dialog-footer">
       <button type="button" class="btn btn-outline-secondary" (click)="closeDialog()">
-        Cancel
+        {{ translatedTexts['Cancel'] || 'Cancel' }}
       </button>
       <button type="button" class="btn btn-primary" (click)="confirmInfoAction()">
-        <i class="fas" [ngClass]="infoDialogConfirmIcon"></i> {{ infoDialogConfirmText }}
+        <i class="fas" [ngClass]="infoDialogConfirmIcon"></i> {{ translatedTexts[infoDialogConfirmText] || infoDialogConfirmText }}
       </button>
     </div>
   </div>

@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { Component, Inject } from '@angular/core';
+import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
@@ -7,11 +7,12 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   imports: [MatDialogModule, MatButtonModule],
   templateUrl: './delete-confirmation-dialog.component.html',
-  styleUrls: ['./delete-confirmation-dialog.component.scss'], // <--- Add your SCSS
+  styleUrls: ['./delete-confirmation-dialog.component.scss'],
 })
 export class DeleteConfirmationDialogComponent {
   constructor(
-    public dialogRef: MatDialogRef<DeleteConfirmationDialogComponent>
+    public dialogRef: MatDialogRef<DeleteConfirmationDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { translations: {[key: string]: string} }
   ) {}
 
   onCancel(): void {

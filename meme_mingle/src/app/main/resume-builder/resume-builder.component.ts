@@ -44,6 +44,10 @@ export class ResumeBuilderComponent implements OnInit {
     skills: 0,
     projects: 0
   };
+  
+  // Translation related properties
+  preferredLanguage: string = 'en';
+  translatedTexts: { [key: string]: string } = {};
 
 
   showSuccessDialog = false;
@@ -102,6 +106,172 @@ infoDialogAction: (() => void) | null = null;
       projects: this.fb.array([]), // Start empty or add initial item if desired
       references: this.fb.array([])
     });
+    
+    // Get user's preferred language
+    this.preferredLanguage = localStorage.getItem('preferredLanguage') || 'en';
+    
+    // Only translate if language is not English
+    if (this.preferredLanguage !== 'en') {
+      this.translateContent(this.preferredLanguage);
+    }
+  }
+
+  // Translation method to translate static content
+  private translateContent(targetLanguage: string) {
+    const elementsToTranslate = document.querySelectorAll('[data-translate]');
+    const textsToTranslate = Array.from(elementsToTranslate).map(
+      (el) => el.textContent?.trim() || ''
+    );
+
+    // Include additional texts that need translation
+    const additionalTexts = [
+      // Resume Builder
+      'Resume Builder',
+      'Create a professional resume in minutes with AI enhancement',
+      
+      // Tabs
+      'Personal', 'Education', 'Experience', 'Skills', 'Projects',
+      
+      // Personal Info
+      'Personal Information', 'First Name', 'Last Name', 'Professional Summary',
+      'Your legal first name', 'Briefly describe your professional background and career goals',
+      
+      // Career Goals
+      'Career Goals', 'Primary Career Goal', 'Alternate Career',
+      'e.g. Software Engineer', 'e.g. Data Scientist', 'e.g. Web Developer',
+      
+      // Contact Info
+      'Contact Information', 'Mobile Number', 'E-mail', 'Personal Website',
+      'Social Media Accounts', 'Add your professional social media profiles',
+      'Platform', 'Handle', 'Profile URL', 'Add Social Media Profile',
+      'Select platform', 'LinkedIn', 'GitHub', 'Twitter', 'Instagram', 'Other',
+      'e.g. @john_doe', 'e.g. https://www.linkedin.com/in/john-doe',
+      
+      // Education
+      'School/University Name', 'Graduation Date', 'Degree/Major', 'Add Education',
+      'e.g. Georgia Southwestern University', 'e.g. B.S. in Computer Science',
+      
+      // Experience
+      'Work Experience', 'Company Name', 'Employment Period', 'Description of Role',
+      'e.g. Google', 'e.g. 2021 - 2023', 'Add Work Experience',
+      'Describe your responsibilities, achievements, and technologies used',
+      'Pro tip: Use action verbs and quantify your achievements when possible',
+      
+      // Skills
+      'Skills & Achievements', 'Technical Skills',
+      'List your relevant skills (e.g. Java, React, Project Management)',
+      'Achievements/Awards', 'e.g. Dean\'s List, Hackathon Winner, etc.',
+      'Certifications', 'e.g. AWS Certified, PMP, etc.', 'JavaScript','Python','React','Angular','Node.js',
+      
+      // Projects
+      'Project Name', 'Project URL', 'Project Description','Add Project',
+      'e.g. Personal Portfolio',
+      'e.g. https://github.com/yourusername/project',
+      'Describe the project, your role, technologies used, and outcomes',
+      
+      // References
+      'References', 'Reference Name', 'Contact Info','Add Reference',
+      'e.g. John Doe', 'Email or Phone',
+      
+      // Buttons
+      'Previous', 'Next', 'Save Resume', 'Download Draft',
+      'Enhance with AI', 'Enhancing Resume...', 'Download Enhanced',
+      
+      // Progress steps
+      'Create Resume', 'Save', 'Enhance', 'Download',
+      
+      // Enhancement section
+      'Resume ID:', 'AI-Enhanced Resume', 'ATS Score',
+      
+      // Tips
+      'Keywords optimized for increased visibility by recruiters\' automated systems.',
+      'Professional tone and language improved for better industry alignment.',
+      'Grammar and formatting perfected for professional appearance.',
+      
+      // Dialog texts
+      'Continue', 'Close', 'Try Again', 'Cancel', 'Confirm',
+      'Your resume has been saved successfully with ID:',
+
+      // Add more as needed
+      'Resume Created Successfully',
+      'Your resume has been saved to our database and is ready for enhancement.',
+      'Resume Enhancement Failed',
+      'An error occurred while enhancing your resume. Please try again.',
+      'Resume Enhanced',
+      'Your resume has been improved with AI technology.',
+    ];
+    
+    const allTextsToTranslate = [...textsToTranslate, ...additionalTexts];
+
+    // Call translation service
+    this.appService
+      .translateTexts(allTextsToTranslate, targetLanguage)
+      .subscribe({
+        next: (response) => {
+          const translations = response.translations;
+
+          // Translate texts from data-translate elements
+          elementsToTranslate.forEach((element, index) => {
+            const originalText = textsToTranslate[index];
+            this.translatedTexts[originalText] = translations[index];
+
+            // Update directly if it's a regular DOM element
+            if (!(element.tagName.startsWith('MAT-'))) {
+              element.textContent = translations[index];
+            }
+          });
+
+          // Handle additional texts
+          additionalTexts.forEach((text, index) => {
+            const translatedText = translations[textsToTranslate.length + index];
+            this.translatedTexts[text] = translatedText;
+          });
+          
+          // After translations are loaded, update dynamic content if needed
+          setTimeout(() => this.translateDynamicContent(), 100);
+        },
+        error: (error) => {
+          console.error('Error translating texts:', error);
+        }
+      });
+  }
+  
+  // Translate dynamic content (content that might be added after initial load)
+  translateDynamicContent(): void {
+    if (this.preferredLanguage === 'en') return;
+    
+    // Find all data-translate elements that might have been dynamically added
+    const elementsToTranslate = document.querySelectorAll('[data-translate]');
+    const textsToTranslate = Array.from(elementsToTranslate).map(
+      (el) => el.textContent?.trim() || ''
+    );
+    
+    // Filter out texts that are already translated
+    const untranslatedTexts = textsToTranslate.filter(
+      text => !this.translatedTexts[text] && text !== ''
+    );
+    
+    if (untranslatedTexts.length === 0) return;
+    
+    this.appService.translateTexts(untranslatedTexts, this.preferredLanguage)
+      .subscribe({
+        next: (response) => {
+          const translations = response.translations;
+          
+          untranslatedTexts.forEach((text, idx) => {
+            this.translatedTexts[text] = translations[idx];
+          });
+          
+          // Update the DOM elements
+          elementsToTranslate.forEach(element => {
+            const text = element.textContent?.trim() || '';
+            if (this.translatedTexts[text] && !(element.tagName.startsWith('MAT-'))) {
+              element.textContent = this.translatedTexts[text];
+            }
+          });
+        },
+        error: (err) => console.error('Error translating dynamic content:', err)
+      });
   }
 
   // Dialog methods
@@ -300,13 +470,21 @@ retryErrorAction() {
     // If your backend expects user_id from the front end, supply it (or use JWT on server side).
     formData.user_id = localStorage.getItem('user_id') || '12345';
 
+    // Define message strings
+    const successTitle = 'Resume Created Successfully';
+    const successMessage = 'Your resume has been saved to our database and is ready for enhancement.';
+    const errorTitle = 'Resume Creation Failed';
+    const errorMessage = 'We encountered a problem while saving your resume.';
+
     this.appService.createResume(formData).subscribe({
       next: (res) => {
         console.log('Resume created:', res);
         this.createdResumeId = res.resume_id;
+        
+        // Use translated strings if available, otherwise use default English
         this.showSuccess(
-          'Resume Created Successfully', 
-          'Your resume has been saved to our database and is ready for enhancement.',
+          this.translatedTexts[successTitle] || successTitle,
+          this.translatedTexts[successMessage] || successMessage,
           true,
           false
         );
@@ -318,8 +496,8 @@ retryErrorAction() {
         console.error('Error creating resume:', err);
         
         this.showError(
-          'Resume Creation Failed',
-          'We encountered a problem while saving your resume.',
+          this.translatedTexts[errorTitle] || errorTitle,
+          this.translatedTexts[errorMessage] || errorMessage,
           err.message || 'Unknown error',
           () => this.onSubmit() // Retry action
         );
@@ -386,10 +564,15 @@ retryErrorAction() {
   // *** (3) Improve Resume => calls AI endpoint
   improveResume() {
     if (!this.createdResumeId) {
+      // Define message strings for the info dialog
+      const infoTitle = 'Resume Required';
+      const infoMessage = 'Please save your resume first before enhancing it.';
+      const saveButtonText = 'Save Resume';
+      
       this.showInfo(
-        'Resume Required',
-        'Please save your resume first before enhancing it.',
-        'Save Resume',
+        this.translatedTexts[infoTitle] || infoTitle,
+        this.translatedTexts[infoMessage] || infoMessage,
+        this.translatedTexts[saveButtonText] || saveButtonText,
         'fa-save',
         () => this.onSubmit()
       );
@@ -397,15 +580,23 @@ retryErrorAction() {
     }
     this.isImproving = true;
 
+    // Define message strings for success and error cases
+    const successTitle = 'Resume Enhanced';
+    const successMessage = 'Your resume has been improved with AI technology.';
+    const errorTitle = 'Enhancement Failed';
+    const errorMessage = 'We encountered a problem while enhancing your resume.';
+
     this.appService.improveResume(this.createdResumeId).subscribe({
       next: (res) => {
         console.log('AI improved resume:', res);
         this.isImproving = false;
         this.enhancedResumeText = res.ai_enhanced_resume;
         this.atsScore = res.ats_score;
+        
+        // Use translated strings if available, otherwise use default English
         this.showSuccess(
-          'Resume Enhanced', 
-          'Your resume has been improved with AI technology.',
+          this.translatedTexts[successTitle] || successTitle,
+          this.translatedTexts[successMessage] || successMessage,
           false,
           true
         );
@@ -414,9 +605,11 @@ retryErrorAction() {
       error: (err) => {
         console.error('Failed to improve resume:', err);
         this.isImproving = false;
+        
+        // Use translated strings if available, otherwise use default English
         this.showError(
-          'Enhancement Failed',
-          'We encountered a problem while enhancing your resume.',
+          this.translatedTexts[errorTitle] || errorTitle,
+          this.translatedTexts[errorMessage] || errorMessage,
           err.message || 'Unknown error',
           () => this.improveResume() // Retry action
         );
