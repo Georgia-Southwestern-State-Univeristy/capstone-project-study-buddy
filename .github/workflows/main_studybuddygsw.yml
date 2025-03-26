@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy Node.js app to Azure Web App - StudyBuddyGsw
+name: Build and deploy Angular app to Azure Web App - StudyBuddyGsw
 
 on:
   push:
@@ -13,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read # This is required for actions/checkout
 
     steps:
       - uses: actions/checkout@v4
@@ -23,20 +20,26 @@ jobs:
         with:
           node-version: '22.x'
 
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli
+
       - name: npm install, build, and test
         run: |
+          cd meme_mingle
           npm install
-          npm run build --if-present
-          npm run test --if-present
+          ng build 
+          ng test --watch=false --browsers=ChromeHeadless
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: |
+          cd meme_mingle/dist
+          zip -r release.zip *
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: release.zip
+          name: angular-app
+          path: meme_mingle/dist/release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -45,24 +48,24 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write # This is required for requesting the JWT
+      contents: read # This is required for actions/checkout
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: angular-app
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_C0D1F24BDDE144BC86B16AA436D78185 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3501369DC9E64334B5D435FBA9264A29 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9CE5B4ECB9124CF6B7B9F80FCAFB590C }}
+          client-id: ${{ secrets.__clientidsecretname__ }}
+          tenant-id: ${{ secrets.__tenantidsecretname__ }}
+          subscription-id: ${{ secrets.__subscriptionidsecretname__ }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -71,4 +74,3 @@ jobs:
           app-name: 'StudyBuddyGsw'
           slot-name: 'Production'
           package: .
-          
