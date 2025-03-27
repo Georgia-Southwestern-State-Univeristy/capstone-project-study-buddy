@@ -2,74 +2,74 @@
 <div class="container">
   <div class="gsw-card">
     <div class="gsw-card-header text-center">
-      <h2>Create a New Study Group</h2>
+      <h2 data-translate>Create a New Study Group</h2>
     </div>
     <div class="card-body">
       <form [formGroup]="groupForm" (ngSubmit)="onSubmit()" enctype="multipart/form-data">
         <!-- Group Name -->
         <div class="mb-3">
-          <label for="name" class="form-label">Group Name</label>
+          <label for="name" class="form-label" data-translate>Group Name</label>
           <input
             type="text"
             id="name"
             formControlName="name"
             class="form-control"
-            placeholder="Enter a memorable name for your group">
+            placeholder="{{translatedTexts['Enter a memorable name for your group'] || 'Enter a memorable name for your group'}}">
           <div *ngIf="groupForm.get('name')?.touched && groupForm.get('name')?.invalid" class="text-danger">
-            <small *ngIf="groupForm.get('name')?.errors?.['required']">Group name is required.</small>
-            <small *ngIf="groupForm.get('name')?.errors?.['minlength']">Group name must be at least 3 characters.</small>
-            <small *ngIf="groupForm.get('name')?.errors?.['maxlength']">Group name cannot exceed 50 characters.</small>
+            <small *ngIf="groupForm.get('name')?.errors?.['required']" data-translate>Group name is required.</small>
+            <small *ngIf="groupForm.get('name')?.errors?.['minlength']" data-translate>Group name must be at least 3 characters.</small>
+            <small *ngIf="groupForm.get('name')?.errors?.['maxlength']" data-translate>Group name cannot exceed 50 characters.</small>
           </div>
         </div>
 
         <!-- Description -->
         <div class="mb-3">
-          <label for="description" class="form-label">Description</label>
+          <label for="description" class="form-label" data-translate>Description</label>
           <textarea
             id="description"
             formControlName="description"
             class="form-control"
             rows="3"
-            placeholder="What is this group about? What will members learn?"></textarea>
+            placeholder="{{translatedTexts['What is this group about? What will members learn?'] || 'What is this group about? What will members learn?'}}"></textarea>
         </div>
 
         <!-- Topics (comma separated) -->
         <div class="mb-3">
-          <label for="topics" class="form-label">Topics</label>
+          <label for="topics" class="form-label" data-translate>Topics</label>
           <input
             type="text"
             id="topics"
             formControlName="topics"
             class="form-control"
-            placeholder="e.g., Calculus, Physics, Literature (comma separated)">
-          <small class="text-muted">Add relevant topics to help others find your group</small>
+            placeholder="{{translatedTexts['e.g., Calculus, Physics, Literature (comma separated)'] || 'e.g., Calculus, Physics, Literature (comma separated)'}}">
+          <small class="text-muted" data-translate>Add relevant topics to help others find your group</small>
         </div>
 
         <!-- Privacy -->
         <div class="mb-3">
-          <label for="privacy" class="form-label">Privacy Setting</label>
+          <label for="privacy" class="form-label" data-translate>Privacy Setting</label>
           <select id="privacy" formControlName="privacy" class="form-select">
-            <option value="public">Public - Anyone can find and join</option>
-            <option value="private">Private - Members need an invitation</option>
+            <option value="public" data-translate>Public - Anyone can find and join</option>
+            <option value="private" data-translate>Private - Members need an invitation</option>
           </select>
-          <small class="text-muted">You can change this setting later</small>
+          <small class="text-muted" data-translate>You can change this setting later</small>
         </div>
 
         <!-- Rules (comma separated) -->
         <div class="mb-3">
-          <label for="rules" class="form-label">Group Rules</label>
+          <label for="rules" class="form-label" data-translate>Group Rules</label>
           <input
             type="text"
             id="rules"
             formControlName="rules"
             class="form-control"
-            placeholder="Be respectful, No spam, Keep on topic (comma separated)">
-          <small class="text-muted">Rules help set expectations for group members</small>
+            placeholder="{{translatedTexts['Be respectful, No spam, Keep on topic (comma separated)'] || 'Be respectful, No spam, Keep on topic (comma separated)'}}">
+          <small class="text-muted" data-translate>Rules help set expectations for group members</small>
         </div>
 
         <!-- Group Image -->
         <div class="mb-3">
-          <label class="form-label">Group Image</label>
+          <label class="form-label" data-translate>Group Image</label>
           <div class="row">
             <div class="col-md-6 mb-2">
               <input
@@ -77,8 +77,8 @@
                 id="image_url"
                 formControlName="image_url"
                 class="form-control"
-                placeholder="Enter image URL">
-              <small class="text-muted">Or upload an image file below</small>
+                placeholder="{{translatedTexts['Enter image URL'] || 'Enter image URL'}}">
+              <small class="text-muted" data-translate>Or upload an image file below</small>
             </div>
             <div class="col-md-6">
               <input
@@ -87,19 +87,19 @@
                 (change)="onFileSelected($event)"
                 class="form-control"
                 accept="image/*">
-              <small class="text-muted">Max size: 5MB</small>
+              <small class="text-muted" data-translate>Max size: 5MB</small>
             </div>
           </div>
         </div>
 
         <!-- Invite Members (Dropdown) -->
         <div class="mb-3">
-          <label for="members" class="form-label">Invite Members</label>
+          <label for="members" class="form-label" data-translate>Invite Members</label>
           <div class="input-group mb-2">
             <input
               type="text"
               class="form-control"
-              placeholder="Search for users by username..."
+              placeholder="{{translatedTexts['Search for users by username...'] || 'Search for users by username...'}}"
               (input)="filterUsers($event)">
             <button class="btn" type="button" (click)="loadUsers(searchTerm)">
               <i class="bi bi-search"></i>
@@ -134,13 +134,13 @@
             </div>
           </div>
           
-          <small class="text-muted">Share your group with classmates right away</small>
+          <small class="text-muted" data-translate>Share your group with classmates right away</small>
         </div>
 
         <!-- Submit Button -->
         <div class="d-grid">
           <button type="submit" class="gsw-btn-primary" [disabled]="groupForm.invalid || loading">
-            <i class="bi bi-plus-circle-fill me-2"></i>{{ loading ? 'Creating...' : 'Create Group' }}
+            <i class="bi bi-plus-circle-fill me-2"></i>{{ loading ? (translatedTexts['Creating...'] || 'Creating...') : (translatedTexts['Create Group'] || 'Create Group') }}
           </button>
         </div>
       </form>
@@ -157,10 +157,10 @@
 
       <!-- Invite Link Section -->
       <div *ngIf="inviteLink" class="mt-3">
-        <label class="form-label">Shareable Invite Link:</label>
+        <label class="form-label" data-translate>Shareable Invite Link:</label>
         <div class="input-group">
           <input type="text" [value]="inviteLink" class="form-control" readonly>
-          <button class="btn" (click)="copyInviteLink()">
+          <button class="btn" (click)="copyInviteLink()" data-translate>
             <i class="bi bi-clipboard"></i> Copy
           </button>
         </div>

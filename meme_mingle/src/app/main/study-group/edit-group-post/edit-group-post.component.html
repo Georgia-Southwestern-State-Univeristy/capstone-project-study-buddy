@@ -5,14 +5,14 @@
         <button class="back-btn" (click)="navigateBack()">
           <i class="bi bi-arrow-left"></i>
         </button>
-        <h2>Edit Post</h2>
+        <h2 data-translate>Edit Post</h2>
       </div>
       <button 
         class="update-btn" 
         [disabled]="updating || !postContent.trim() || (!isFormDirty())" 
         (click)="updatePost()"
       >
-        <span *ngIf="!updating">Update</span>
+        <span *ngIf="!updating" data-translate>Update</span>
         <span *ngIf="updating" class="updating-spinner"></span>
       </button>
     </div>
@@ -20,7 +20,7 @@
     <!-- Loading indicator -->
     <div class="loading-container" *ngIf="loading">
       <div class="loading-spinner"></div>
-      <p>Loading post...</p>
+      <p data-translate>Loading post...</p>
     </div>
   
     <!-- Error message -->
@@ -40,7 +40,7 @@
       <div class="post-content-area">
         <textarea 
           [(ngModel)]="postContent" 
-          placeholder="What do you want to share with your group?" 
+          placeholder="{{ translatedTexts['What do you want to share with your group?'] || 'What do you want to share with your group?' }}" 
           class="content-textarea"
           [disabled]="updating"
         ></textarea>
@@ -50,7 +50,7 @@
       <div class="post-attachments">
         <!-- Current Attachments -->
         <div *ngIf="post.attachments && post.attachments.length > 0">
-          <h4 class="attachments-title">Current Attachments</h4>
+          <h4 class="attachments-title" data-translate>Current Attachments</h4>
           <div class="attachments-preview">
             <div *ngFor="let attachment of post.attachments" class="attachment-item" 
                 [ngClass]="{'deleted': isMarkedForDeletion(attachment)}">
@@ -67,7 +67,7 @@
                   </button>
                   <button *ngIf="isMarkedForDeletion(attachment)" class="restore-btn" 
                           (click)="undoDeleteAttachment(attachment)" [disabled]="updating">
-                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                    <i class="bi bi-arrow-counterclockwise"></i> <span data-translate>Restore</span>
                   </button>
                 </div>
               </div>
@@ -85,7 +85,7 @@
                   </button>
                   <button *ngIf="isMarkedForDeletion(attachment)" class="restore-btn" 
                           (click)="undoDeleteAttachment(attachment)" [disabled]="updating">
-                    <i class="bi bi-arrow-counterclockwise"></i> Restore
+                    <i class="bi bi-arrow-counterclockwise"></i> <span data-translate>Restore</span>
                   </button>
                 </div>
               </div>
@@ -95,7 +95,7 @@
         
         <!-- New Attachments -->
         <div *ngIf="newAttachments.length > 0" class="new-attachments">
-          <h4 class="attachments-title">New Attachments</h4>
+          <h4 class="attachments-title" data-translate>New Attachments</h4>
           <div class="attachments-preview">
             <div *ngFor="let file of newAttachments; let i = index" class="attachment-item">
               <!-- Image Preview -->
@@ -145,22 +145,22 @@
             style="display: none;"
           >
           <label for="attachment-upload" class="attachment-upload-btn" [class.disabled]="updating">
-            <i class="bi bi-paperclip"></i> Add Attachments
+            <i class="bi bi-paperclip"></i> <span> {{ translatedTexts['Add Attachments'] || 'Add Attachments' }}</span>
           </label>
         </div>
       </div>
       
       <!-- Action buttons -->
       <div class="action-buttons">
-        <button class="cancel-btn" (click)="navigateBack()" [disabled]="updating">Cancel</button>
+        <button class="cancel-btn" (click)="navigateBack()" [disabled]="updating">{{ translatedTexts['Cancel'] || 'Cancel' }}</button>
         <button 
           class="save-btn" 
           [disabled]="updating || !postContent.trim() || (!isFormDirty())" 
           (click)="updatePost()"
         >
-          <span *ngIf="!updating">Update Post</span>
+          <span *ngIf="!updating">{{ translatedTexts['Update Post'] || 'Update Post' }}</span>
           <span *ngIf="updating">
-            <i class="bi bi-arrow-repeat updating-icon"></i> Updating...
+            <i class="bi bi-arrow-repeat updating-icon"></i> <span >{{ translatedTexts['Updating...'] || 'Updating...' }}</span>
           </span>
         </button>
       </div>

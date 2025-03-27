@@ -3,7 +3,7 @@
 <div class="group-sidebar" [ngClass]="{ 'collapsed': !sidebarVisible }">
   <!-- Header Section -->
   <div class="header">
-    <h3>Study Groups</h3>
+    <h3 data-translate>Study Groups</h3>
   </div>
 
   <!-- Action Buttons -->
@@ -14,7 +14,7 @@
       class="collapse-btn"
       aria-label="Toggle Sidebar"
       (click)="toggleSidebar()"
-      title="Toggle Sidebar"
+      title="{{ translatedTexts['Toggle Sidebar'] || 'Toggle Sidebar' }}"
     >
       <i class="bi" [ngClass]="sidebarVisible ? 'bi-chevron-left' : 'bi-chevron-right'"></i>
     </button>
@@ -25,7 +25,7 @@
       routerLink="/main/study-group/create-group"
       routerLinkActive="active"
       [routerLinkActiveOptions]="{ exact: true }"
-      title="Create New Group"
+      title="{{ translatedTexts['Create New Group'] || 'Create New Group' }}"
     >
       <i class="bi bi-plus-lg"></i>
     </button>
@@ -35,7 +35,7 @@
   <div class="search-container">
     <input 
       type="text" 
-      placeholder="Search groups..." 
+      placeholder="{{ translatedTexts['Search groups...'] || 'Search groups...' }}" 
       [(ngModel)]="searchTerm"
       (input)="filterGroups()"
     >
@@ -46,7 +46,7 @@
     <!-- Loading State -->
     <div *ngIf="loading" class="loading">
       <div class="spinner"></div>
-      <span>Loading groups...</span>
+      <span data-translate>Loading groups...</span>
     </div>
     
     <!-- Error State -->
@@ -59,9 +59,9 @@
       <div class="empty-icon">
         <i class="bi bi-people"></i>
       </div>
-      <p>No study groups found. Create a new group or join existing ones!</p>
+      <p data-translate>No study groups found. Create a new group or join existing ones!</p>
       <button routerLink="/main/study-group/create-group">
-        <i class="bi bi-plus-circle"></i> Create Group
+        <i class="bi bi-plus-circle"></i> <span data-translate>Create Group</span>
       </button>
     </div>
     
@@ -78,7 +78,7 @@
           <img
             *ngIf="group.image_url; else defaultImage"
             [src]="group.image_url"
-            alt="Group Image"
+            alt="{{ translatedTexts['Group Image'] || 'Group Image' }}"
           />
           <ng-template #defaultImage>
             <div class="default-icon">
@@ -99,6 +99,7 @@
           class="join-button" 
           *ngIf="!group.members?.includes(userId)"
           (click)="joinGroup(group); $event.stopPropagation()"
+          data-translate
         >
           Join
         </button>

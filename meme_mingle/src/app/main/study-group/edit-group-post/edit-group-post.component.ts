@@ -28,6 +28,10 @@ export class EditGroupPostComponent implements OnInit, CanComponentDeactivate {
   successMessage: string | null = null;
   post: any = null;
   
+  // Translation related properties
+  preferredLanguage: string = 'en';
+  translatedTexts: { [key: string]: string } = {};
+  
   // Attachment handling properties
   attachments: string[] = [];
   originalAttachments: string[] = [];
@@ -45,6 +49,8 @@ export class EditGroupPostComponent implements OnInit, CanComponentDeactivate {
 
   ngOnInit(): void {
     this.userId = localStorage.getItem('user_id') || '';
+    // Load user's preferred language from localStorage
+    this.preferredLanguage = localStorage.getItem('preferredLanguage') || 'en';
     
     // Get query parameters
     this.route.queryParams.subscribe(params => {
@@ -59,6 +65,20 @@ export class EditGroupPostComponent implements OnInit, CanComponentDeactivate {
       
       this.fetchPostDetails();
     });
+    
+    // If user's language is not English, translate the content
+    if (this.preferredLanguage !== 'en') {
+      this.translateContent(this.preferredLanguage);
+    }
+  }
+  
+  // Once view is initialized, handle any leftover dynamic text
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      if (this.preferredLanguage !== 'en') {
+        this.translateDynamicContent();
+      }
+    }, 300);
   }
 
   fetchPostDetails(): void {
@@ -101,9 +121,132 @@ export class EditGroupPostComponent implements OnInit, CanComponentDeactivate {
     });
   }
 
+  //=========================================
+  // 1) Translate All Static Content
+  //=========================================
+  private translateContent(targetLanguage: string) {
+    // 1) Grab the text from all elements marked with data-translate
+    const elementsToTranslate = document.querySelectorAll('[data-translate]');
+    const textsInDom = Array.from(elementsToTranslate).map(
+      (el) => el.textContent?.trim() || ''
+    );
+
+    // 2) Include additional strings you might need from code
+    const additionalTexts = [
+      'Edit Post',
+      'Update',
+      'Loading post...',
+      'What do you want to share with your group?',
+      'Current Attachments',
+      'New Attachments',
+      'Add Attachments',
+      'Cancel',
+      'Update Post',
+      'Updating...',
+      'Restore',
+      'You have unsaved changes. Are you sure you want to leave?',
+      'Post updated successfully!',
+      'An error occurred while updating the post.',
+      'Post content cannot be empty',
+      'File is too large. Maximum size is 10MB.'
+    ];
+
+    // Combine them into a unique set
+    const combinedSet = new Set([...textsInDom, ...additionalTexts].filter(Boolean));
+    const allTextsToTranslate = Array.from(combinedSet);
+
+    // If target language is English or nothing to translate, skip
+    if (!allTextsToTranslate.length || targetLanguage === 'en') {
+      return;
+    }
+
+    // 3) Call the translation service
+    this.appService.translateTexts(allTextsToTranslate, targetLanguage).subscribe({
+      next: (response) => {
+        const translations = response.translations;
+        // Store them in our dictionary
+        allTextsToTranslate.forEach((original, idx) => {
+          this.translatedTexts[original] = translations[idx];
+        });
+        // Update the DOM
+        elementsToTranslate.forEach((element) => {
+          const originalText = element.textContent?.trim() || '';
+          if (this.translatedTexts[originalText]) {
+            element.textContent = this.translatedTexts[originalText];
+          }
+        });
+        
+        // Translate any error messages if they exist
+        if (this.errorMessage && this.translatedTexts[this.errorMessage]) {
+          this.errorMessage = this.translatedTexts[this.errorMessage];
+        }
+        
+        // Translate success messages if they exist
+        if (this.successMessage && this.translatedTexts[this.successMessage]) {
+          this.successMessage = this.translatedTexts[this.successMessage];
+        }
+        
+        // Translate upload error if it exists
+        if (this.uploadError && this.translatedTexts[this.uploadError]) {
+          this.uploadError = this.translatedTexts[this.uploadError];
+        }
+      },
+      error: (err) => {
+        console.error('Translation error:', err);
+      }
+    });
+  }
+
+  //=========================================
+  // 2) Translate Any New DOM Elements
+  //    (like dynamically added content)
+  //=========================================
+  private translateDynamicContent(): void {
+    if (this.preferredLanguage === 'en') return;
+    
+    const elementsToTranslate = document.querySelectorAll('[data-translate]');
+    const textsInDom = Array.from(elementsToTranslate).map(
+      (el) => el.textContent?.trim() || ''
+    );
+
+    // Filter out any you already have
+    const notYetTranslated = textsInDom.filter(t => !this.translatedTexts[t] && t !== '');
+
+    if (!notYetTranslated.length) {
+      // everything is either translated or empty
+      // just reassign to be safe
+      elementsToTranslate.forEach((element) => {
+        const text = element.textContent?.trim() || '';
+        if (this.translatedTexts[text]) {
+          element.textContent = this.translatedTexts[text];
+        }
+      });
+      return;
+    }
+
+    // call translation service for the new strings
+    this.appService.translateTexts(notYetTranslated, this.preferredLanguage)
+      .subscribe({
+        next: (response) => {
+          const translations = response.translations;
+          notYetTranslated.forEach((original, i) => {
+            this.translatedTexts[original] = translations[i];
+          });
+          // update the DOM
+          elementsToTranslate.forEach((element) => {
+            const text = element.textContent?.trim() || '';
+            if (this.translatedTexts[text]) {
+              element.textContent = this.translatedTexts[text];
+            }
+          });
+        },
+        error: (err) => console.error('Error translating dynamic content:', err)
+      });
+  }
+
   updatePost(): void {
     if (!this.postContent.trim()) {
-      this.errorMessage = "Post content cannot be empty";
+      this.errorMessage = this.translatedTexts["Post content cannot be empty"] || "Post content cannot be empty";
       return;
     }
     
@@ -145,7 +288,7 @@ export class EditGroupPostComponent implements OnInit, CanComponentDeactivate {
     
     this.appService.updateGroupPost(this.postId, formData).subscribe({
       next: (response: { message: string }) => {
-        this.successMessage = "Post updated successfully!";
+        this.successMessage = this.translatedTexts["Post updated successfully!"] || "Post updated successfully!";
         this.updating = false;
         
         // Navigate back after a brief delay
@@ -153,7 +296,7 @@ export class EditGroupPostComponent implements OnInit, CanComponentDeactivate {
       },
       error: (error: { error: { error: string } }) => {
         console.error('Error updating post:', error);
-        this.errorMessage = error?.error?.error || 'An error occurred while updating the post.';
+        this.errorMessage = error?.error?.error || this.translatedTexts["An error occurred while updating the post."] || 'An error occurred while updating the post.';
         this.updating = false;
       }
     });
@@ -175,7 +318,8 @@ export class EditGroupPostComponent implements OnInit, CanComponentDeactivate {
         
         // Check file size
         if (file.size > this.maxFileSize) {
-          this.uploadError = `File ${file.name} is too large. Maximum size is 10MB.`;
+          this.uploadError = this.translatedTexts[`File ${file.name} is too large. Maximum size is 10MB.`] || 
+                            `File ${file.name} is too large. Maximum size is 10MB.`;
           continue;
         }
         
@@ -231,7 +375,8 @@ export class EditGroupPostComponent implements OnInit, CanComponentDeactivate {
   // Confirm before leaving if there are unsaved changes
   canDeactivate(): boolean {
     if (this.isFormDirty() && !this.updating) {
-      return confirm('You have unsaved changes. Are you sure you want to leave?');
+      return confirm(this.translatedTexts['You have unsaved changes. Are you sure you want to leave?'] || 
+                    'You have unsaved changes. Are you sure you want to leave?');
     }
     return true;
   }

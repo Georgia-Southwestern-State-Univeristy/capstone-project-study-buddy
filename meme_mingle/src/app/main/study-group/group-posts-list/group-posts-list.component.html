@@ -1,16 +1,16 @@
 <div class="group-posts-container">
   <!-- Header -->
   <div class="group-posts-header">
-    <h2>{{ group.name ? group.name + ' Posts' : 'Group Posts' }}</h2>
+    <h2>{{ group.name ? group.name + ' ' + (translatedTexts['Posts'] || 'Posts') : (translatedTexts['Group Posts'] || 'Group Posts') }}</h2>
     <button class="add-post-btn" (click)="onCreatePost()">
-      <i class="bi bi-plus-circle-fill"></i> Create Post
+      <i class="bi bi-plus-circle-fill"></i> <span data-translate>Create Post</span>
     </button>
   </div>
 
   <!-- Loading Indicator -->
   <div class="loading-container" *ngIf="loading">
     <div class="loading-spinner"></div>
-    <p>Loading posts...</p>
+    <p data-translate>Loading posts...</p>
   </div>
 
   <!-- Error Message -->
@@ -22,7 +22,7 @@
   <!-- No Posts Found -->
   <div *ngIf="!loading && posts?.length === 0 && !errorMessage" class="alert alert-info">
     <i class="bi bi-info-circle-fill"></i>
-    No posts found for this group. Be the first to create one!
+    <span data-translate>No posts found for this group. Be the first to create one!</span>
   </div>
 
   <!-- Posts List -->
@@ -50,17 +50,17 @@
             <!-- Owner-only options -->
             <div *ngIf="isPostOwner(post)">
               <button class="option-btn" (click)="editPost(post)">
-                <i class="bi bi-pencil-fill"></i> Edit Post
+                <i class="bi bi-pencil-fill"></i> <span>{{ translatedTexts['Edit Post'] || 'Edit Post' }}</span>
               </button>
               <button class="option-btn delete-option" (click)="confirmDeletePost(post._id)">
-                <i class="bi bi-trash-fill"></i> Delete Post
+                <i class="bi bi-trash-fill"></i> <span>{{ translatedTexts['Delete Post'] || 'Delete Post' }}</span>
               </button>
             </div>
             
             <!-- Non-owner options -->
             <div *ngIf="!isPostOwner(post)">
               <button class="option-btn" (click)="hidePost(post._id)">
-                <i class="bi bi-eye-slash-fill"></i> Hide Post
+                <i class="bi bi-eye-slash-fill"></i> <span>{{ translatedTexts['Hide Post'] || 'Hide Post' }}</span>
               </button>
             </div>
           </div>
@@ -73,7 +73,7 @@
         
         <!-- Display post attachments if available -->
         <div class="post-attachments" *ngIf="post.attachments && post.attachments.length > 0">
-          <h4 class="attachments-title">Attachments</h4>
+          <h4 class="attachments-title" data-translate>Attachments</h4>
           <div class="attachments-list">
             <div class="attachment-item" *ngFor="let attachment of post.attachments">
               <!-- Image attachments -->
@@ -107,7 +107,7 @@
           <i class="bi bi-heart-fill"></i> {{ post.likes }}
         </div>
         <div *ngIf="post.comments > 0" class="comments-count">
-          {{ post.comments }} {{ post.comments === 1 ? 'comment' : 'comments' }}
+          {{ post.comments }} {{ post.comments === 1 ? (translatedTexts['comment'] || 'comment') : (translatedTexts['comments'] || 'comments') }}
         </div>
       </div>
 
@@ -116,23 +116,23 @@
         <div class="actions">
           <button (click)="likePost(post._id)" [class.liked]="isPostLiked(post._id)" class="action-btn">
             <i class="bi" [ngClass]="isPostLiked(post._id) ? 'bi-heart-fill' : 'bi-heart'"></i>
-            <span class="action-label">Like</span>
+            <span class="action-label">{{ translatedTexts['Like'] || 'Like' }} </span>
           </button>
           <button (click)="toggleCommentsVisibility(post._id)" class="action-btn">
             <i class="bi bi-chat"></i>
-            <span class="action-label">{{ areCommentsVisible(post._id) ? 'Hide Comments' : 'Comments' }}</span>
+            <span class="action-label">
+              {{ areCommentsVisible(post._id) ? (translatedTexts['Hide Comments'] || 'Hide Comments') : (translatedTexts['Comments'] || 'Comments') }}
+            </span>
           </button>
-          <!-- <button class="action-btn">
-            <i class="bi bi-share"></i>
-            <span class="action-label">Share</span>
-          </button> -->
         </div>
         
         <!-- Comments Display Section - Only show when comments are toggled visible -->
         <div class="comments-display" *ngIf="areCommentsVisible(post._id) && post.comment_list && post.comment_list.length > 0">
           <div class="comment-count" *ngIf="post.comment_list.length > 3" (click)="toggleComments(post._id)">
             <i class="bi" [ngClass]="expandedCommentPostIds.has(post._id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
-            {{ expandedCommentPostIds.has(post._id) ? 'Hide' : 'View all' }} {{ post.comments }} comments
+            {{ expandedCommentPostIds.has(post._id) ? (translatedTexts['Hide'] || 'Hide') : (translatedTexts['View all'] || 'View all') }} 
+            {{ post.comments }} 
+            {{ translatedTexts['comments'] || 'comments' }}
           </div>
           <div class="comments-list" [class.expanded]="expandedCommentPostIds.has(post._id)">
             <div class="comment-item" *ngFor="let comment of getDisplayComments(post)">
@@ -156,7 +156,7 @@
         <!-- Add Comment Button - Show only when comments are visible but input isn't -->
         <div class="add-comment-button" *ngIf="areCommentsVisible(post._id) && activeCommentPostId !== post._id">
           <button (click)="showCommentInput(post._id)" class="add-comment-btn">
-            <i class="bi bi-plus-circle"></i> Add a comment
+            <i class="bi bi-plus-circle"></i> <span data-translate>Add a comment</span>
           </button>
         </div>
         
@@ -173,7 +173,7 @@
               <input 
                 type="text" 
                 [(ngModel)]="commentText" 
-                placeholder="Write a comment..." 
+                [placeholder]="translatedTexts['Write a comment...'] || 'Write a comment...'" 
                 class="comment-input"
                 (keyup.enter)="commentText.trim() && submitComment(post._id)"
               />

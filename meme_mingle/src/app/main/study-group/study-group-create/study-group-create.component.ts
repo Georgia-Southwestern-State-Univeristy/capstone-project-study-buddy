@@ -26,6 +26,10 @@ export class StudyGroupCreateComponent implements OnInit {
   searchTerm: string = '';
   selectedMembers: any[] = [];
 
+  // Translation related properties
+  preferredLanguage: string = 'en';
+  translatedTexts: { [key: string]: string } = {};
+
   constructor(private fb: FormBuilder, private appService: AppService) {}
 
   ngOnInit(): void {
@@ -42,6 +46,148 @@ export class StudyGroupCreateComponent implements OnInit {
     
     // Fetch users for the dropdown
     this.loadUsers();
+    
+    // Load from localStorage if user has previously chosen a language
+    this.preferredLanguage = localStorage.getItem('preferredLanguage') || 'en';
+
+    // If user's language is not English, do an initial pass of translation
+    if (this.preferredLanguage !== 'en') {
+      this.translateContent(this.preferredLanguage);
+    }
+  }
+
+  // Once view is initialized, handle any leftover dynamic text
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      if (this.preferredLanguage !== 'en') {
+        this.translateDynamicContent();
+      }
+    }, 300);
+  }
+
+  //=========================================
+  // 1) Translate All Static Content
+  //=========================================
+  private translateContent(targetLanguage: string) {
+    // 1) Grab the text from all elements marked with data-translate
+    const elementsToTranslate = document.querySelectorAll('[data-translate]');
+    const textsInDom = Array.from(elementsToTranslate).map(
+      (el) => el.textContent?.trim() || ''
+    );
+
+    // 2) Include additional strings you might need from code
+    const additionalTexts = [
+      'Create a New Study Group',
+      'Group Name',
+      'Enter a memorable name for your group',
+      'Group name is required.',
+      'Group name must be at least 3 characters.',
+      'Group name cannot exceed 50 characters.',
+      'Description',
+      'What is this group about? What will members learn?',
+      'Topics',
+      'e.g., Calculus, Physics, Literature (comma separated)',
+      'Add relevant topics to help others find your group',
+      'Privacy Setting',
+      'Public - Anyone can find and join',
+      'Private - Members need an invitation',
+      'You can change this setting later',
+      'Group Rules',
+      'Be respectful, No spam, Keep on topic (comma separated)',
+      'Rules help set expectations for group members',
+      'Group Image',
+      'Enter image URL',
+      'Or upload an image file below',
+      'Max size: 5MB',
+      'Invite Members',
+      'Search for users by username...',
+      'Share your group with classmates right away',
+      'Creating...',
+      'Create Group',
+      'Shareable Invite Link:',
+      'Copy',
+      'Invite link copied to clipboard!',
+      'Failed to load users for invitation',
+      'Group created successfully!',
+      'An error occurred. Please try again.'
+    ];
+
+    // Combine them into a unique set
+    const combinedSet = new Set([...textsInDom, ...additionalTexts].filter(Boolean));
+    const allTextsToTranslate = Array.from(combinedSet);
+
+    // If target language is English or nothing to translate, skip
+    if (!allTextsToTranslate.length || targetLanguage === 'en') {
+      return;
+    }
+
+    // 3) Call the translation service
+    this.appService.translateTexts(allTextsToTranslate, targetLanguage).subscribe({
+      next: (response) => {
+        const translations = response.translations;
+        // Store them in our dictionary
+        allTextsToTranslate.forEach((original, idx) => {
+          this.translatedTexts[original] = translations[idx];
+        });
+        // Update the DOM
+        elementsToTranslate.forEach((element) => {
+          const originalText = element.textContent?.trim() || '';
+          if (this.translatedTexts[originalText]) {
+            element.textContent = this.translatedTexts[originalText];
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Translation error:', err);
+      }
+    });
+  }
+
+  //=========================================
+  // 2) Translate Any New DOM Elements
+  //    (like dynamic content that appears after init)
+  //=========================================
+  private translateDynamicContent(): void {
+    if (this.preferredLanguage === 'en') return;
+    
+    const elementsToTranslate = document.querySelectorAll('[data-translate]');
+    const textsInDom = Array.from(elementsToTranslate).map(
+      (el) => el.textContent?.trim() || ''
+    );
+
+    // Filter out any you already have
+    const notYetTranslated = textsInDom.filter(t => !this.translatedTexts[t] && t !== '');
+
+    if (!notYetTranslated.length) {
+      // everything is either translated or empty
+      // just reassign to be safe
+      elementsToTranslate.forEach((element) => {
+        const text = element.textContent?.trim() || '';
+        if (this.translatedTexts[text]) {
+          element.textContent = this.translatedTexts[text];
+        }
+      });
+      return;
+    }
+
+    // call translation service for the new strings
+    this.appService.translateTexts(notYetTranslated, this.preferredLanguage)
+      .subscribe({
+        next: (response) => {
+          const translations = response.translations;
+          notYetTranslated.forEach((original, i) => {
+            this.translatedTexts[original] = translations[i];
+          });
+          // update the DOM
+          elementsToTranslate.forEach((element) => {
+            const text = element.textContent?.trim() || '';
+            if (this.translatedTexts[text]) {
+              element.textContent = this.translatedTexts[text];
+            }
+          });
+        },
+        error: (err) => console.error('Error translating dynamic content:', err)
+      });
   }
 
   loadUsers(search: string = '') {
@@ -52,7 +198,7 @@ export class StudyGroupCreateComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error fetching users:', error);
-        this.errorMessage = 'Failed to load users for invitation';
+        this.errorMessage = this.translatedTexts['Failed to load users for invitation'] || 'Failed to load users for invitation';
       }
     });
   }
@@ -154,7 +300,7 @@ export class StudyGroupCreateComponent implements OnInit {
     // Call the createGroup method in the AppService with FormData
     this.appService.createGroup(formData).subscribe({
       next: (response) => {
-        this.successMessage = response.message || 'Group created successfully!';
+        this.successMessage = this.translatedTexts['Group created successfully!'] || response.message || 'Group created successfully!';
         // Reset the form (reinitialize privacy to "public")
         this.groupForm.reset();
         this.groupForm.patchValue({ privacy: 'public' });
@@ -168,7 +314,7 @@ export class StudyGroupCreateComponent implements OnInit {
         }
       },
       error: (error) => {
-        this.errorMessage = error.error?.error || 'An error occurred. Please try again.';
+        this.errorMessage = this.translatedTexts['An error occurred. Please try again.'] || error.error?.error || 'An error occurred. Please try again.';
         this.loading = false;
       }
     });
@@ -184,7 +330,7 @@ export class StudyGroupCreateComponent implements OnInit {
   copyInviteLink() {
     if (this.inviteLink) {
       navigator.clipboard.writeText(this.inviteLink).then(() => {
-        alert('Invite link copied to clipboard!');
+        alert(this.translatedTexts['Invite link copied to clipboard!'] || 'Invite link copied to clipboard!');
       }).catch(err => {
         console.error('Failed to copy invite link: ', err);
       });

@@ -4,7 +4,7 @@
       <button class="back-btn" (click)="onBack()">
         <i class="bi bi-arrow-left"></i>
       </button>
-      <h2>Create New Post</h2>
+      <h2 data-translate>Create New Post</h2>
     </div>
     
     <div class="card-body">
@@ -27,22 +27,22 @@
     
         <!-- Post Content -->
         <div class="mb-3">
-          <label for="content" class="form-label">What's on your mind?</label>
+          <label for="content" class="form-label" data-translate>What's on your mind?</label>
           <textarea
             id="content"
             rows="4"
             formControlName="content"
             class="form-control"
-            placeholder="Share your thoughts, questions, or insights with the group..."
+            [placeholder]="translatedTexts['Share your thoughts, questions, or insights with the group...'] || 'Share your thoughts, questions, or insights with the group...'"
           ></textarea>
           <div *ngIf="postForm.get('content')?.touched && postForm.get('content')?.invalid" class="text-danger">
-            <small *ngIf="postForm.get('content')?.errors?.['required']">Please add some content to your post.</small>
+            <small *ngIf="postForm.get('content')?.errors?.['required']" data-translate>Please add some content to your post.</small>
           </div>
         </div>
     
         <!-- File Upload Section -->
         <div class="mb-3">
-          <label class="form-label">Add Photos or Files (Optional)</label>
+          <label class="form-label" data-translate>Add Photos or Files (Optional)</label>
           
           <div class="file-upload-container">
             <input
@@ -58,8 +58,8 @@
                 <i class="bi bi-cloud-arrow-up"></i>
               </div>
               <div class="upload-text">
-                <span class="primary-text">Drop files here or click to browse</span>
-                <span class="secondary-text">Supports images, PDFs, and office documents</span>
+                <span class="primary-text" data-translate>Drop files here or click to browse</span>
+                <span class="secondary-text" data-translate>Supports images, PDFs, and office documents</span>
               </div>
             </label>
           </div>
@@ -80,7 +80,7 @@
               </div>
               
               <!-- Remove Button -->
-              <button type="button" class="remove-file" (click)="removeFile(i)" title="Remove file">
+              <button type="button" class="remove-file" (click)="removeFile(i)" [attr.title]="translatedTexts['Remove file'] || 'Remove file'">
                 <i class="bi bi-x"></i>
               </button>
             </div>
@@ -90,7 +90,7 @@
         <!-- Submit Button -->
         <div class="d-grid">
           <button type="submit" class="gsw-btn-primary" [disabled]="postForm.invalid || isSubmitting">
-            <i class="bi bi-send-fill me-2"></i>{{ isSubmitting ? 'Posting...' : 'Share Post' }}
+            <i class="bi bi-send-fill me-2"></i>{{ isSubmitting ? (translatedTexts['Posting...'] || 'Posting...') : (translatedTexts['Share Post'] || 'Share Post') }}
           </button>
         </div>
       </form>
