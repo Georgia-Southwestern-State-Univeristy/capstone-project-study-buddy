@@ -93,7 +93,10 @@ def get_bing_search_results(query: str):
         list: A list of search results with titles and links.
     """
     try:
-        bing_search_wrapper = BingSearchAPIWrapper()
+        # Initialize with correct endpoint
+        bing_search_wrapper = BingSearchAPIWrapper(
+            bing_search_url="https://api.bing.microsoft.com/v7.0/search"
+        )
         search_results = bing_search_wrapper.run(query)
         print("Search results obtained:", search_results)
 
@@ -101,7 +104,7 @@ def get_bing_search_results(query: str):
         return search_results
 
     except Exception as e:
-        print(f"Failed to fetch Bing search results: {e}", exc_info=True)
+        print(f"Failed to fetch Bing search results: {e}")
         return None
     
 
