@@ -5,7 +5,7 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from services.db.user import get_user_profile_by_user_id
 from services.db.user_journey import get_user_journey_by_user_id
 from langchain.tools import Tool
-from utils.agents import fetch_meme,get_job_listings,get_bing_search_results,get_gutendex_domain_textbooks, get_public_domain_textbooks, generate_suggestions, generate_document
+from utils.agents import generate_ai_image,fetch_meme,get_job_listings,get_bing_search_results,get_gutendex_domain_textbooks, get_public_domain_textbooks, generate_suggestions, generate_document
 from langchain_google_community import GooglePlacesTool
 from .tool_schemas import (
     GenerateDocumentInput,
@@ -16,7 +16,8 @@ from .tool_schemas import (
     AgentFactsInput,
     JobSearchInput,
     FetchMemeInput,
-    UserJourneyRetrievalInput
+    UserJourneyRetrievalInput,
+    ImageGenerationInput
 )
 
 
@@ -94,6 +95,16 @@ toolbox = {
             ),
             "args_schema": UserJourneyRetrievalInput
 
+        },
+        "image_generation": {
+            "func": generate_ai_image,
+            "description": (
+                "Generates an AI image based on the user's prompt. "
+                "You must pass a 'prompt' describing the desired image and "
+                "optionally a 'size' like '512x512'."
+            ),
+            "structured": True,
+            "args_schema": ImageGenerationInput,  
         },
     }
 }

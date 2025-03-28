@@ -1,7 +1,7 @@
 """This module defines the input schemas for the tools in the tool agent."""
 
 """Step 1: Import necessary modules"""
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 """Step 2: Define the input schemas"""
 # Define the input schema for the GenerateDocument tool
@@ -46,4 +46,8 @@ class JobSearchInput(BaseModel):
 # Define the input schema for the FetchMeme tool
 class FetchMemeInput(BaseModel):
     topic: str  # The topic to fetch memes about
+
+class ImageGenerationInput(BaseModel):
+    prompt: str = Field(..., description="The text prompt describing the desired image.")
+    size: str = Field("512x512", description="Image size, e.g. '256x256', '512x512', or '1024x1024'.")
 

@@ -3,7 +3,7 @@
 """Step 1: Import necessary modules"""
 import os
 from dotenv import load_dotenv
-from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings, ChatOpenAI
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
 from utils.consts import CONTEXT_LENGTH_LIMIT
 
 """Step 2: Define the Azure OpenAI services"""
@@ -17,28 +17,6 @@ def get_azure_openai_variables():
     AOAI_COMPLETIONS = os.getenv("COMPLETIONS_DEPLOYMENT_NAME")
 
     return AOAI_ENDPOINT, AOAI_KEY, AOAI_API_VERSION, AOAI_EMBEDDINGS, AOAI_COMPLETIONS
-
-# Get the DeepSeek variables
-def get_deepseek_variables():
-    load_dotenv()
-    DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
-    DEEPSEEK_BASE_URL = "https://aimlapi.com/app/"  # or correct base
-    return DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL
-
-def get_deepseek_llm():
-    DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL = get_deepseek_variables()
-
-    # Make sure streaming=False here
-    llm = ChatOpenAI(
-        temperature=0.3,
-        openai_api_key=DEEPSEEK_API_KEY,
-        base_url="https://api.aimlapi.com/v1",  # Replace with the correct base
-        model_name="deepseek/deepseek-r1",
-        max_tokens=(CONTEXT_LENGTH_LIMIT // 2),
-        streaming=False,   # <--- ensure no streaming
-        max_retries=3
-    )
-    return llm
 
 # Define the function to get the Azure OpenAI language model
 def get_azure_openai_llm():

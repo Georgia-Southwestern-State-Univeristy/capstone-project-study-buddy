@@ -87,6 +87,7 @@ class MemeMingleAIAgent(AIAgent):
             ("system", "You can generate documents using the 'generate_document' tool."),
             ("system", "You can fetch popular memes using the 'fetch_meme' tool."),
             ("system", "You can retrieve your user journey using the 'user_journey_retrieval' tool."),
+            ("system", "You can generate images using the 'image_generation' tool."),
             ("system", "user_id:{user_id}"),
             MessagesPlaceholder(variable_name="chat_turns"),
             ("human", "{input}"),

@@ -17,6 +17,8 @@ from reportlab.lib.units import inch
 from uuid import uuid4
 import os
 from PIL import Image, ImageDraw, ImageFont
+import uuid
+import time
 
 # Initialize Azure Text Analytics Client
 text_analytics_key = os.getenv("AZURE_TEXT_ANALYTICS_KEY")
@@ -393,3 +395,139 @@ def fetch_meme(topic: str) -> str:
         print(f"Error fetching meme: {e}")
         return "Failed to fetch meme."
     
+
+def generate_ai_image(prompt: str, size: str = "512x512") -> str:
+    """
+    Calls Azure OpenAI DALL·E 3 to generate an image from a prompt, using the
+    asynchronous 'submit -> poll -> retrieve' workflow. Downloads the result
+    to a local file and returns a /download_image/<filename> route.
+
+    Args:
+        prompt (str): Text prompt describing the desired image.
+        size (str): One of "256x256", "512x512", or "1024x1024" typically.
+
+    Returns:
+        str: A local route-based URL to the downloaded image file,
+             or an error message if generation failed.
+    """
+    # 1. Get environment config for Azure
+    #    Example: AZURE_OPENAI_ENDPOINT="https://YOUR_RESOURCE_NAME.openai.azure.com"
+    #             AOAI_KEY="YOUR-AZURE-OPENAI-KEY"
+    #    (Make sure you have a deployment named "dall-e-3" in that resource.)
+    azure_openai_endpoint = os.getenv("AOAI_ENDPOINT")  # e.g. "https://studybuddy1.openai.azure.com"
+    azure_openai_api_key = os.getenv("AOAI_KEY")
+    deployment_name = "dall-e-3"  # The name of your DALL·E 3 deployment
+    api_version = "2024-02-01"    # Or the version you see in the portal for your DALL·E 3
+
+    if not azure_openai_endpoint or not azure_openai_api_key:
+        return "Azure OpenAI image-generation credentials are not configured properly."
+
+    # 2. Submit the generation request
+    #    POST {endpoint}/openai/deployments/{deployment-name}/images/generations:submit?api-version=...
+    #    Body must wrap prompt text in an object, e.g. "prompt": {"text": "..."}
+    submit_url = (
+        f"{azure_openai_endpoint}openai/deployments/{deployment_name}/images/generations:submit"
+        f"?api-version={api_version}"
+    )
+
+    submit_payload = {
+        "prompt": {
+            "text": prompt
+        },
+        "n": 1,
+        "size": size
+    }
+
+    try:
+        submit_resp = requests.post(
+            submit_url,
+            headers={
+                "Content-Type": "application/json",
+                "api-key": azure_openai_api_key
+            },
+            json=submit_payload,
+            timeout=60
+        )
+        submit_resp.raise_for_status()
+    except Exception as e:
+        return f"Azure OpenAI image generation (submit) failed: {e}"
+
+    # The response will contain an operationId (often in headers or JSON)
+    # We can parse from JSON or from the headers “Operation-Location” or “operationId”.
+    try:
+        submit_data = submit_resp.json()
+        operation_id = submit_data["operationId"]  # or possibly submit_resp.headers["Operation-Location"]
+    except Exception as e:
+        return f"Unexpected submit response: {submit_resp.text}"
+
+    # 3. Poll the generation status until it’s done
+    status_url = (
+        f"{azure_openai_endpoint}openai/images/generations:status"
+        f"?api-version={api_version}&operationId={operation_id}"
+    )
+
+    for _ in range(40):  # poll up to ~40x
+        try:
+            stat_resp = requests.get(
+                status_url,
+                headers={"api-key": azure_openai_api_key},
+                timeout=10
+            )
+            stat_resp.raise_for_status()
+            stat_data = stat_resp.json()
+        except Exception as e:
+            return f"Error checking generation status: {e}"
+
+        status = stat_data.get("status")
+        if status == "succeeded":
+            break
+        elif status == "failed":
+            return f"Image generation failed with response: {stat_data}"
+        time.sleep(2)  # Wait briefly before re-checking
+
+    if status != "succeeded":
+        return f"Image generation did not succeed in time. Last status: {stat_data}"
+
+    # 4. Retrieve the final result (once status is "succeeded")
+    result_url = (
+        f"{azure_openai_endpoint}openai/images/generations:result"
+        f"?api-version={api_version}&operationId={operation_id}"
+    )
+
+    try:
+        result_resp = requests.get(
+            result_url,
+            headers={"api-key": azure_openai_api_key},
+            timeout=30
+        )
+        result_resp.raise_for_status()
+    except Exception as e:
+        return f"Could not retrieve final image result: {e}"
+
+    result_data = result_resp.json()
+    # Typically shape: { "result": { "data": [ { "url": "https://..." } ] } }
+    try:
+        image_url = result_data["result"]["data"][0]["url"]
+    except Exception as e:
+        return f"Unexpected result JSON: {result_data}"
+
+    # 5. Download the resulting image and store locally
+    try:
+        img_resp = requests.get(image_url, timeout=30)
+        img_resp.raise_for_status()
+        filename = f"{uuid.uuid4()}.png"
+        output_dir = "generated_images"
+        os.makedirs(output_dir, exist_ok=True)
+        file_path = os.path.join(output_dir, filename)
+
+        with open(file_path, "wb") as f:
+            f.write(img_resp.content)
+
+        # Return a local URL to your Flask route
+        backend_base_url = os.getenv("BACKEND_BASE_URL", "http://localhost:8000")
+        download_url = f"{backend_base_url}/ai_mentor/download_image/{filename}"
+
+        return download_url
+
+    except Exception as e:
+        return f"Could not download or store generated image: {str(e)}"

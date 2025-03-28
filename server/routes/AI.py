@@ -46,7 +46,8 @@ def get_mental_health_agent_welcome(user_id):
             "job_search",
             "web_search_bing",
             "fetch_meme",
-            "user_journey_retrieval"
+            "user_journey_retrieval",
+            "image_generation"
         ],
         desired_role=desired_role  # Pass the desired role to the agent
     )
@@ -119,7 +120,8 @@ def run_mental_health_agent(user_id, chat_id):
             "job_search",
             "web_search_bing",
             "fetch_meme",
-            "user_journey_retrieval"
+            "user_journey_retrieval",
+            "image_generation"
         ],
         desired_role=desired_role  
     )
@@ -151,7 +153,7 @@ def run_mental_health_agent(user_id, chat_id):
 def set_mental_health_end_state(user_id, chat_id):
     try:
         logger.info(f"Finalizing chat {chat_id} for user {user_id}")
-        agent = MemeMingleAIAgent(tool_names=["gutendex_textbook_search","generate_suggestions","web_search_youtube","web_search_tavily","textbook_search","location_search_gplaces", "web_search_google", "user_profile_retrieval", "agent_facts"])
+        agent = MemeMingleAIAgent(tool_names=["image_generation","gutendex_textbook_search","generate_suggestions","web_search_youtube","web_search_tavily","textbook_search","location_search_gplaces", "web_search_google", "user_profile_retrieval", "agent_facts"])
 
         agent.perform_final_processes(user_id, chat_id)
 
@@ -236,3 +238,12 @@ def download_audio(filename):
         return jsonify({'error': 'Invalid filename'}), 400
     # Serve the file from the 'generated_audio' directory
     return send_from_directory('generated_audio', filename, as_attachment=True, mimetype='audio/wav')
+
+@ai_routes.get("/ai_mentor/download_image/<filename>")
+def download_image(filename):
+    # Security check to prevent directory traversal
+    if ".." in filename or filename.startswith("/"):
+        return jsonify({'error': 'Invalid filename'}), 400
+    
+    # Serve the file from the 'generated_images' directory
+    return send_from_directory('generated_images', filename, as_attachment=True)
