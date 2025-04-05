@@ -5,6 +5,7 @@ from flask import Flask
 from bson import ObjectId
 from routes.group import groups_routes
 from pydantic import ValidationError
+import io
 
 # Import the groups_routes Blueprint
 
@@ -13,6 +14,7 @@ def app():
     app = Flask(__name__)
     app.config['TESTING'] = True
     app.register_blueprint(groups_routes)
+    # Ensure all endpoints are properly registered including the /users/list
     return app
 
 @pytest.fixture
@@ -79,7 +81,117 @@ class TestCreateGroup:
         mock_db.__getitem__.return_value.find_one.assert_called_once()
         mock_db.__getitem__.return_value.insert_one.assert_called_once()
     
+    @patch('routes.group.StudyGroup')
+    @patch('routes.group.User')
+    @patch('routes.group.MongoDBClient')
+    @patch('routes.group.AzureBlobService')
+    def test_create_group_with_file_upload(self, mock_azure_blob, mock_mongodb, mock_user, mock_study_group, client):
+        """Test successful group creation with file upload"""
+        # Setup mocks
+        mock_group_instance = MagicMock()
+        mock_group_instance.created_by = "user123"
+        mock_group_instance.admins = ["user123"]
+        mock_group_instance.members = []
+        mock_group_instance.name = "Test Group"
+        mock_group_instance.dict.return_value = {
+            "created_by": "user123",
+            "admins": ["user123"],
+            "members": [],
+            "name": "Test Group",
+            "description": "Test description",
+            "privacy": "public",
+            "image_url": "https://test-storage.blob.core.windows.net/group-images/test.jpg"
+        }
+        
+        mock_study_group.return_value = mock_group_instance
+        
+        # Mock user exists
+        mock_user.find_by_id.return_value = {"_id": "user123", "name": "Test User"}
+        
+        # Mock DB operations
+        mock_db = MagicMock()
+        mock_client = MagicMock()
+        mock_mongodb.get_client.return_value = mock_client
+        mock_mongodb.get_db_name.return_value = "test_db"
+        mock_client.__getitem__.return_value = mock_db
+        mock_db.__getitem__.return_value.find_one.return_value = None  # No existing group
+
+        # Mock Azure Blob Service
+        mock_blob_service = MagicMock()
+        mock_blob_service.upload_file.return_value = "https://test-storage.blob.core.windows.net/group-images/test.jpg"
+        mock_azure_blob.get_group_images_service.return_value = mock_blob_service
+        
+        # Prepare test data with file
+        file_data = io.BytesIO(b"test file content")
+        
+        # Create form data
+        data = dict(
+            name="Test Group",
+            description="Test description",
+            privacy="public",
+            created_by="user123",
+            topics=json.dumps(["python", "study"]),
+            rules=json.dumps(["Be respectful", "No spamming"]),
+            members=json.dumps([])
+        )
+        
+        # Make request with file
+        response = client.post(
+            '/groups/create',
+            data=dict(
+                data,
+                group_image=(file_data, 'test.jpg')
+            ),
+            content_type='multipart/form-data'
+        )
+        
+        # Assertions
+        assert response.status_code == 201
+        response_data = json.loads(response.data)
+        assert response_data["message"] == "Group created successfully"
+        assert "group" in response_data
+        
+        # Verify file was uploaded
+        mock_azure_blob.get_group_images_service.assert_called_once()
+        mock_blob_service.upload_file.assert_called_once()
+        
+        # Verify DB operations
+        mock_db.__getitem__.return_value.insert_one.assert_called_once()
     
+    @patch('routes.group.StudyGroup')
+    def test_create_group_validation_error(self, mock_study_group, client):
+        """Test group creation with validation error"""
+        # Setup mock to raise ValidationError properly
+        error = ValidationError.from_exception_data(
+            title="ValidationError",
+            line_errors=[{
+                'loc': ('name',),
+                'msg': 'field required',
+                'type': 'missing'  # Simplified error type
+            }]
+        )
+        mock_study_group.side_effect = error
+        
+        # Test data (missing required field 'name')
+        group_data = {
+            "description": "Test description",
+            "privacy": "public",
+            "created_by": "user123"
+        }
+        
+        # Make request
+        response = client.post(
+            '/groups/create',
+            data=json.dumps(group_data),
+            content_type='application/json'
+        )
+        
+        # Assertions
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert "error" in response_data
+        assert "Validation failed" in response_data["error"]
+        assert "details" in response_data
     
     @patch('routes.group.StudyGroup')
     @patch('routes.group.User')
@@ -229,6 +341,33 @@ class TestCreateGroup:
         response_data = json.loads(response.data)
         assert "error" in response_data
         assert "already exists" in response_data["error"]
+    
+    @patch('routes.group.StudyGroup')
+    @patch('routes.group.MongoDBClient')
+    def test_create_group_server_error(self, mock_mongodb, mock_study_group, client):
+        """Test group creation with server error"""
+        # Setup mock to raise exception
+        mock_mongodb.get_client.side_effect = Exception("Database connection error")
+        
+        # Test data
+        group_data = {
+            "name": "Test Group",
+            "description": "Test description",
+            "created_by": "user123"
+        }
+        
+        # Make request
+        response = client.post(
+            '/groups/create',
+            data=json.dumps(group_data),
+            content_type='application/json'
+        )
+        
+        # Assertions
+        assert response.status_code == 500
+        response_data = json.loads(response.data)
+        assert "error" in response_data
+        assert "Database connection error" in response_data["error"]
 
 
 class TestJoinGroup:
@@ -417,6 +556,33 @@ class TestJoinGroup:
         
         # Verify update was not called
         mock_db.__getitem__.return_value.update_one.assert_not_called()
+    
+    @patch('routes.group.User')
+    @patch('routes.group.MongoDBClient')
+    def test_join_group_server_error(self, mock_mongodb, mock_user, client):
+        """Test join group with server error"""
+        # Setup mocks
+        mock_user.find_by_id.return_value = {"_id": "user123", "name": "Test User"}
+        mock_mongodb.get_client.side_effect = Exception("Database error during join operation")
+        
+        # Test data
+        join_data = {
+            "group_id": "group456",
+            "user_id": "user123"
+        }
+        
+        # Make request
+        response = client.post(
+            '/groups/join',
+            data=json.dumps(join_data),
+            content_type='application/json'
+        )
+        
+        # Assertions
+        assert response.status_code == 500
+        response_data = json.loads(response.data)
+        assert "error" in response_data
+        assert "Database error during join operation" in response_data["error"]
 
 
 class TestRetrieveGroups:
@@ -620,6 +786,51 @@ class TestRetrieveGroups:
         mock_cursor.skip.assert_called_once_with(5)
         mock_cursor.skip.return_value.limit.assert_called_once_with(5)
     
+    @patch('routes.group.StudyGroup')
+    @patch('routes.group.MongoDBClient')
+    def test_retrieve_groups_with_combined_filters(self, mock_mongodb, mock_study_group, client):
+        """Test retrieving groups with multiple filters"""
+        # Setup mocks
+        mock_db = MagicMock()
+        mock_client = MagicMock()
+        mock_mongodb.get_client.return_value = mock_client
+        mock_mongodb.get_db_name.return_value = "test_db"
+        mock_client.__getitem__.return_value = mock_db
+        
+        # Mock group instance
+        group = MagicMock()
+        group.dict.return_value = {"name": "Math Study", "privacy": "public", "topics": ["mathematics"]}
+        
+        # Mock the parsing
+        mock_study_group.parse_obj.return_value = group
+        
+        # Mock find operation
+        mock_groups = [{"name": "Math Study", "privacy": "public", "topics": ["mathematics"]}]
+        mock_cursor = MagicMock()
+        mock_cursor.skip.return_value.limit.return_value = mock_groups
+        mock_db.__getitem__.return_value.find.return_value = mock_cursor
+        mock_db.__getitem__.return_value.count_documents.return_value = 1
+        
+        # Make request with multiple filters
+        response = client.get('/groups/retrieve?privacy=public&name=Math&topic=mathematics')
+        
+        # Assertions
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert "data" in response_data
+        assert len(response_data["data"]) == 1
+        assert response_data["data"][0]["privacy"] == "public"
+        assert "Math" in response_data["data"][0]["name"]
+        assert "mathematics" in response_data["data"][0]["topics"]
+        
+        # Verify expected query
+        expected_query = {
+            "privacy": "public",
+            "name": {"$regex": "Math", "$options": "i"},
+            "topics": {"$in": ["mathematics"]}
+        }
+        mock_db.__getitem__.return_value.find.assert_called_once_with(expected_query)
+    
     @patch('routes.group.MongoDBClient')
     def test_retrieve_groups_exception(self, mock_mongodb, client):
         """Test retrieving groups when an exception occurs"""
@@ -634,3 +845,158 @@ class TestRetrieveGroups:
         response_data = json.loads(response.data)
         assert "error" in response_data
         assert "Test database error" in response_data["error"]
+    
+    @patch('routes.group.StudyGroup')
+    @patch('routes.group.MongoDBClient')
+    def test_retrieve_groups_empty_result(self, mock_mongodb, mock_study_group, client):
+        """Test retrieving groups with no matching results"""
+        # Setup mocks
+        mock_db = MagicMock()
+        mock_client = MagicMock()
+        mock_mongodb.get_client.return_value = mock_client
+        mock_mongodb.get_db_name.return_value = "test_db"
+        mock_client.__getitem__.return_value = mock_db
+        
+        # Mock empty result
+        mock_cursor = MagicMock()
+        mock_cursor.skip.return_value.limit.return_value = []
+        mock_db.__getitem__.return_value.find.return_value = mock_cursor
+        mock_db.__getitem__.return_value.count_documents.return_value = 0
+        
+        # Make request
+        response = client.get('/groups/retrieve?name=NonExistentGroup')
+        
+        # Assertions
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert "data" in response_data
+        assert len(response_data["data"]) == 0
+        assert response_data["pagination"]["total"] == 0
+
+
+class TestListUsers:
+    @patch('routes.group.MongoDBClient')
+    def test_list_users_success(self, mock_mongodb, client):
+        """Test successful users list retrieval"""
+        # Setup mocks
+        mock_db = MagicMock()
+        mock_client = MagicMock()
+        mock_mongodb.get_client.return_value = mock_client
+        mock_mongodb.get_db_name.return_value = "test_db"
+        mock_client.__getitem__.return_value = mock_db
+        
+        # Mock users data with proper MongoDB cursor simulation
+        mock_users = [
+            {"_id": "user1", "username": "testuser1", "name": "Test User 1", "profile_picture": "url1"},
+            {"_id": "user2", "username": "testuser2", "name": "Test User 2", "profile_picture": "url2"}
+        ]
+        
+        # Better cursor simulation that allows MongoDB-style iteration
+        mock_cursor = MagicMock()
+        mock_cursor.__iter__.return_value = iter(mock_users)
+        mock_cursor.limit.return_value = mock_cursor  # For chained limit() call
+        
+        # Setup mock to return the cursor
+        mock_db.__getitem__.return_value.find.return_value = mock_cursor
+        
+        # Make request
+        response = client.get('/users/list')
+        
+        # Assertions
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert "message" in response_data
+        assert "Users retrieved successfully" == response_data["message"]
+        assert "data" in response_data
+        assert len(response_data["data"]) == 2
+        
+        # Check user data
+        assert response_data["data"][0]["username"] == "testuser1"
+        assert response_data["data"][1]["username"] == "testuser2"
+        
+        # Verify find was called with correct projection
+        mock_db.__getitem__.return_value.find.assert_called_once_with(
+            {}, 
+            {"_id": 1, "username": 1, "name": 1, "profile_picture": 1}
+        )
+    
+    @patch('routes.group.MongoDBClient')
+    def test_list_users_with_search(self, mock_mongodb, client):
+        """Test users list retrieval with search parameter"""
+        # Setup mocks
+        mock_db = MagicMock()
+        mock_client = MagicMock()
+        mock_mongodb.get_client.return_value = mock_client
+        mock_mongodb.get_db_name.return_value = "test_db"
+        mock_client.__getitem__.return_value = mock_db
+        
+        # Mock users data with proper MongoDB cursor simulation
+        mock_users = [
+            {"_id": "user1", "username": "alice", "name": "Alice Smith", "profile_picture": "url1"},
+        ]
+        
+        # Better cursor simulation that allows MongoDB-style iteration
+        mock_cursor = MagicMock()
+        mock_cursor.__iter__.return_value = iter(mock_users)
+        mock_cursor.limit.return_value = mock_cursor  # For chained limit() call
+        
+        # Setup mock to return the cursor
+        mock_db.__getitem__.return_value.find.return_value = mock_cursor
+        
+        # Make request with search parameter
+        response = client.get('/users/list?search=alice')
+        
+        # Assertions
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert "data" in response_data
+        assert len(response_data["data"]) == 1
+        assert response_data["data"][0]["username"] == "alice"
+        
+        # Verify find was called with correct query and projection
+        mock_db.__getitem__.return_value.find.assert_called_once_with(
+            {"username": {"$regex": "alice", "$options": "i"}}, 
+            {"_id": 1, "username": 1, "name": 1, "profile_picture": 1}
+        )
+    
+    @patch('routes.group.MongoDBClient')
+    def test_list_users_empty_result(self, mock_mongodb, client):
+        """Test users list retrieval with no matching results"""
+        # Setup mocks
+        mock_db = MagicMock()
+        mock_client = MagicMock()
+        mock_mongodb.get_client.return_value = mock_client
+        mock_mongodb.get_db_name.return_value = "test_db"
+        mock_client.__getitem__.return_value = mock_db
+        
+        # Mock empty result with proper MongoDB cursor simulation
+        mock_cursor = MagicMock()
+        mock_cursor.__iter__.return_value = iter([])
+        mock_cursor.limit.return_value = mock_cursor  # For chained limit() call
+        
+        # Setup mock to return the cursor
+        mock_db.__getitem__.return_value.find.return_value = mock_cursor
+        
+        # Make request with non-matching search
+        response = client.get('/users/list?search=nonexistentuser')
+        
+        # Assertions
+        assert response.status_code == 200
+        response_data = json.loads(response.data)
+        assert "data" in response_data
+        assert len(response_data["data"]) == 0
+    
+    @patch('routes.group.MongoDBClient')
+    def test_list_users_server_error(self, mock_mongodb, client):
+        """Test users list retrieval with server error"""
+        # Setup mock to raise exception
+        mock_mongodb.get_client.side_effect = Exception("Database connection error")
+        
+        # Make request
+        response = client.get('/users/list')
+        
+        # Assertions
+        assert response.status_code == 500
+        response_data = json.loads(response.data)
+        assert "error" in response_data
+        assert "Database connection error" in response_data["error"]

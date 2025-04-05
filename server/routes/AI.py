@@ -105,6 +105,11 @@ def run_mental_health_agent(user_id, chat_id):
     db = db_client[db_name]
     chat_summary_collection = db["chat_summaries"]
     chat_summary = chat_summary_collection.find_one({"user_id": user_id, "chat_id": int(chat_id)})
+    
+    # Add this check to handle None chat_summary
+    if chat_summary is None:
+        return jsonify({"error": "Chat summary not found"}), 404
+        
     desired_role = chat_summary.get("desired_role", "educational mentor")
     print(f"Desired role: {desired_role}")
     agent = MemeMingleAIAgent(
