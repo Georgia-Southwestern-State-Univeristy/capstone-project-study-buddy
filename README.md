@@ -87,6 +87,7 @@ The **Flask-Python** backend of this application makes it both scalable and reli
 
 The codebase is well-documented, following best practices and complemented by the smart code completions of **GitHub Copilot**. This thorough approach ensures that the code remains maintainable and promotes a high degree of collaboration between team members, which raises quality throughout the software development process.
 
+![Study Buddy Assistant in action](./Assets/SA.gif)
 ---
 
 ### **Design**
