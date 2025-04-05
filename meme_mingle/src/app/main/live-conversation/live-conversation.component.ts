@@ -339,18 +339,27 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
   }
 
   unlockAudio(): void {
+    // First hide the overlay and initialize conversation
+    this.showOverlay = false;
+    
+    // Then try to unlock audio, but don't make functionality dependent on it
     const silentAudio = new Audio();
-    silentAudio.src =
-      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
-    silentAudio
-      .play()
+    silentAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
+    silentAudio.muted = true; // Ensure it's muted for mobile compatibility
+    
+    // Try to play audio but continue with initialization regardless of success
+    silentAudio.play()
       .then(() => {
         silentAudio.pause();
-        this.showOverlay = false;
-        this.initializeConversation();
+        console.log('Audio context unlocked successfully');
       })
       .catch((error: any) => {
-        console.error('Audio Unlock Error:', error);
+        console.warn('Audio may not be fully initialized:', error);
+        // Continue anyway - we'll request permission again when needed
+      })
+      .finally(() => {
+        // Always initialize conversation, even if audio unlock fails
+        this.initializeConversation();
       });
   }
 
