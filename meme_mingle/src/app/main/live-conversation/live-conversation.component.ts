@@ -484,7 +484,27 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
     }
   }
   
+  //Method to check if the image URL is valid
+  isValidImageUrl(url: string | undefined): boolean {
+    if (!url) return false;
+    
+    // Check if the string is actually an error message
+    if (url.startsWith('No memes') || url === 'No memes found for the given topic.') {
+      return false;
+    }
+    
+    // Simple URL validation - checks if it starts with http/https and has typical image extensions
+    try {
+      // Check if it's a valid URL structure
+      const urlObj = new URL(url);
+      // Check for common image extensions or just ensure it's a URL with http/https protocol
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch (e) {
+      return false;
+    }
+  }
 
+  // Method To initialize the conversation
   initializeConversation(): void {
     this.isProcessing = true;
     const welcomeSub = this.appService.aimentorwelcome(this.userId, this.selectedRole).subscribe({
@@ -494,7 +514,9 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
         console.log('response:', response);
         const aiMessage = response.message.message;
         const audioUrl = response.message.audio_url;
-        const imageUrl = response.message.meme_url; // Assuming your backend returns image_url
+        // Only pass the image URL if it's valid
+        const imageUrl = this.isValidImageUrl(response.message.meme_url) ? response.message.meme_url : undefined;
+        
         this.addMessage('Mentor', aiMessage, audioUrl, imageUrl);
         if (audioUrl) {
           this.playAudio(audioUrl);
@@ -683,7 +705,8 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
         next: (response: any) => {
           const aiMessage = response.message;
           const audioUrl = response.audio_url;
-          const imageUrl = response.meme_url;
+          // Only pass the image URL if it's valid
+          const imageUrl = this.isValidImageUrl(response.meme_url) ? response.meme_url : undefined;
 
           this.addMessage('Mentor', aiMessage, audioUrl, imageUrl);
           if (audioUrl) {
