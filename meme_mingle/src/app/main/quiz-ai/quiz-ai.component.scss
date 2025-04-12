@@ -21,8 +21,9 @@ $submit-btn-height: 50px;
   max-height: 98.4vh;
   
   @media (max-width: 768px) {
-    max-width: 100%; // Return to original width on larger screens
-    margin: 5px auto;
+    max-width: 60%; // Return to original width on larger screens
+    margin: 5px;
+    top: 5px;
   }
   // Tab styling
   ::ng-deep .mat-mdc-tab-group {
