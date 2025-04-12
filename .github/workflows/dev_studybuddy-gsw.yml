@@ -54,7 +54,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: angular-app
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
