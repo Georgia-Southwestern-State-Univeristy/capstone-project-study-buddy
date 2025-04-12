@@ -42,6 +42,12 @@ $transition-base: all .2s ease-in-out;
   &:hover {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   }
+
+  @media (max-width: 768px) {
+    max-width: 60%; // Return to original width on larger screens
+    margin: 5px;
+    top: 5px;
+  }
 }
 
 .gsw-card-header {
@@ -505,6 +511,11 @@ $transition-base: all .2s ease-in-out;
         background: linear-gradient(to right, $gsw-success, $gsw-border);
       }
     }
+  }
+  @media (max-width: 768px) {
+    max-width: 60%; // Return to original width on larger screens
+    margin: 5px;
+    
   }
 }
 

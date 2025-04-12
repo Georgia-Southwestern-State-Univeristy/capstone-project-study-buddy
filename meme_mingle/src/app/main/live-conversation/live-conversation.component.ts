@@ -342,23 +342,43 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
     // First hide the overlay and initialize conversation
     this.showOverlay = false;
     
-    // Then try to unlock audio, but don't make functionality dependent on it
+    // Check if running on iOS/Safari
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    // Create unmuted audio for iOS (muting prevents activation on iOS)
     const silentAudio = new Audio();
     silentAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
-    silentAudio.muted = true; // Ensure it's muted for mobile compatibility
+    silentAudio.muted = !(isIOS || isSafari); // Don't mute for iOS/Safari
     
-    // Try to play audio but continue with initialization regardless of success
+    // Try to play audio but continue with initialization regardless
     silentAudio.play()
       .then(() => {
         silentAudio.pause();
         console.log('Audio context unlocked successfully');
+        
+        // Special handling for iOS/Safari - ensure recognition is properly initialized
+        if (isIOS || isSafari) {
+          console.log('iOS/Safari detected, ensuring proper recognition initialization');
+          // Reinitialize recognition if needed
+          if (this.recognition) {
+            try {
+              this.recognition.stop();
+            } catch (e) { /* Ignore if not started */ }
+          }
+        }
       })
       .catch((error: any) => {
         console.warn('Audio may not be fully initialized:', error);
-        // Continue anyway - we'll request permission again when needed
+        // On iOS/Safari, show a message to the user
+        if (isIOS || isSafari) {
+          this.addMessage('Mentor', 
+            'Please note: Voice recognition may have limited functionality on iOS devices. ' +
+            'You can continue by typing your messages below.');
+        }
       })
       .finally(() => {
-        // Always initialize conversation, even if audio unlock fails
+        // Always initialize conversation, regardless of audio unlock status
         this.initializeConversation();
       });
   }

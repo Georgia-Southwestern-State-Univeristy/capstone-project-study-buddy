@@ -54,6 +54,12 @@ $concern-high-bg: #ffebee;
       background: linear-gradient(90deg, transparent, $gsw-secondary, transparent);
     }
   }
+
+  @media (max-width: 768px) {
+    padding: 1rem 0.5rem;
+    max-width: 100%; /* Fix from 60% to 100% */
+    width: 100%;
+  }
 }
 
 /* Main Profile Card */
@@ -80,6 +86,7 @@ $concern-high-bg: #ffebee;
     height: 5px;
     background: linear-gradient(90deg, $gsw-primary, darken($gsw-primary, 15%), $gsw-primary);
   }
+  
 }
 
 /* Avatar Section */
@@ -180,7 +187,8 @@ $concern-high-bg: #ffebee;
 
 /* Tab Content */
 .tab-content {
-  width: 600px;
+  width: 100%; /* Change from fixed 600px to responsive 100% */
+  max-width: 600px; /* Set max-width instead of fixed width */
   padding: 1rem 0;
 }
 
@@ -359,6 +367,10 @@ $concern-high-bg: #ffebee;
   border-radius: $border-radius-sm;
   padding: 0.75rem;
   min-height: 60px;
+
+  @media (max-width: 768px) {
+    max-width: 100%; /* Change from 60% to 100% */
+  }
   
   .chip {
     display: flex;
@@ -434,6 +446,10 @@ $concern-high-bg: #ffebee;
       }
     }
   }
+  @media (max-width: 768px) {
+    max-width: 60%; 
+  }
+
 }
 
 /* Study Plan Accordion */
@@ -736,6 +752,23 @@ $concern-high-bg: #ffebee;
       width: 100% !important;
     }
   }
+  .field-row {
+    input, select, mat-form-field {
+      width: 100%;
+    }
+  }
+  
+  /* Fix gender slider on mobile */
+  .gender-slider {
+    flex-wrap: wrap;
+    justify-content: center;
+    
+    .nav-arrow {
+      width: 28px;
+      height: 28px;
+    }
+  }
+
 }
 
 /* Tablet responsive adjustments */
