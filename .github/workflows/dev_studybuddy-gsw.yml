@@ -13,30 +13,36 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read  # Required for actions/checkout
 
     steps:
+      # 1) Check out your repository
       - uses: actions/checkout@v4
 
+      # 2) Set up Node 22.x
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
 
+      # 3) Install the Angular CLI globally
       - name: Install Angular CLI
         run: npm install -g @angular/cli
 
+      # 4) Install dependencies and build the Angular project
       - name: npm install, build, and test
         run: |
           cd meme_mingle
           npm install
-          ng build 
-          
+          ng build
+
+      # 5) Zip the built artifacts
       - name: Zip artifact for deployment
         run: |
           cd meme_mingle/dist
           zip -r release.zip *
-          
+
+      # 6) Upload the zip file as an artifact named "angular-app"
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -49,21 +55,25 @@ jobs:
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
+
     steps:
+      # 1) Download the "angular-app" artifact
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: angular-app
+          path: .
 
+      # 2) Unzip the release.zip to reveal the Angular build files
       - name: Unzip artifact for deployment
         run: unzip release.zip
-      
-      - name: 'Deploy to Azure Web App'
+
+      # 3) Deploy those files to Azure Web App using publish profile
+      - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'studybuddy-Gsw'
+          app-name: 'studybuddy-Gsw'  # <-- Change if your app name differs
           slot-name: 'Production'
           package: .
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A78A924CE36A49C5BBB15A3DC10C2BDC }}
