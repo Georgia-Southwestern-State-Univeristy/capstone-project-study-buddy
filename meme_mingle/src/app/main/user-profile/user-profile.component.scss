@@ -187,9 +187,13 @@ $concern-high-bg: #ffebee;
 
 /* Tab Content */
 .tab-content {
-  width: 100%; /* Change from fixed 600px to responsive 100% */
-  max-width: 600px; /* Set max-width instead of fixed width */
+  width: 600px; 
   padding: 1rem 0;
+  
+  @media (max-width: 768px) {
+   width: 100%; /* Change from fixed 600px to responsive 100% */
+   max-width: 600px;
+  }
 }
 
 /* Form Fields Container */
