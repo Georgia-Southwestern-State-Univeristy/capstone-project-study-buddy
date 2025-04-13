@@ -13,64 +13,54 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read  # Required for actions/checkout
+      contents: read
 
     steps:
-      # 1) Check out your repository
       - uses: actions/checkout@v4
-
-      # 2) Set up Node 22.x (or your preferred Node version)
       - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
-
-      # 3) Install the Angular CLI globally
       - name: Install Angular CLI
         run: npm install -g @angular/cli
-
-      # 4) Install dependencies and build the Angular project
       - name: npm install and build
         run: |
           cd meme_mingle
           npm install
           ng build
-
-      # 5) Zip ONLY the contents of dist/meme-mingle
-      #
-      # The trick is to zip from inside the folder so we don't
-      # accidentally nest them under "meme-mingle" again.
+      - name: Debug build output
+        run: |
+          ls meme_mingle/dist/meme-mingle
       - name: Zip artifact for deployment
         run: |
           cd meme_mingle/dist/meme-mingle
-          zip -r ../../../release.zip .   # Zip *just* the built files
-          
-      # 6) Upload the zip file as an artifact named "angular-dist"
+          zip -r ../../../release.zip .
+      - name: Debug zip contents
+        run: unzip -l release.zip
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: angular-dist
-          path: release.zip   # It's in the root of the repo now (../../..)
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      # 1) Download the "angular-dist" artifact
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: angular-dist
           path: .
-
-      # 2) Unzip so that index.html ends up in the current directory
+      - name: Debug downloaded artifact
+        run: unzip -l release.zip
       - name: Unzip artifact
         run: unzip release.zip
-
-      # 3) Deploy to Azure Web App using publish profile
+      - name: Debug deployment directory
+        run: ls -R
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'studybuddy-Gsw'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A78A924CE36A49C5BBB15A3DC10C2BDC }}
-          package: '.'  # Deploy *this* folder's contents
+          package: '.'
