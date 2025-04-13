@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and Deploy Angular App to Azure Web App - studybuddy-Gsw
 
 on:
@@ -36,18 +33,12 @@ jobs:
           mkdir deploy
           cp meme_mingle/server.js deploy/
           cp meme_mingle/package.json deploy/
-          cp -r meme_mingle/node_modules deploy/
           cp -r meme_mingle/dist/meme-mingle deploy/dist
 
       - name: 🗜️ Zip deploy folder
         run: |
           cd deploy
           zip -r ../release.zip .
-          run: rm -rf node_modules 
-          run: rm -rf dist
-          run: rm -rf package.json
-          run: rm -rf server.js
-          
 
       - name: ☁️ Upload artifact
         uses: actions/upload-artifact@v4
@@ -73,5 +64,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'studybuddy-Gsw'
-          package: '.'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A78A924CE36A49C5BBB15A3DC10C2BDC }}
+          package: '.'
