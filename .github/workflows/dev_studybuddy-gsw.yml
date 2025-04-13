@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and Deploy Angular App to Azure Web App - studybuddy-Gsw
 
 on:
@@ -16,28 +13,32 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js version
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '22.x'
+
       - name: Install Angular CLI
         run: npm install -g @angular/cli
-      - name: npm install and build
+
+      - name: Install dependencies and build Angular app
         run: |
           cd meme_mingle
           npm install
-          ng build
-      - name: Debug build output
-        run: |
-          ls meme_mingle/dist/meme-mingle
-      - name: Zip artifact for deployment
+          ng build --configuration production
+
+      - name: Copy server.js into dist folder
+        run: cp server.js meme_mingle/dist/meme-mingle/
+
+      - name: Zip the build for deployment
         run: |
           cd meme_mingle/dist/meme-mingle
           zip -r ../../../release.zip .
-      - name: Debug zip contents
-        run: unzip -l release.zip
-      - name: Upload artifact
+
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: angular-dist
@@ -46,18 +47,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: angular-dist
           path: .
-      - name: Debug downloaded artifact
-        run: unzip -l release.zip
+
       - name: Unzip artifact
         run: unzip release.zip
-      - name: Debug deployment directory
-        run: ls -R
+
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
