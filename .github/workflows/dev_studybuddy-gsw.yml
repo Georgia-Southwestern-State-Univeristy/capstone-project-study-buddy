@@ -8,37 +8,43 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.x'
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '22.x'
 
-      - name: Install Angular CLI
-        run: npm install -g @angular/cli
+    - name: Install Angular CLI
+      run: npm install -g @angular/cli
 
-      - name: Install dependencies and build Angular app
-        run: |
-          cd meme_mingle
-          npm install
-          ng build
+    - name: Install dependencies and build
+      run: |
+        cd meme_mingle
+        npm install
+        ng build
 
-      - name: Copy server.js to dist directory
-        run: cp meme_mingle/server.js meme_mingle/dist/meme-mingle/
+    - name: Copy dist into root for server to serve
+      run: |
+        mkdir meme_mingle/build
+        cp -r meme_mingle/dist/meme-mingle meme_mingle/build/dist
+        cp meme_mingle/server.js meme_mingle/build/
+        cp meme_mingle/package.json meme_mingle/build/
+        cp -r meme_mingle/node_modules meme_mingle/build/
 
-      - name: Zip build artifacts
-        run: |
-          cd meme_mingle/dist/meme-mingle
-          zip -r ../../../release.zip .
+    - name: Zip build
+      run: |
+        cd meme_mingle/build
+        zip -r ../../release.zip .
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: angular-dist
-          path: release.zip
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: angular-dist
+        path: release.zip
+
 
   deploy:
     runs-on: ubuntu-latest
