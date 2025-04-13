@@ -64,3 +64,4 @@ jobs:
           app-name: 'studybuddy-Gsw'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A78A924CE36A49C5BBB15A3DC10C2BDC }}
           package: '.'
+          clean: true   
