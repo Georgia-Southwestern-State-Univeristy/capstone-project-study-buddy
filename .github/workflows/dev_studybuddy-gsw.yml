@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -21,25 +22,26 @@ jobs:
       - name: 🌐 Install Angular CLI
         run: npm install -g @angular/cli
 
-      - name: 📦 Install dependencies & build Angular app
+      - name: 📦 Install deps and build Angular app
         run: |
           cd meme_mingle
           npm install
           ng build --configuration production
 
-      - name: 📁 Prepare files for deployment
+      - name: 🗂️ Prepare deployment package
         run: |
-          cp meme_mingle/server.js .
-          cp meme_mingle/package.json .
-          cp -r meme_mingle/node_modules .
-          mkdir -p dist/meme-mingle
-          cp -r meme_mingle/dist/meme-mingle/* dist/meme-mingle/
+          mkdir deploy
+          cp meme_mingle/server.js deploy/
+          cp meme_mingle/package.json deploy/
+          cp -r meme_mingle/node_modules deploy/
+          cp -r meme_mingle/dist/meme-mingle deploy/dist
 
-      - name: 🗜️ Zip everything into root level
+      - name: 🗜️ Zip deploy folder
         run: |
-          zip -r release.zip server.js package.json node_modules dist
+          cd deploy
+          zip -r ../release.zip .
 
-      - name: ☁️ Upload Artifact
+      - name: ☁️ Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: angular-dist
@@ -48,14 +50,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
+
     steps:
-      - name: 📥 Download Artifact
+      - name: 📥 Download artifact
         uses: actions/download-artifact@v4
         with:
           name: angular-dist
           path: .
 
-      - name: 🗜️ Unzip Artifact
+      - name: 🗜️ Unzip artifact
         run: unzip release.zip
 
       - name: 🚀 Deploy to Azure Web App
@@ -64,4 +67,3 @@ jobs:
           app-name: 'studybuddy-Gsw'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A78A924CE36A49C5BBB15A3DC10C2BDC }}
           package: '.'
-          clean: true   
