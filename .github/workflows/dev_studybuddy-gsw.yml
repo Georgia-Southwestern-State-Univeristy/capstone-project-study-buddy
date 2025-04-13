@@ -32,7 +32,7 @@ jobs:
       - name: Zip build artifacts
         run: |
           cd meme_mingle/dist/meme-mingle
-          zip -r ../../../../release.zip .
+          zip -r ../../../release.zip .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
