@@ -43,6 +43,11 @@ jobs:
         run: |
           cd deploy
           zip -r ../release.zip .
+          run: rm -rf node_modules 
+          run: rm -rf dist
+          run: rm -rf package.json
+          run: rm -rf server.js
+          
 
       - name: ☁️ Upload artifact
         uses: actions/upload-artifact@v4
