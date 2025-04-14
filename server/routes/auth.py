@@ -237,7 +237,7 @@ def google_callback():
             expires_delta=timedelta(hours=72)
         )
         # Redirect to frontend with token and user ID
-        frontend_redirect_url = os.getenv('BASE_URL')  # e.g., 'http://localhost:4200'
+        frontend_redirect_url = os.getenv('BASE_URL') or os.getenv('BASE_URL_1')  # e.g., 'http://localhost:4200'
         print(f"Frontend redirect URL: {frontend_redirect_url}")
         redirect_url = f"{frontend_redirect_url}/auth/auth-callback?token={access_token}&userId={user_id}"
         return redirect(redirect_url, code=302)
@@ -264,7 +264,7 @@ def request_password_reset():
             return jsonify({"message": "No user found with this email"}), 404
 
         token = generate_reset_token(user.email)
-        base_url = os.getenv('RESET_PASSWORD_BASE_URL', 'http://localhost:3000/reset_password/')  # Default if not set
+        base_url = os.getenv('RESET_PASSWORD_BASE_URL') or os.getenv('RESET_PASSWORD_BASE_URL_1', 'http://localhost:3000/reset_password/')  # Try both URLs, use default if neither is set
         reset_url = f"{base_url}{token}"
         
         # Retrieve MAIL_DEFAULT_SENDER
