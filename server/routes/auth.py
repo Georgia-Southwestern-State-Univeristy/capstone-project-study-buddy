@@ -168,25 +168,54 @@ def logout():
 
 
 # Route to start Google OAuth
+# Route to start Google OAuth
 @auth_routes.route('/auth/google')
 def google_login():
-    scheme = "https" if request.is_secure else "http"
-    redirect_uri = url_for('auth.google_callback', _external=True, _scheme=scheme)
-    nonce = token_urlsafe(16)  # Generate a secure random nonce
-    session['oauth_nonce'] = nonce  # Store the nonce in the session
-    logging.info(f"Redirect URI: {redirect_uri}")
-    return oauth.google.authorize_redirect(redirect_uri, nonce=nonce)
+    try:
+        # Always use HTTPS for production OAuth flows in Azure Container Apps
+        redirect_uri = url_for('auth.google_callback', _external=True, _scheme='https')
+        
+        # Generate and store state parameter in a secure cookie instead of session
+        state = token_urlsafe(32)
+        nonce = token_urlsafe(16)
+        
+        # Enhanced logging for debugging
+        logging.info(f"Starting Google OAuth flow with redirect URI: {redirect_uri}")
+        
+        # Use state parameter as well as nonce for additional security
+        response = oauth.google.authorize_redirect(redirect_uri, nonce=nonce, state=state)
+        
+        # Store nonce and state in secure, HTTP-only cookies with SameSite=Lax
+        max_age = 300  # 5 minutes expiration
+        response.set_cookie('oauth_nonce', nonce, max_age=max_age, secure=True, httponly=True, samesite='Lax')
+        response.set_cookie('oauth_state', state, max_age=max_age, secure=True, httponly=True, samesite='Lax')
+        
+        return response
+    except Exception as e:
+        logging.error(f"Error initiating Google OAuth: {str(e)}")
+        return jsonify({"error": "Failed to initiate authentication"}), 500
 
 # Route to handle Google OAuth callback
 @auth_routes.route('/auth/google/callback')
 def google_callback():
     try:
+        # Retrieve nonce from cookie instead of session
+        nonce = request.cookies.get('oauth_nonce')
+        state = request.cookies.get('oauth_state')
+        
+        if not nonce or not state:
+            logging.error("Missing OAuth security parameters in cookies")
+            return jsonify({'error': 'Authentication session expired or invalid'}), 400
+            
+        # Validate state parameter
+        if state != request.args.get('state'):
+            logging.error("OAuth state parameter mismatch")
+            return jsonify({'error': 'Invalid authentication state'}), 400
+            
         token = oauth.google.authorize_access_token()
-        nonce = session.pop('oauth_nonce', None)  # Retrieve and remove the nonce from the session
-
-        if not nonce:
-            logging.error("Nonce not found in session")
-            return jsonify({'error': 'Session expired or invalid'}), 400
+        if not token:
+            logging.error("Failed to retrieve access token from Google")
+            return jsonify({'error': 'Failed to retrieve access token'}), 400
         
         # Add claims_options to specify the expected issuer
         claims_options = {
@@ -237,7 +266,7 @@ def google_callback():
             expires_delta=timedelta(hours=72)
         )
         # Redirect to frontend with token and user ID
-        frontend_redirect_url = os.getenv('BASE_URL') or os.getenv('BASE_URL_1')  # e.g., 'http://localhost:4200'
+        frontend_redirect_url = os.getenv('BASE_URL_1') or os.getenv('BASE_URL')  # e.g., 'http://localhost:4200'
         print(f"Frontend redirect URL: {frontend_redirect_url}")
         redirect_url = f"{frontend_redirect_url}/auth/auth-callback?token={access_token}&userId={user_id}"
         return redirect(redirect_url, code=302)
@@ -264,7 +293,7 @@ def request_password_reset():
             return jsonify({"message": "No user found with this email"}), 404
 
         token = generate_reset_token(user.email)
-        base_url = os.getenv('RESET_PASSWORD_BASE_URL') or os.getenv('RESET_PASSWORD_BASE_URL_1', 'http://localhost:3000/reset_password/')  # Try both URLs, use default if neither is set
+        base_url = os.getenv('RESET_PASSWORD_BASE_URL_1') or os.getenv('RESET_PASSWORD_BASE_URL', 'http://localhost:3000/reset_password/')  # Try both URLs, use default if neither is set
         reset_url = f"{base_url}{token}"
         
         # Retrieve MAIL_DEFAULT_SENDER
