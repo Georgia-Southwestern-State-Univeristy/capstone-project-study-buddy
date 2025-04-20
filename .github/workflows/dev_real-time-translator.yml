@@ -1,3 +1,4 @@
+
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
@@ -7,6 +8,9 @@ on:
   push:
     branches:
       - dev
+    paths:
+      - 'AI-agent-SpeechTranslator/**'
+      - '.github/workflows/dev_real-time-translator.yml'
   workflow_dispatch:
 
 jobs:
@@ -23,17 +27,31 @@ jobs:
         with:
           dotnet-version: '9.x'
 
+      - name: Restore NuGet dependencies
+        run: dotnet restore AI-agent-SpeechTranslator/AI-agent-SpeechTranslator.csproj
+
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build AI-agent-SpeechTranslator/AI-agent-SpeechTranslator.csproj --configuration Release --no-restore
+
+      - name: Create .env file
+        run: |
+          New-Item -Path "AI-agent-SpeechTranslator/.env" -ItemType "file" -Force
+          Add-Content -Path "AI-agent-SpeechTranslator/.env" -Value "SPEECH_API_KEY=${{ secrets.SPEECH_API_KEY }}"
+          Add-Content -Path "AI-agent-SpeechTranslator/.env" -Value "SPEECH_ENDPOINT=${{ secrets.SPEECH_ENDPOINT }}"
+          Add-Content -Path "AI-agent-SpeechTranslator/.env" -Value "SPEECH_REGION=${{ secrets.SPEECH_REGION }}"
+          Add-Content -Path "AI-agent-SpeechTranslator/.env" -Value "TRANSLATOR_API_KEY=${{ secrets.TRANSLATOR_API_KEY }}"
+          Add-Content -Path "AI-agent-SpeechTranslator/.env" -Value "TRANSLATOR_ENDPOINT=${{ secrets.TRANSLATOR_ENDPOINT }}"
+          Add-Content -Path "AI-agent-SpeechTranslator/.env" -Value "TRANSLATOR_REGION=${{ secrets.TRANSLATOR_REGION }}"
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish AI-agent-SpeechTranslator/AI-agent-SpeechTranslator.csproj -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
+          retention-days: 1
 
   deploy:
     runs-on: windows-latest
