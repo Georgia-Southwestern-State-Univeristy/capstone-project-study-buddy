@@ -1,0 +1,126 @@
+<div class="translator-container">
+  <div class="translator-card">
+    <header class="translator-header">
+      <h1>Real-Time Speech Translator</h1>
+      <p>Speak in one language, translate to another instantly</p>
+    </header>
+
+    <div class="connection-status" [ngClass]="connectionStatus">
+      <div class="status-indicator"></div>
+      <span class="status-text">{{ connectionStatus === 'connected' ? 'Connected' : connectionStatus === 'error' ? 'Connection Error' : 'Disconnected' }}</span>
+    </div>
+
+    <div class="language-selector">
+      <div class="language-group">
+        <label for="sourceLanguage">Speak in:</label>
+        <select id="sourceLanguage" [(ngModel)]="sourceLanguage" [disabled]="isListening">
+          <option *ngFor="let lang of languageOptions" [value]="lang.code">{{ lang.name }}</option>
+        </select>
+      </div>
+
+      <div class="direction-indicator">
+        <span class="material-icons">translate</span>
+      </div>
+
+      <div class="language-group">
+        <label for="targetLanguage">Translate to:</label>
+        <select id="targetLanguage" [(ngModel)]="targetLanguage" [disabled]="isListening">
+          <option *ngFor="let lang of languageOptions" [value]="lang.code">{{ lang.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="start-btn" (click)="startTranslation()" [disabled]="isListening">
+        <span class="material-icons">mic</span>
+        Start Translating
+      </button>
+      <button class="stop-btn" (click)="stopTranslation()" [disabled]="!isListening">
+        <span class="material-icons">stop</span>
+        Stop
+      </button>
+      <button *ngIf="fullOriginalText" class="view-btn" (click)="toggleFullTextView()">
+        <span class="material-icons">{{ showFullText ? 'visibility_off' : 'visibility' }}</span>
+        {{ showFullText ? 'Real-time View' : 'Full Text' }}
+      </button>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div class="translation-display" *ngIf="!showFullText">
+      <!-- Real-time translation panels -->
+      <div class="translation-panel source-panel">
+        <div class="panel-header">
+          <h3>{{ getLanguageName(sourceLanguage) }}</h3>
+          <div class="listening-indicator" [class.active]="isListening">
+            <span class="material-icons">hearing</span>
+            {{ isListening ? 'Listening...' : 'Ready' }}
+          </div>
+        </div>
+        <div class="text-content">
+          <p *ngIf="!originalText && !isListening">No speech detected yet. Press Start to begin.</p>
+          <p *ngIf="!originalText && isListening">Listening for speech...</p>
+          <p *ngIf="originalText">{{ originalText }}</p>
+        </div>
+      </div>
+
+      <div class="translation-panel target-panel">
+        <div class="panel-header">
+          <h3>{{ getLanguageName(targetLanguage) }}</h3>
+        </div>
+        <div class="text-content">
+          <p *ngIf="!translatedText && !isListening">Translation will appear here.</p>
+          <p *ngIf="!translatedText && isListening">Waiting for speech to translate...</p>
+          <p *ngIf="translatedText">{{ translatedText }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full text view -->
+    <div *ngIf="showFullText">
+      <div class="full-text-controls">
+        <div class="title">
+          <span class="material-icons">text_snippet</span>
+          Full Translation Text
+        </div>
+        <div class="actions">
+          <button class="btn-copy" (click)="copyFullText()">
+            <span class="material-icons">content_copy</span> Copy
+          </button>
+          <button class="btn-return" (click)="toggleFullTextView()">
+            <span class="material-icons">keyboard_return</span> Back
+          </button>
+        </div>
+      </div>
+
+      <div class="translation-display">
+        <div class="translation-panel source-panel full-text">
+          <div class="panel-header">
+            <h3>Full {{ getLanguageName(sourceLanguage) }} Text</h3>
+          </div>
+          <div class="text-content">
+            <p *ngIf="!fullOriginalText">No complete text available yet.</p>
+            <p *ngIf="fullOriginalText">{{ fullOriginalText }}</p>
+          </div>
+        </div>
+
+        <div class="translation-panel target-panel full-text">
+          <div class="panel-header">
+            <h3>Full {{ getLanguageName(targetLanguage) }} Translation</h3>
+          </div>
+          <div class="text-content">
+            <p *ngIf="!fullTranslatedText">No complete translation available yet.</p>
+            <p *ngIf="fullTranslatedText">{{ fullTranslatedText }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="translator-footer">
+      <p>Powered by Azure Cognitive Services</p>
+      <p class="note">Note: This service requires microphone access. Please ensure you've granted permission.</p>
+    </footer>
+  </div>
+</div>

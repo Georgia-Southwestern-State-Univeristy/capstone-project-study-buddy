@@ -32,7 +32,11 @@ export const main_routes: Routes = [
         loadComponent: () =>
           import('./user-profile/user-profile.component').then((m) => m.UserProfileComponent),
       },
-      
+      {
+      path: 'real-time-speech-translator',
+      loadComponent: () =>
+        import('./real-time-speech-translator/real-time-speech-translator.component').then((m) => m.RealTimeSpeechTranslatorComponent),
+    },
       
       {
         path:'study-group',
