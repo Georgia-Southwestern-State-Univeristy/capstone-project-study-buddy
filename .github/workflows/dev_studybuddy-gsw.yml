@@ -1,47 +1,68 @@
-name: Build & Deploy – studybuddy-Gsw
+name: Build and Deploy Angular App to Azure Web App - studybuddy-Gsw
 
 on:
   push:
-    branches: [dev]
+    branches:
+      - dev
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v3
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: '22.x'
 
-      - run: npm ci --prefix meme_mingle
+      - name: 🌐 Install Angular CLI
+        run: npm install -g @angular/cli
 
-      - run: npx ng build --configuration production --project meme_mingle
-
-      - run: |
+      - name: 📦 Install deps and build Angular app
+        run: |
           cd meme_mingle
-          zip -r ../release.zip \
-              dist/meme-mingle \
-              server.js \
-              package.json
+          npm install
+          ng build --configuration production
 
-      - uses: actions/upload-artifact@v4
+      - name: 🗂️ Prepare deployment package
+        run: |
+          mkdir deploy
+          cp meme_mingle/server.js deploy/
+          cp meme_mingle/package.json deploy/
+          cp -r meme_mingle/dist/meme-mingle deploy/dist
+
+      - name: 🗜️ Zip deploy folder
+        run: |
+          cd deploy
+          zip -r ../release.zip .
+
+      - name: ☁️ Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: release
+          name: angular-dist
           path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+
     steps:
-      - uses: actions/download-artifact@v4
+      - name: 📥 Download artifact
+        uses: actions/download-artifact@v4
         with:
-          name: release
+          name: angular-dist
           path: .
 
-      - uses: azure/webapps-deploy@v3
+      - name: 🗜️ Unzip artifact
+        run: unzip release.zip
+
+      - name: 🚀 Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
         with:
-          app-name: studybuddy-Gsw
+          app-name: 'studybuddy-Gsw'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_A78A924CE36A49C5BBB15A3DC10C2BDC }}
-          package: release.zip   # deploy EXACT artifact
+          package: '.'
