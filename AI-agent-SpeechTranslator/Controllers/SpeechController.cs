@@ -43,15 +43,28 @@ namespace SpeechTranslator.Controllers
                     {
                         var speechStream = _speechService.GetSpeechStreamAsync(request.SourceLanguage, request.TargetLanguage);
                         
-                        await foreach (var (originalText, translatedText) in speechStream)
+                        await foreach (var (originalText, translatedText, isInterim) in speechStream)
                         {
-                            await _hubContext.Clients.All.SendAsync(
-                                "ReceiveTranslation", 
-                                originalText, 
-                                translatedText, 
-                                request.SourceLanguage, 
-                                request.TargetLanguage
-                            );
+                            if (isInterim)
+                            {
+                                await _hubContext.Clients.All.SendAsync(
+                                    "ReceiveInterimTranslation", 
+                                    originalText, 
+                                    translatedText, 
+                                    request.SourceLanguage, 
+                                    request.TargetLanguage
+                                );
+                            }
+                            else
+                            {
+                                await _hubContext.Clients.All.SendAsync(
+                                    "ReceiveTranslation", 
+                                    originalText, 
+                                    translatedText, 
+                                    request.SourceLanguage, 
+                                    request.TargetLanguage
+                                );
+                            }
                         }
                     }
                     catch (Exception ex)

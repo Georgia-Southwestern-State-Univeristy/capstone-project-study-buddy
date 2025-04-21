@@ -18,6 +18,11 @@ namespace SpeechTranslator.Hubs
             await Clients.All.SendAsync("ReceiveTranslation", originalText, translatedText, sourceLanguage, targetLanguage);
         }
 
+        public async Task SendInterimTranslation(string originalText, string translatedText, string sourceLanguage, string targetLanguage)
+        {
+            await Clients.All.SendAsync("ReceiveInterimTranslation", originalText, translatedText, sourceLanguage, targetLanguage);
+        }
+
         public async Task SendFullTranslation(string originalText, string translatedText)
         {
             await Clients.All.SendAsync("ReceiveFullTranslation", originalText, translatedText);

@@ -21,6 +21,9 @@ namespace SpeechTranslator.Services
         // Add properties to accumulate text
         private readonly StringBuilder _accumulatedOriginalText = new();
         private readonly StringBuilder _accumulatedTranslatedText = new();
+        
+        // Track the last interim text to avoid duplicates
+        private string _lastInterimText = string.Empty;
 
         // Add property to access the accumulated texts
         public (string Original, string Translated) AccumulatedTexts => 
@@ -123,7 +126,7 @@ namespace SpeechTranslator.Services
             return audioFilePath;
         }
 
-        public async IAsyncEnumerable<(string Original, string Translated)> GetSpeechStreamAsync(string sourceLanguage, string targetLanguage)
+        public async IAsyncEnumerable<(string Original, string Translated, bool IsInterim)> GetSpeechStreamAsync(string sourceLanguage, string targetLanguage)
         {
             _speechRecognizer = new SpeechRecognizer(_speechConfig);
             _speechSynthesizer = new SpeechSynthesizer(_speechConfig);
@@ -131,34 +134,51 @@ namespace SpeechTranslator.Services
             // Clear previous accumulated text when starting a new session
             _accumulatedOriginalText.Clear();
             _accumulatedTranslatedText.Clear();
+            _lastInterimText = string.Empty;
 
-            var translationPairs = new Queue<(string Original, string Translated)>();
+            var translationPairs = new Queue<(string Original, string Translated, bool IsInterim)>();
             _isListening = true;
 
-            // Invoke the translation service for interim results
+            // Handle interim results (while speaking)
             _speechRecognizer.Recognizing += async (s, e) =>
             {
-                if (!string.IsNullOrWhiteSpace(e.Result.Text))
+                if (!string.IsNullOrWhiteSpace(e.Result.Text) && e.Result.Text != _lastInterimText)
                 {
+                    _lastInterimText = e.Result.Text;
                     Console.WriteLine($"Interim Recognized: {e.Result.Text}");
                     
-                    // We're not adding interim results to the queue
+                    // Translate the interim result
+                    try
+                    {
+                        string interimText = e.Result.Text;
+                        string translatedText = await _translationService.TranslateTextAsync(sourceLanguage, targetLanguage, interimText);
+                        
+                        // Queue the interim result with the IsInterim flag set to true
+                        translationPairs.Enqueue((interimText, translatedText, true));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error translating interim text: {ex.Message}");
+                    }
                 }
             };
 
+            // Handle final results (after pauses)
             _speechRecognizer.Recognized += async (s, e) =>
             {
                 if (!string.IsNullOrWhiteSpace(e.Result.Text))
                 {
                     string originalText = e.Result.Text;
+                    _lastInterimText = string.Empty; // Reset interim tracking
                     
-                    var translationStream = _translationService.TranslateTextStreamAsync(sourceLanguage, targetLanguage, GetSingleTextStream(originalText));
-                    await foreach (var translatedText in translationStream)
+                    try
                     {
+                        string translatedText = await _translationService.TranslateTextAsync(sourceLanguage, targetLanguage, originalText);
+                        
                         Console.WriteLine($"Original: {originalText}");
                         Console.WriteLine($"Translated: {translatedText}");
                         
-                        // Accumulate the text
+                        // Accumulate the final text
                         if (_accumulatedOriginalText.Length > 0)
                         {
                             _accumulatedOriginalText.Append(" ");
@@ -167,8 +187,12 @@ namespace SpeechTranslator.Services
                         _accumulatedOriginalText.Append(originalText);
                         _accumulatedTranslatedText.Append(translatedText);
                         
-                        // Store both original and translated text
-                        translationPairs.Enqueue((originalText, translatedText));
+                        // Store both original and translated text with IsInterim flag set to false
+                        translationPairs.Enqueue((originalText, translatedText, false));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error translating final text: {ex.Message}");
                     }
                 }
             };
@@ -182,17 +206,11 @@ namespace SpeechTranslator.Services
                     yield return translationPairs.Dequeue();
                 }
 
-                await Task.Delay(30); // Allow recognition to continue
+                await Task.Delay(10); // Reduced delay for more responsive processing
             }
 
             await _speechRecognizer.StopContinuousRecognitionAsync();
             yield break;
-
-            static async IAsyncEnumerable<string> GetSingleTextStream(string text)
-            {
-                yield return text;
-                await Task.CompletedTask;
-            }
         }
 
         public async Task StopListeningAsync()

@@ -60,9 +60,14 @@
           </div>
         </div>
         <div class="text-content">
-          <p *ngIf="!originalText && !isListening">No speech detected yet. Press Start to begin.</p>
-          <p *ngIf="!originalText && isListening">Listening for speech...</p>
+          <p *ngIf="!originalText && !interimOriginalText && !isListening">No speech detected yet. Press Start to begin.</p>
+          <p *ngIf="!originalText && !interimOriginalText && isListening">Listening for speech...</p>
+          
+          <!-- Show final recognized text -->
           <p *ngIf="originalText">{{ originalText }}</p>
+          
+          <!-- Show interim text with styling -->
+          <p *ngIf="interimOriginalText" class="interim-text">{{ interimOriginalText }}</p>
         </div>
       </div>
 
@@ -71,9 +76,14 @@
           <h3>{{ getLanguageName(targetLanguage) }}</h3>
         </div>
         <div class="text-content">
-          <p *ngIf="!translatedText && !isListening">Translation will appear here.</p>
-          <p *ngIf="!translatedText && isListening">Waiting for speech to translate...</p>
+          <p *ngIf="!translatedText && !interimTranslatedText && !isListening">Translation will appear here.</p>
+          <p *ngIf="!translatedText && !interimTranslatedText && isListening">Waiting for speech to translate...</p>
+          
+          <!-- Show final translation -->
           <p *ngIf="translatedText">{{ translatedText }}</p>
+          
+          <!-- Show interim translation with styling -->
+          <p *ngIf="interimTranslatedText" class="interim-text">{{ interimTranslatedText }}</p>
         </div>
       </div>
     </div>

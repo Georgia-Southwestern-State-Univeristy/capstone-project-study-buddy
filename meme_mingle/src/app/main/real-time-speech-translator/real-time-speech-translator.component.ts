@@ -25,6 +25,8 @@ export class RealTimeSpeechTranslatorComponent implements OnInit, OnDestroy {
   connectionStatus = 'disconnected';
   originalText = '';
   translatedText = '';
+  interimOriginalText = '';
+  interimTranslatedText = '';
   errorMessage = '';
   fullOriginalText = '';
   fullTranslatedText = '';
@@ -50,6 +52,7 @@ export class RealTimeSpeechTranslatorComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.initializeConnection();
     this.listenForTranslations();
+    this.listenForInterimTranslations();
     this.listenForFullTranslation();
   }
 
@@ -80,6 +83,11 @@ export class RealTimeSpeechTranslatorComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(isListening => {
         this.isListening = isListening;
+        if (!isListening) {
+          // Clear interim text when we stop listening
+          this.interimOriginalText = '';
+          this.interimTranslatedText = '';
+        }
       });
   }
 
@@ -90,6 +98,21 @@ export class RealTimeSpeechTranslatorComponent implements OnInit, OnDestroy {
         if (result) {
           this.originalText = result.originalText;
           this.translatedText = result.translatedText;
+          
+          // Clear interim text when we get final results
+          this.interimOriginalText = '';
+          this.interimTranslatedText = '';
+        }
+      });
+  }
+  
+  private listenForInterimTranslations(): void {
+    this.speechService.interimTranslation$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((result: TranslationResult | null) => {
+        if (result) {
+          this.interimOriginalText = result.originalText;
+          this.interimTranslatedText = result.translatedText;
         }
       });
   }
@@ -110,6 +133,8 @@ export class RealTimeSpeechTranslatorComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.originalText = '';
     this.translatedText = '';
+    this.interimOriginalText = '';
+    this.interimTranslatedText = '';
     this.fullOriginalText = '';
     this.fullTranslatedText = '';
     this.showFullText = false;
@@ -146,7 +171,6 @@ export class RealTimeSpeechTranslatorComponent implements OnInit, OnDestroy {
     return this.languageOptions.find(lang => lang.code === code)?.name || code;
   }
 
-  // Add a method to copy full text to clipboard
   copyFullText(): void {
     const combinedText = `Original (${this.getLanguageName(this.sourceLanguage)}):\n${this.fullOriginalText}\n\nTranslation (${this.getLanguageName(this.targetLanguage)}):\n${this.fullTranslatedText}`;
     
