@@ -8,6 +8,8 @@ The AI Agent - Speech Translator is a real-time speech-to-text and translation a
 - **Real-Time Translation**: Translates recognized text into a target language.
 - **Audio Feedback**: Speaks the translated text back to the user in real-time.
 - **Multi-Language Support**: Supports multiple source and target languages.
+- **Web Interface**: Access translation services through a modern web interface.
+- **Real-time Updates**: View translations as they happen using SignalR technology.
 
 ## Setup Instructions
 
@@ -23,8 +25,10 @@ Create a `.env` file in the root directory of the project with the following var
 ```
 SPEECH_API_KEY=<Your Azure Speech API Key>
 SPEECH_REGION=<Your Azure Speech Region>
+SPEECH_ENDPOINT=<Your Azure Speech Endpoint>
 TRANSLATOR_API_KEY=<Your Azure Translator API Key>
 TRANSLATOR_REGION=<Your Azure Translator Region>
+TRANSLATOR_ENDPOINT=<Your Azure Translator Endpoint or https://api.cognitive.microsofttranslator.com/>
 ```
 
 ### Installation
@@ -43,24 +47,37 @@ TRANSLATOR_REGION=<Your Azure Translator Region>
    ```bash
    dotnet run
    ```
-2. Follow the prompts:
-   - Enter the source language (e.g., `en` for English).
-   - Enter the target language (e.g., `es` for Spanish).
-   - Start speaking into your microphone.
-   - Press `Enter` to stop.
-3. The application will:
-   - Display recognized text in real-time.
-   - Translate the text into the target language.
-   - Speak the translated text back to you.
+2. The application will start on:
+   - http://localhost:5000 (HTTP)
+   - https://localhost:5001 (HTTPS)
+   
+3. Access the web interface in your browser and:
+   - Select source and target languages
+   - Start the translation session
+   - Speak into your microphone
+   - View real-time translations
+   - Stop the session when finished
+
+4. API endpoints:
+   - `GET /api/speech/status` - Check if the service is running
+   - `POST /api/speech/start` - Start a translation session
+   - `POST /api/speech/stop` - Stop the current translation session
 
 ## Project Structure
-- **Program.cs**: Entry point of the application.
+- **Program.cs**: Entry point of the application, configures services and middleware.
+- **Controllers/**: API endpoints:
+  - `SpeechController.cs`: Handles speech translation requests.
 - **Services/**: Contains the core services:
   - `SpeechToTextService.cs`: Handles speech recognition.
   - `TranslationService.cs`: Handles text translation.
-- **bin/** and **obj/**: Build and output directories.
+- **Hubs/**: SignalR hubs for real-time communication:
+  - `TranslationHub.cs`: Manages real-time translation updates.
 
 ## Dependencies
 - [Microsoft.CognitiveServices.Speech](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech/)
 - [Azure.AI.Translation.Text](https://www.nuget.org/packages/Azure.AI.Translation.Text/)
 - [dotenv.net](https://www.nuget.org/packages/dotenv.net/)
+- [Microsoft.AspNetCore.SignalR](https://www.nuget.org/packages/Microsoft.AspNetCore.SignalR/)
+
+## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
