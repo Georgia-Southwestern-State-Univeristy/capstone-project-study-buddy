@@ -34,7 +34,7 @@ TRANSLATOR_ENDPOINT=<Your Azure Translator Endpoint or https://api.cognitive.mic
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Georgia-Southwestern-State-Univeristy/capstone-project-study-buddy.git
    cd AI-agent-SpeechTranslator
    ```
 2. Restore NuGet packages:
@@ -78,6 +78,21 @@ TRANSLATOR_ENDPOINT=<Your Azure Translator Endpoint or https://api.cognitive.mic
 - [Azure.AI.Translation.Text](https://www.nuget.org/packages/Azure.AI.Translation.Text/)
 - [dotenv.net](https://www.nuget.org/packages/dotenv.net/)
 - [Microsoft.AspNetCore.SignalR](https://www.nuget.org/packages/Microsoft.AspNetCore.SignalR/)
+
+### Add FFmpeg to System PATH
+
+If you've successfully located the `bin` folder now:
+
+1. **Edit the PATH Environment Variable:**
+   - Press `Windows key + R`, type `sysdm.cpl`, and press Enter.
+   - Go to the 'Advanced' tab and click on 'Environment Variables'.
+   - Under 'System Variables', scroll down to find the 'Path' variable and click on 'Edit'.
+   - Click 'New' and add the full path to the `bin` folder, e.g., `C:\FFmpeg\bin`.
+   - Click 'OK' to save your changes and close all remaining windows by clicking 'OK'.
+
+2. **Verify FFmpeg Installation:**
+   - Open a new command prompt or PowerShell window (make sure to open it after updating the PATH).
+   - Type `ffmpeg -version` and press Enter. This command should now return the version of FFmpeg, confirming it's installed correctly and recognized by the system.
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a Pull Request.
