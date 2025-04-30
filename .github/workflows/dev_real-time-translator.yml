@@ -3,7 +3,7 @@ name: Build and Deploy Angular App to Azure Web App - studybuddy-Gsw
 on:
   push:
     branches:
-      - dev
+      - main
   workflow_dispatch:
 
 jobs:
