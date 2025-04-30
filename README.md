@@ -1,4 +1,3 @@
-
 **Study-Buddy** is an innovative, voice-enabled artificial intelligence tutor developed for the Azure AI Developer Hackathon that fundamentally transforms the interaction of students aged 15 to 25 years with their study content. The product utilizes **the rapid coding capability of GitHub Copilot and the extensive set of features of Microsoft Azure** - such as speech services, real-time translation, document intelligence, and open-source data analytics - to deliver an immersive, multi-dimensioned learning experience. Through the application of humor, response-based interactivity, and personalized insights, **Study-Buddy transforms boring study sessions into engaging experiences, assisting in building a genuine passion for learning**. Through interactive study group sessions to mood-based personal guidance, **this AI-powered study buddy ensures that all students experience a sense of companionship, motivation, and active participation in the educational process**.
 
 ---
@@ -8,6 +7,7 @@
 1. **Conversational AI Interaction**
    - **Multi-Modal Communication:** Provides support for text-to-text, speech-to-speech, text-to-speech, and speech-to-text interactions so the user can communicate in his or her most preferred mode using **Azure Cognitive Speech Services**.
    - **Dynamic Responses:** Sends related GIFs, using **GIPHY** API, with messages to make the interactions lively and engaging.
+   - **AI-Generated Images:** Creates custom images based on user prompts using Azure OpenAI (DALL·E), allowing you to visually illustrate concepts, scenes, or ideas in a polished and engaging manner.
    - **Expert Personas:** Adopts the persona of an expert in a user-selected topic (e.g., Science) to deliver responses that are both informative and engaging.
    - **Multi-Language Support:** Allows communication in more than one language, making it more accessible to different users using **Azure Translator service**.
    - **Initial Greeting and File Uploads:** Starts the interactions with a friendly greeting and lets users upload files for further assistance.
@@ -16,6 +16,7 @@
    - **Document Generation:** Generates documents in different formats like PDF, DOC, etc., depending upon the user's input.
    - **Mood Detection and Coping Mechanisms:** Analyzes user mood using **Azure Text Analytics** and provides relevant coping strategies.
    - **User Profile and User Journey Integration:** Reads and uses **user profiles and user journey** from **Cosmos MongoDB** to make interactions more personalized.
+     ![Study Buddy Assistant in action](./Assets/SA.gif)
 
 2. **AI Avatar Interaction**
    - **Azure Cognitive Speech Services:**  Powers the voice capabilities of the AI avatar, enabling natural and responsive conversations.
@@ -59,9 +60,18 @@
      - The platform also **includes templates and formatting** options to help users create professional and visually appealing resumes.
      - With secure storage and easy access, users can **update and download their resumes anytime**, ensuring they are always ready for new job applications.
 
-7. **User Authentication**
- - **Secure Login/Signup:** Offers both manual entering of credentials and Google Authenticator for secure and hassle-free authentication for users.
- - **Forgot Password Option:** Provides the secure and user-friendly feature of resetting passwords with verification, through an email that guarantees both account security and accessibility.
+7. **Real-time Speech Translator**
+   - The **Real-time Speech Translator** is a real-time speech-to-text and translation application. It leverages Microsoft Cognitive Services for speech recognition and translation, enabling users to transcribe spoken words and translate them into a target language.
+      - **Real-Time Speech Recognition**: Converts spoken words into text using Microsoft Cognitive Services.
+      - **Real-Time Translation**: Translates recognized text into a target language.
+      - **Multi-Language Support**: Supports multiple source and target languages.
+      - **Web Interface**: Access translation services through a modern web interface.
+      - **Real-time Updates**: View translations as they happen using SignalR technology.
+
+
+8. **User Authentication**
+   - **Secure Login/Signup:** Offers both manual entering of credentials and Google Authenticator for secure and hassle-free authentication for users.
+   - **Forgot Password Option:** Provides the secure and user-friendly feature of resetting passwords with verification, through an email that guarantees both account security and accessibility.
 
 ---
 
@@ -69,23 +79,24 @@
 
 **Study-Buddy** represents good software development since it incorporates both **GitHub Copilot** and **Microsoft Azure** tools in its implementation to provide a wholesome experience. **GitHub Copilot** really fast-tracked our development; it not only enabled the very fast generation of code but also assured the quality and efficiency of the codebase. The project utilizes different services from Azure, which include:
 
-
 - **Azure Cognitive Speech Services:** Built for natural language processing and voice interaction.
 - **Azure Text Analytics:** To identify the user's mood and recommend appropriate coping mechanisms.
 - **Azure Translator Service:** To provide multilingual support.
 - **Azure OpenAI Services:** To generate and score the content for conversation and quizzes.
-- **Azure Document Intelligence:**For uploaded document processing.
+- **Azure Document Intelligence:** For uploaded document processing.
 - **Azure Cosmos DB for MongoDB(vCore):** Stores user data and provides data management.
 - **Azure Container Registry:** Stores and manages Docker images of our backend services in an efficient way for version control and distribution.
 - **Azure Container Apps:** This was used to deploy and scale our microservices architecture easily.
 - **Azure Web App:** To host and deploy the frontend of Study-Buddy.
 - **Azure Bing Search:** To take a user's query and perform a web search, responding with articles, news, and other relevant information.
 - **Azure Blob Storage:** Used for storing user profile pictures and other uploaded files securely.
+- **Azure SignalR Service:** Enables real-time web functionality for applications, used for features like live updates in the Real-time Speech Translator.
 
 
-The **Flask-Python** backend of this application makes it both scalable and reliable. It has also utilized **Angular.js** in the development of a responsive, interactive frontend; furthermore, multiple APIs, like **Tavily, GIPHY, Google Places,** and **Adzuna**, have been integrated into making the application richer in features, thus capable of handling more extensively.
+The **Flask-Python** backend of this application makes it both scalable and reliable. Additionally, **C#/.NET** was used to develop robust microservices like the Real-time-SpeechTranslator, providing excellent performance for real-time processing requirements. It has also utilized **Angular.js** in the development of a responsive, interactive frontend; furthermore, multiple APIs, like **Tavily, GIPHY, Google Places,** and **Adzuna**, have been integrated into making the application richer in features, thus capable of handling more extensively.
 
 The codebase is well-documented, following best practices and complemented by the smart code completions of **GitHub Copilot**. This thorough approach ensures that the code remains maintainable and promotes a high degree of collaboration between team members, which raises quality throughout the software development process.
+
 
 ---
 
@@ -139,8 +150,25 @@ Study-Buddy is a novel and groundbreaking learning technology solution. It combi
 **Study-Buddy** puts modern EdTech concepts into action and gives them a creative twist, including alternative means of communication and instant resource searching. This enhances online learning considerably and makes it more enjoyable than ever.
 
 ---
+### **Table highlighting the features of Study‑Buddy alongside other popular study applications**
+
+| Feature / Functionality | **Study‑Buddy** | **Quizlet** | **ChatGPT** | **Duolingo** | **Khan Academy** |
+|---|---|---|---|---|---|
+| **Conversational AI Interaction** | Yes – multi‑modal (text↔speech) via Azure Cognitive Speech Services, dynamic GIF responses (GIPHY), AI‑generated images (DALL·E), expert personas, multi‑language (Azure Translator). | No – flashcard‑based learning; no conversational AI. | Yes – advanced conversational capabilities across many topics. | No – lesson‑driven; no conversational AI. | No – video lessons and exercises without conversational AI. |
+| **AI Avatar Interaction** | Yes – animated avatar with natural voice powered by Azure Speech. | No. | No. | No (mascot is non‑interactive). | No. |
+| **AI Quiz Generation** | Yes – customizable quizzes, auto‑generated from uploads (Azure Document Intelligence), instant feedback, leaderboards, performance charts. | Yes – quizzes and games, but all manually created. | No built‑in quiz feature. | No – focuses on language drills. | Yes – practice exercises; no AI generation. |
+| **Content Translation** | Yes – full content translation through Azure Translator. | Limited – UI supports multiple languages; content mostly manual. | No. | Yes – courses offered in 40+ languages. | Limited – some translated content. |
+| **Real‑Time Speech Translator** | Yes – live speech‑to‑speech and speech‑to‑text translation using Azure Speech Translation. | No – only plays recorded audio for flashcards. | Yes – voice mode can translate live speech. | No – records speech for pronunciation; no real‑time translation. | No – no live speech translation. |
+| **Collaborative Study Groups** | Yes – create/join groups with real‑time chat, posts, threaded discussions. | Yes – share sets & collaborate; no live chat. | No. | No. | Yes – teacher/classroom features (no real‑time chat). |
+| **Career Guidance Features** | Yes – AI‑assisted resume builder with ATS optimization, multi‑format export. | No. | No. | No. | No. |
+| **User Authentication** | Yes – secure login/signup, Google Authenticator, password reset. | Yes. | No account required. | Yes – accounts for progress sync. | Yes – accounts for progress tracking. |
+| **Technological Integration** | Extensive Azure stack (Speech, Text Analytics, Translator, OpenAI, Document Intelligence, Cosmos DB, Container Apps, etc.) plus Flask backend & Angular frontend. | Minimal external integrations. | Proprietary OpenAI stack. | Proprietary tech geared to language learning. | Proprietary platform without major third‑party integrations. |
+| **Design & User Experience** | Responsive UI, animated avatars/GIFs, accessible multi‑language interface, balanced front‑/back‑end architecture. | Clean, flashcard‑centric UI with games. | Simple text interface. | Gamified lessons with mascot, points, rewards. | Video‑focused interface with exercises. |
+| **Potential Impact on Education** | Engaging AI‑driven learning, global accessibility, scalable microservices architecture. | Aids memorization for test prep. | Conversational tutor across subjects. | Makes language learning fun and accessible. | Free, high‑quality resources for self‑paced learning worldwide. |                                                                                                                     |
 
 
+
+---
 ### **Contributing to Study-Buddy**
 
 We welcome contributions to Study-Buddy! Here’s a quick guide to help you get started:

@@ -640,16 +640,25 @@ $transition-standard: all 0.2s ease-in-out;
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .group-posts-container {
-    max-width: 100%;
-    margin: 10px;
-    
+    height: auto; 
+    overflow-y: visible;
+    padding-top: 0; // remove the extra padding
+
     .group-posts-header {
-      border-radius: 8px;
-      width: calc(100% - 20px);
-      
+      position: static;  // not fixed anymore
+      margin-bottom: 1rem;
+      width: auto;       // let it size normally
+      max-width: 100%;   // ensure it doesn’t overflow
+
       h2 {
         font-size: 1.3rem;
+        margin-right: 5px;
       }
+      .add-post-btn {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+      }
+
     }
     
     .post {

@@ -48,8 +48,7 @@ $sidebar-margin: 10px;
 /* Responsive Adjustments */
 @media (max-width: 767.98px) {
   .wrapper {
-    flex-direction: column;
-    width: fit-content;
+    flex-direction: row;;
   }
 
   .main {

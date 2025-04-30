@@ -35,6 +35,7 @@
         <i class="bi bi-magic"></i> <!-- Updated to magic wand icon -->
         <span data-translate> Chat Wizard</span>
       </button>
+
       <!-- AI Avatar -->
       <button
         class="menu-btn"
@@ -81,6 +82,18 @@
       <span role="img" aria-label="paper">📝</span>
       <span data-translate>Resume</span>
     </button>
+
+    <!-- Real-Time Translation -->
+    <button
+    class="menu-btn"
+    title="{{ translatedTexts['Real-Time Translation'] || 'Real-Time Translation' }}"
+    routerLink="/main/real-time-speech-translator"
+    routerLinkActive="active" 
+    [routerLinkActiveOptions]="{ exact: true }"
+  >
+    <i class="bi bi-translate"></i>
+    <span data-translate>Real-Time Translator</span>
+  </button>
     </div>
   </div>
 

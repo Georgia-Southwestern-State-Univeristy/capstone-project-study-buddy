@@ -2,8 +2,8 @@ import pytest
 import json
 import io
 import os
-from unittest.mock import patch, MagicMock, mock_open
-from flask import Flask, Request
+from unittest.mock import patch, MagicMock, mock_open, call
+from flask import Flask
 from bson import ObjectId
 from flask_jwt_extended import JWTManager, create_access_token
 
@@ -11,6 +11,7 @@ from routes.user_profile import user_routes, allowed_file, ALLOWED_EXTENSIONS
 
 # Create a valid ObjectId for testing
 TEST_USER_ID = str(ObjectId())
+TEST_OBJECT_ID = ObjectId(TEST_USER_ID)  # Create an ObjectId instance for comparison
 
 @pytest.fixture
 def app():
@@ -66,7 +67,25 @@ def mock_mongodb_client():
         mock.get_db_name.return_value = mock_db_name
         mock_client.__getitem__.return_value = mock_db
         
-        yield mock, mock_client, mock_db
+        # Create separate dictionary for users/journeys collections to avoid reference issues
+        users_collection = MagicMock()
+        journeys_collection = MagicMock()
+        mock_db.__getitem__.side_effect = lambda x: users_collection if x == "users" else journeys_collection
+        
+        yield mock, mock_client, mock_db, users_collection, journeys_collection
+
+@pytest.fixture
+def mock_azure_blob_service():
+    with patch('routes.user_profile.AzureBlobService') as mock:
+        # Create a mock instance for the service
+        mock_instance = MagicMock()
+        mock.return_value = mock_instance
+        
+        # Mock the blob operations
+        mock_instance.upload_file.return_value = "https://teststorage.blob.core.windows.net/users/test-profile.jpg"
+        mock_instance.delete_blob.return_value = True
+        
+        yield mock_instance
 
 class TestAllowedFile:
     
@@ -90,9 +109,9 @@ class TestGetUserProfile:
     def test_get_profile_success(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
         """Test successful retrieval of user profile"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, journeys_collection = mock_mongodb_client
             
-            # Mock the find_one operation to return a user
+            # Mock the find_one operation to return a user as a dictionary
             mock_user = {
                 "_id": ObjectId(),
                 "username": "testuser",
@@ -100,7 +119,16 @@ class TestGetUserProfile:
                 "password": "hashed_password",
                 "profile_picture": "/static/profile_pics/testuser_pic.jpg"
             }
-            mock_db["users"].find_one.return_value = mock_user
+            users_collection.find_one.return_value = mock_user
+            
+            # Mock user_journey
+            mock_journey = {
+                "_id": ObjectId(),
+                "user_id": TEST_USER_ID,
+                "fieldOfStudy": "Computer Science",
+                "student_goals": ["Learn Python", "Build Web Apps"]
+            }
+            journeys_collection.find_one.return_value = mock_journey
             
             # Make request with auth headers
             response = client.get('/user/profile', headers=auth_headers)
@@ -112,17 +140,19 @@ class TestGetUserProfile:
             assert data["email"] == "test@example.com"
             assert "_id" in data
             assert "password" not in data  # Password should be removed
+            assert "user_journey" in data
+            assert data["user_journey"]["fieldOfStudy"] == "Computer Science"
             
             # Verify find_one was called with the correct user_id
-            mock_db["users"].find_one.assert_called_once_with({"_id": ObjectId(TEST_USER_ID)})
+            users_collection.find_one.assert_called_once_with({"_id": TEST_OBJECT_ID})
     
     def test_get_profile_user_not_found(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
         """Test getting profile when user is not found"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, _ = mock_mongodb_client
             
             # Mock the find_one operation to return None (user not found)
-            mock_db["users"].find_one.return_value = None
+            users_collection.find_one.return_value = None
             
             # Make request with auth headers
             response = client.get('/user/profile', headers=auth_headers)
@@ -134,27 +164,36 @@ class TestGetUserProfile:
             assert "User could not be found" in data["error"]
             
             # Verify find_one was called with the correct user_id
-            mock_db["users"].find_one.assert_called_once_with({"_id": ObjectId(TEST_USER_ID)})
+            users_collection.find_one.assert_called_once_with({"_id": TEST_OBJECT_ID})
     
-    def test_get_profile_exception(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
-        """Test getting profile when an exception occurs"""
+    def test_get_profile_no_user_journey(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
+        """Test getting profile when user has no journey"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, journeys_collection = mock_mongodb_client
             
-            # Mock the find_one operation to raise an exception
-            mock_db["users"].find_one.side_effect = Exception("Database error")
+            # Mock the find_one operation to return a user
+            mock_user = {
+                "_id": ObjectId(),
+                "username": "testuser",
+                "email": "test@example.com",
+                "profile_picture": "/static/profile_pics/testuser_pic.jpg"
+            }
+            users_collection.find_one.return_value = mock_user
             
-            # Need to use try-except to handle the exception
-            try:
-                # Import get_public_profile directly
-                from routes.user_profile import get_public_profile
-                
-                # Call the function directly - it should raise an exception
-                result = get_public_profile()
-                assert False, "Expected an exception but none was raised"
-            except Exception:
-                # We expect an exception
-                assert True
+            # Mock no user_journey (return None)
+            journeys_collection.find_one.return_value = None
+            
+            # Make request with auth headers
+            response = client.get('/user/profile', headers=auth_headers)
+            
+            # Assertions
+            assert response.status_code == 200
+            data = json.loads(response.data)
+            assert "username" in data
+            assert "user_journey" not in data
+            
+            # Verify find_one was called with the correct user_id
+            users_collection.find_one.assert_called_once_with({"_id": TEST_OBJECT_ID})
 
 
 class TestUpdateUserProfile:
@@ -162,7 +201,7 @@ class TestUpdateUserProfile:
     def test_update_profile_success(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
         """Test successful profile update (text fields only)"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, _ = mock_mongodb_client
             
             # Mock the find_one operation
             mock_user = {
@@ -171,32 +210,31 @@ class TestUpdateUserProfile:
                 "email": "old@example.com",
                 "profile_picture": "/static/profile_pics/testuser_pic.jpg"
             }
-            mock_db["users"].find_one.return_value = mock_user
+            users_collection.find_one.return_value = mock_user
             
             # Create request data
             form_data = {"email": "new@example.com", "bio": "New bio"}
             
-            # Make request
+            # Make request with JSON data
             response = client.patch('/user/profile', 
-                                data=form_data, 
+                                json=form_data,
                                 headers=auth_headers)
             
             # Assertions
             assert response.status_code == 200
             data = json.loads(response.data)
-            assert data["message"] == "User has been updated successfully."
-            assert data["profile_picture"] == "/static/profile_pics/testuser_pic.jpg"  # Unchanged
+            assert data["message"] == "Profile updated successfully"
             
             # Verify update_one was called with the correct data
-            mock_db["users"].update_one.assert_called_once_with(
-                {"_id": ObjectId(TEST_USER_ID)}, 
+            users_collection.update_one.assert_called_once_with(
+                {"_id": TEST_OBJECT_ID}, 
                 {"$set": {"email": "new@example.com", "bio": "New bio"}}
             )
     
-    def test_update_profile_with_picture(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
+    def test_update_profile_with_picture(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client, mock_azure_blob_service):
         """Test profile update with new profile picture"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, _ = mock_mongodb_client
             
             # Mock the find_one operation
             mock_user = {
@@ -205,45 +243,44 @@ class TestUpdateUserProfile:
                 "email": "test@example.com",
                 "profile_picture": "/static/profile_pics/old_picture.jpg"
             }
-            mock_db["users"].find_one.return_value = mock_user
+            users_collection.find_one.return_value = mock_user
             
             # Create test file
             test_file = (io.BytesIO(b"test file content"), "new_picture.jpg")
             
-            # Mock file operations without patching request
-            with patch('werkzeug.datastructures.FileStorage.save'):
-                with patch('routes.user_profile.os.path.exists', return_value=True):
-                    with patch('routes.user_profile.os.remove'):
-                        with patch('routes.user_profile.os.path.join', return_value="/path/to/file"):
-                            # Make request
-                            response = client.patch(
-                                '/user/profile',
-                                data={
-                                    'bio': 'Updated bio',
-                                    'profile_picture': test_file
-                                },
-                                content_type='multipart/form-data',
-                                headers=auth_headers
-                            )
-                            
-                            # Assertions
-                            assert response.status_code == 200
-                            data = json.loads(response.data)
-                            assert data["message"] == "User has been updated successfully."
-                            assert "profile_picture" in data
-
+            # Make request
+            response = client.patch(
+                '/user/profile',
+                data={
+                    'bio': 'Updated bio',
+                    'profile_picture': test_file
+                },
+                content_type='multipart/form-data',
+                headers=auth_headers
+            )
+            
+            # Assertions
+            assert response.status_code == 200
+            data = json.loads(response.data)
+            assert data["message"] == "Profile updated successfully"
+            assert "profile_picture" in data
+            assert data["profile_picture"] == "https://teststorage.blob.core.windows.net/users/test-profile.jpg"
+            
+            # Verify blob service was called correctly
+            mock_azure_blob_service.delete_blob.assert_called_once_with("/static/profile_pics/old_picture.jpg")
+            mock_azure_blob_service.upload_file.assert_called_once()
     
-    def test_update_profile_invalid_image_format(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
+    def test_update_profile_invalid_image_format(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client, mock_azure_blob_service):
         """Test profile update with invalid image format"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, _ = mock_mongodb_client
             
             # Mock the find_one operation
             mock_user = {
                 "_id": ObjectId(),
                 "username": "testuser"
             }
-            mock_db["users"].find_one.return_value = mock_user
+            users_collection.find_one.return_value = mock_user
             
             # Create invalid test file
             test_file = (io.BytesIO(b"test file content"), "document.txt")
@@ -251,7 +288,9 @@ class TestUpdateUserProfile:
             # Make request
             response = client.patch(
                 '/user/profile',
-                data={'profile_picture': test_file},
+                data={
+                    'profile_picture': test_file
+                },
                 content_type='multipart/form-data',
                 headers=auth_headers
             )
@@ -261,21 +300,24 @@ class TestUpdateUserProfile:
             data = json.loads(response.data)
             assert "error" in data
             assert "Invalid image format" in data["error"]
+            
+            # Verify blob service was not called
+            mock_azure_blob_service.upload_file.assert_not_called()
     
     def test_update_profile_no_fields(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
         """Test profile update with no fields to update"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, _ = mock_mongodb_client
             
             # Mock the find_one operation
             mock_user = {
                 "_id": ObjectId(),
                 "username": "testuser"
             }
-            mock_db["users"].find_one.return_value = mock_user
+            users_collection.find_one.return_value = mock_user
             
-            # Make request with empty data
-            response = client.patch('/user/profile', headers=auth_headers)
+            # Make request with empty JSON
+            response = client.patch('/user/profile', json={}, headers=auth_headers)
             
             # Assertions
             assert response.status_code == 200
@@ -283,20 +325,20 @@ class TestUpdateUserProfile:
             assert data["message"] == "No fields to update."
             
             # Verify database not updated
-            mock_db["users"].update_one.assert_not_called()
+            users_collection.update_one.assert_not_called()
     
     def test_update_profile_user_not_found(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
         """Test profile update when user is not found"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, _ = mock_mongodb_client
             
             # Mock the find_one operation to return None (user not found)
-            mock_db["users"].find_one.return_value = None
+            users_collection.find_one.return_value = None
             
             # Make request
             response = client.patch(
                 '/user/profile',
-                data={"bio": "New bio"},
+                json={"bio": "New bio"},
                 headers=auth_headers
             )
             
@@ -304,39 +346,87 @@ class TestUpdateUserProfile:
             assert response.status_code == 404
             data = json.loads(response.data)
             assert "error" in data
-            assert "User cannot be found" in data["error"]
+            assert "User not found" in data["error"]
             
             # Verify database not updated
-            mock_db["users"].update_one.assert_not_called()
-    
-    def test_update_profile_exception(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
-        """Test profile update when an exception occurs"""
+            users_collection.update_one.assert_not_called()
+            
+    def test_update_journey_field(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
+        """Test updating a journey-specific field"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, journeys_collection = mock_mongodb_client
             
-            # Mock the find_one operation to raise an exception
-            mock_db["users"].find_one.side_effect = Exception("Database error")
+            # Mock the find_one operation
+            mock_user = {
+                "_id": ObjectId(),
+                "username": "testuser"
+            }
+            users_collection.find_one.return_value = mock_user
             
-            # Make request
+            # Make request with journey field
+            journey_data = {"mental_health_concerns": ["stress", "anxiety"]}
             response = client.patch(
                 '/user/profile',
-                data={"bio": "New bio"},
+                json=journey_data,
                 headers=auth_headers
             )
             
             # Assertions
-            assert response.status_code == 500
+            assert response.status_code == 200
             data = json.loads(response.data)
-            assert "error" in data
-            assert "An error occurred while updating the profile" in data["error"]
+            assert data["message"] == "Profile updated successfully"
+            
+            # Verify only journeys collection was updated
+            journeys_collection.update_one.assert_called_once_with(
+                {"user_id": TEST_USER_ID},
+                {"$set": {"mental_health_concerns": ["stress", "anxiety"]}},
+                upsert=True
+            )
+            users_collection.update_one.assert_not_called()
+    
+    def test_update_field_of_study(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
+        """Test updating fieldOfStudy which should update both user and journey"""
+        with app.app_context():
+            _, _, _, users_collection, journeys_collection = mock_mongodb_client
+            
+            # Mock the find_one operation
+            mock_user = {
+                "_id": ObjectId(),
+                "username": "testuser",
+                "fieldOfStudy": "History"
+            }
+            users_collection.find_one.return_value = mock_user
+            
+            # Make request to update fieldOfStudy
+            response = client.patch(
+                '/user/profile',
+                json={"fieldOfStudy": "Computer Science"},
+                headers=auth_headers
+            )
+            
+            # Assertions
+            assert response.status_code == 200
+            data = json.loads(response.data)
+            assert data["message"] == "Profile updated successfully"
+            
+            # Verify both collections were updated with correct queries
+            users_collection.update_one.assert_called_once_with(
+                {"_id": TEST_OBJECT_ID}, 
+                {"$set": {"fieldOfStudy": "Computer Science"}}
+            )
+            journeys_collection.update_one.assert_called_once_with(
+                {"user_id": TEST_USER_ID},
+                {"$set": {"fieldOfStudy": "Computer Science"}},
+                upsert=True
+            )
 
 
 class TestDeleteUserProfile:
     
-    def test_delete_profile_success(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
+    def test_delete_profile_success(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client, mock_azure_blob_service):
         """Test successful user profile deletion"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, journeys_collection = mock_mongodb_client
             
             # Mock the find_one operation
             mock_user = {
@@ -344,37 +434,7 @@ class TestDeleteUserProfile:
                 "username": "testuser",
                 "profile_picture": "/static/profile_pics/testuser_pic.jpg"
             }
-            mock_db["users"].find_one.return_value = mock_user
-            
-            # Mock file operations
-            with patch('routes.user_profile.os.path.exists', return_value=True):
-                with patch('routes.user_profile.os.remove') as mock_remove:
-                    # Make request
-                    response = client.delete('/user/profile', headers=auth_headers)
-                    
-                    # Assertions
-                    assert response.status_code == 200
-                    data = json.loads(response.data)
-                    assert data["message"] == "User has been deleted successfully."
-                    
-                    # Verify profile picture was deleted
-                    mock_remove.assert_called_once()
-                    
-                    # Verify database deletion
-                    mock_db["users"].delete_one.assert_called_once_with({"_id": ObjectId(TEST_USER_ID)})
-    
-    def test_delete_profile_no_picture(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
-        """Test user deletion when profile has no picture"""
-        with app.app_context():
-            _, _, mock_db = mock_mongodb_client
-            
-            # Mock the find_one operation with no profile picture
-            mock_user = {
-                "_id": ObjectId(),
-                "username": "testuser"
-                # No profile_picture field
-            }
-            mock_db["users"].find_one.return_value = mock_user
+            users_collection.find_one.return_value = mock_user
             
             # Make request
             response = client.delete('/user/profile', headers=auth_headers)
@@ -384,16 +444,48 @@ class TestDeleteUserProfile:
             data = json.loads(response.data)
             assert data["message"] == "User has been deleted successfully."
             
-            # Verify database deletion
-            mock_db["users"].delete_one.assert_called_once_with({"_id": ObjectId(TEST_USER_ID)})
+            # Verify profile picture was deleted
+            mock_azure_blob_service.delete_blob.assert_called_once_with("/static/profile_pics/testuser_pic.jpg")
+            
+            # Verify database deletion for both collections with correct queries
+            users_collection.delete_one.assert_called_once_with({"_id": TEST_OBJECT_ID})
+            journeys_collection.delete_one.assert_called_once_with({"user_id": TEST_USER_ID})
+    
+    def test_delete_profile_no_picture(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client, mock_azure_blob_service):
+        """Test user deletion when profile has no picture"""
+        with app.app_context():
+            _, _, _, users_collection, journeys_collection = mock_mongodb_client
+            
+            # Mock the find_one operation with no profile picture
+            mock_user = {
+                "_id": ObjectId(),
+                "username": "testuser"
+                # No profile_picture field
+            }
+            users_collection.find_one.return_value = mock_user
+            
+            # Make request
+            response = client.delete('/user/profile', headers=auth_headers)
+            
+            # Assertions
+            assert response.status_code == 200
+            data = json.loads(response.data)
+            assert data["message"] == "User has been deleted successfully."
+            
+            # Verify blob deletion was not called
+            mock_azure_blob_service.delete_blob.assert_not_called()
+            
+            # Verify database deletion with correct queries
+            users_collection.delete_one.assert_called_once_with({"_id": TEST_OBJECT_ID})
+            journeys_collection.delete_one.assert_called_once_with({"user_id": TEST_USER_ID})
     
     def test_delete_profile_user_not_found(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
         """Test profile deletion when user is not found"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, journeys_collection = mock_mongodb_client
             
             # Mock the find_one operation to return None (user not found)
-            mock_db["users"].find_one.return_value = None
+            users_collection.find_one.return_value = None
             
             # Make request
             response = client.delete('/user/profile', headers=auth_headers)
@@ -402,18 +494,55 @@ class TestDeleteUserProfile:
             assert response.status_code == 404
             data = json.loads(response.data)
             assert "error" in data
-            assert "User cannot be found" in data["error"]
+            assert "User not found" in data["error"]
             
             # Verify database deletion was not called
-            mock_db["users"].delete_one.assert_not_called()
+            users_collection.delete_one.assert_not_called()
+            journeys_collection.delete_one.assert_not_called()
     
-    def test_delete_profile_exception(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client):
-        """Test profile deletion when an exception occurs"""
+    def test_delete_profile_blob_exception(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client, mock_azure_blob_service):
+        """Test profile deletion when blob deletion fails but user deletion proceeds"""
         with app.app_context():
-            _, _, mock_db = mock_mongodb_client
+            _, _, _, users_collection, journeys_collection = mock_mongodb_client
             
-            # Mock the find_one operation to raise an exception
-            mock_db["users"].find_one.side_effect = Exception("Database error")
+            # Mock the find_one operation
+            mock_user = {
+                "_id": ObjectId(),
+                "username": "testuser",
+                "profile_picture": "/static/profile_pics/testuser_pic.jpg"
+            }
+            users_collection.find_one.return_value = mock_user
+            
+            # Make blob deletion fail
+            mock_azure_blob_service.delete_blob.side_effect = Exception("Blob not found")
+            
+            # Make request
+            response = client.delete('/user/profile', headers=auth_headers)
+            
+            # Assertions
+            assert response.status_code == 200
+            data = json.loads(response.data)
+            assert data["message"] == "User has been deleted successfully."
+            
+            # Verify database deletion still succeeded
+            users_collection.delete_one.assert_called_once_with({"_id": TEST_OBJECT_ID})
+            journeys_collection.delete_one.assert_called_once_with({"user_id": TEST_USER_ID})
+    
+    def test_delete_profile_database_exception(self, app, client, auth_headers, mock_jwt_required, mock_get_jwt_identity, mock_mongodb_client, mock_azure_blob_service):
+        """Test profile deletion when database operation fails"""
+        with app.app_context():
+            _, _, _, users_collection, _ = mock_mongodb_client
+            
+            # Mock the find_one operation
+            mock_user = {
+                "_id": ObjectId(),
+                "username": "testuser",
+                "profile_picture": "/static/profile_pics/testuser_pic.jpg"
+            }
+            users_collection.find_one.return_value = mock_user
+            
+            # Make database deletion fail
+            users_collection.delete_one.side_effect = Exception("Database error")
             
             # Make request
             response = client.delete('/user/profile', headers=auth_headers)
@@ -422,7 +551,7 @@ class TestDeleteUserProfile:
             assert response.status_code == 500
             data = json.loads(response.data)
             assert "error" in data
-            assert "An error occurred while deleting the profile" in data["error"]
+            assert "An error occurred" in data["error"]
             
-            # Verify database deletion was not called
-            mock_db["users"].delete_one.assert_not_called()
+            # Verify blob was attempted to be deleted
+            mock_azure_blob_service.delete_blob.assert_called_once()

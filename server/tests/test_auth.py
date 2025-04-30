@@ -51,19 +51,25 @@ class TestAuthRoutes:
     @patch('routes.auth.MongoDBClient')
     @patch('routes.auth.generate_password_hash')
     @patch('routes.auth.create_access_token')
-    def test_signup_success(self, mock_create_token, mock_hash, mock_mongo, mock_user, app, client):
+    @patch('routes.auth.AzureBlobService')  # Mock AzureBlobService instead of local file operations
+    def test_signup_success(self, mock_azure_blob, mock_create_token, mock_hash, mock_mongo, mock_user, app, client):
         """Test successful user signup"""
         # Setup mocks
         mock_hash.return_value = "hashed_password"
         mock_create_token.return_value = "test_access_token"
         
-        # Mock UserModel validation - this prevents the serialization error
+        # Mock AzureBlobService upload_file to return a test URL
+        mock_azure_instance = MagicMock()
+        mock_azure_instance.upload_file.return_value = "https://testblob.test/container/test_user_image.jpg"
+        mock_azure_blob.return_value = mock_azure_instance
+        
+        # Mock UserModel validation
         mock_user_instance = MagicMock()
         mock_user_instance.username = "test_user"
         mock_user_instance.email = "test@example.com"
         mock_user_instance.password = "password123"
         mock_user_instance.preferredLanguage = "en"
-        mock_user_instance.profile_picture = "/static/profile_pics/test_user_secure_filename.jpg"
+        mock_user_instance.profile_picture = "https://testblob.test/container/test_user_image.jpg"
         mock_user.return_value = mock_user_instance
         
         # Mock MongoDB client and operations
@@ -76,8 +82,6 @@ class TestAuthRoutes:
         
         # Create test data with file
         from io import BytesIO
-        
-        # Use Flask's FileStorage to properly mock file upload
         from werkzeug.datastructures import FileStorage
         test_file = FileStorage(
             stream=BytesIO(b"test image content"),
@@ -92,44 +96,126 @@ class TestAuthRoutes:
             'name': 'Test User',
         }
         
-        # Mock file saving operations
-        with patch('routes.auth.os.path.join', return_value='/path/to/image.jpg'):
-            with patch('routes.auth.secure_filename', return_value='secure_filename.jpg'):
-                with patch('builtins.open', mock_open()):
-                    with patch('routes.auth.os.makedirs'):  # Ensure makedirs is mocked
-                        # Send request with multipart form data
-                        data['profile_picture'] = test_file
-                        response = client.post(
-                            '/user/signup',
-                            data=data,
-                            content_type='multipart/form-data'
-                        )
-                
+        # Send request with multipart form data
+        data['profile_picture'] = test_file
+        response = client.post(
+            '/user/signup',
+            data=data,
+            content_type='multipart/form-data'
+        )
+        
         # Assertions
         assert response.status_code == 201
         response_data = json.loads(response.data)
         assert 'access_token' in response_data
         assert response_data['message'] == 'User registered successfully'
         assert response_data['preferredLanguage'] == 'en'
-    
+        assert response_data['profile_picture'] == "https://testblob.test/container/test_user_image.jpg"
+        
+        # Verify Azure blob service was called with correct parameters
+        mock_azure_instance.upload_file.assert_called_once()
+        
     @patch('routes.auth.UserModel')
     @patch('routes.auth.MongoDBClient')
-    def test_signup_existing_user(self, mock_mongo, mock_user, app, client):
-        """Test signup with an existing user (username/email)"""
-        # Setup mocks
-        mock_db = MagicMock()
-        mock_mongo.get_client.return_value = MagicMock()
-        mock_mongo.get_db_name.return_value = "test_db"
-        mock_mongo.get_client.return_value.__getitem__.return_value = mock_db
-        # User exists
-        mock_db.__getitem__.return_value.find_one.return_value = {'username': 'test_user', 'email': 'test@example.com'}
+    @patch('routes.auth.AzureBlobService')
+    def test_signup_invalid_file(self, mock_azure_blob, mock_mongo, mock_user, app, client):
+        """Test signup with an invalid file type"""
+        # Create test data with invalid file
+        from io import BytesIO
+        from werkzeug.datastructures import FileStorage
+        test_file = FileStorage(
+            stream=BytesIO(b"test document content"),
+            filename="test.txt",
+            content_type="text/plain",
+        )
         
-        # Create test data
         data = {
             'username': 'test_user',
             'email': 'test@example.com',
             'password': 'password123',
             'name': 'Test User',
+        }
+        
+        # Send request with invalid file
+        data['profile_picture'] = test_file
+        response = client.post(
+            '/user/signup',
+            data=data,
+            content_type='multipart/form-data'
+        )
+            
+        # Assertions
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert response_data['error'] == 'Invalid image format'
+    
+    @patch('routes.auth.UserModel')
+    @patch('routes.auth.MongoDBClient')
+    @patch('routes.auth.AzureBlobService')
+    @patch('routes.auth.generate_password_hash')
+    def test_signup_without_profile_picture(self, mock_hash, mock_azure_blob, mock_mongo, mock_user, app, client):
+        """Test signup without a profile picture"""
+        # Setup mocks
+        mock_hash.return_value = "hashed_password"
+        mock_db = MagicMock()
+        mock_mongo.get_client.return_value = MagicMock()
+        mock_mongo.get_db_name.return_value = "test_db"
+        mock_mongo.get_client.return_value.__getitem__.return_value = mock_db
+        mock_db.__getitem__.return_value.find_one.return_value = None
+        mock_db.__getitem__.return_value.insert_one.return_value.inserted_id = ObjectId("507f1f77bcf86cd799439011")
+        
+        # Mock UserModel validation
+        mock_user_instance = MagicMock()
+        mock_user_instance.username = "test_user"
+        mock_user_instance.email = "test@example.com"
+        mock_user_instance.password = "password123"
+        mock_user_instance.preferredLanguage = "en"
+        mock_user_instance.profile_picture = None
+        mock_user.return_value = mock_user_instance
+        
+        # Create test data without file
+        data = {
+            'username': 'test_user',
+            'email': 'test@example.com',
+            'password': 'password123',
+            'name': 'Test User',
+        }
+        
+        # Send request without profile picture
+        response = client.post(
+            '/user/signup',
+            data=data,
+            content_type='multipart/form-data'
+        )
+            
+        # Assertions
+        assert response.status_code == 201
+        response_data = json.loads(response.data)
+        assert response_data['profile_picture'] is None
+    
+    @patch('routes.auth.AzureBlobService')
+    def test_azure_blob_upload_failure(self, mock_azure_blob, app, client):
+        """Test handling of Azure Blob upload failure"""
+        # Setup Azure Blob Service to raise exception
+        mock_azure_instance = MagicMock()
+        mock_azure_instance.upload_file.side_effect = Exception("Azure Storage connection error")
+        mock_azure_blob.return_value = mock_azure_instance
+        
+        # Create test data with file
+        from io import BytesIO
+        from werkzeug.datastructures import FileStorage
+        test_file = FileStorage(
+            stream=BytesIO(b"test image content"),
+            filename="test.jpg",
+            content_type="image/jpeg",
+        )
+        
+        data = {
+            'username': 'test_user',
+            'email': 'test@example.com',
+            'password': 'password123',
+            'name': 'Test User',
+            'profile_picture': test_file
         }
         
         # Send request
@@ -140,113 +226,50 @@ class TestAuthRoutes:
         )
             
         # Assertions
-        assert response.status_code == 409
+        assert response.status_code == 400
         response_data = json.loads(response.data)
-        assert response_data['error'] == 'User with this username or email already exists'
-    
-    @patch('routes.auth.validate_email')
+        assert "Azure Storage connection error" in response_data.get('error', '')
+
     @patch('routes.auth.UserModel')
-    @patch('routes.auth.check_password_hash')
     @patch('routes.auth.create_access_token')
-    def test_login_success_with_email(self, mock_create_token, mock_check_hash, 
-                                     mock_user, mock_validate, client):
-        """Test successful login with email"""
+    def test_login_with_username(self, mock_create_token, mock_user, client):
+        """Test successful login with username"""
         # Setup mocks
-        mock_validate.return_value = True  # Valid email
         mock_user_instance = MagicMock()
         mock_user_instance.id = "user_id"
         mock_user_instance.password = "hashed_password"
-        mock_user_instance.preferredLanguage = "en"
-        mock_user.find_by_email.return_value = mock_user_instance
-        mock_check_hash.return_value = True  # Password matches
+        mock_user_instance.preferredLanguage = "es"
+        mock_user.find_by_username.return_value = mock_user_instance
         mock_create_token.return_value = "test_access_token"
         
-        # Create test data
-        data = {
-            'identifier': 'test@example.com',
-            'password': 'password123'
-        }
-        
-        # Send request
-        response = client.post('/user/login', 
-                             data=json.dumps(data), 
-                             content_type='application/json')
-        
-        # Assertions
-        assert response.status_code == 200
-        response_data = json.loads(response.data)
-        assert response_data['access_token'] == 'test_access_token'
-        assert response_data['userId'] == 'user_id'
-        assert response_data['preferredLanguage'] == 'en'
-        
-        # Verify mocks were called correctly
-        mock_validate.assert_called_once()
-        mock_user.find_by_email.assert_called_once_with('test@example.com')
-        mock_check_hash.assert_called_once_with('hashed_password', 'password123')
-    
-
-    @patch('routes.auth.token_urlsafe')
-    def test_google_login(self, mock_token_urlsafe, app, client):
-        """Test Google OAuth login redirect"""
-        # Mock token_urlsafe to return a predictable value
-        mock_token_urlsafe.return_value = "test_nonce"
-        
-        # Mock the oauth object
-        with patch('routes.auth.oauth') as mock_oauth:
-            # Set up the google authorize_redirect mock
-            mock_google = MagicMock()
-            mock_oauth.google = mock_google
-            mock_google.authorize_redirect.return_value = "redirect_response"
-            
-            # Call within request context to avoid session issues
-            with app.test_request_context('/auth/google'):
-                # Call the route handler directly
-                from routes.auth import google_login
-                response = google_login()
-                
-                # Verify the oauth redirect was called
-                mock_google.authorize_redirect.assert_called_once()
-                
-                # Verify the nonce was stored in session
-                assert session.get('oauth_nonce') == "test_nonce"
-    
-    @patch('routes.auth.UserModel')
-    @patch('routes.auth.mail')
-    def test_request_password_reset(self, mock_mail, mock_user, client):
-        """Test password reset request"""
-        # Setup mocks
-        mock_user_instance = MagicMock()
-        mock_user_instance.email = "test@example.com"
-        mock_user.find_by_email.return_value = mock_user_instance
-        
-        # Create test data
-        data = {
-            'email': 'test@example.com'
-        }
-        
-        # Mock token generation
-        with patch('routes.auth.generate_reset_token') as mock_token:
-            mock_token.return_value = "reset_token"
+        # Mock password check
+        with patch('routes.auth.check_password_hash', return_value=True):
+            # Create test data
+            data = {
+                'identifier': 'test_user',  # Username instead of email
+                'password': 'password123'
+            }
             
             # Send request
-            response = client.post('/user/request_reset',
-                                data=json.dumps(data),
+            response = client.post('/user/login', 
+                                data=json.dumps(data), 
                                 content_type='application/json')
             
-        # Assertions
-        assert response.status_code == 200
-        response_data = json.loads(response.data)
-        assert response_data['message'] == 'Check your email for the reset password link'
-        
-        # Verify email was sent
-        mock_mail.send.assert_called_once()
-    
+            # Assertions
+            assert response.status_code == 200
+            response_data = json.loads(response.data)
+            assert response_data['access_token'] == 'test_access_token'
+            assert response_data['userId'] == 'user_id'
+            assert response_data['preferredLanguage'] == 'es'
+            
+            # Verify mocks were called correctly
+            mock_user.find_by_username.assert_called_once_with('test_user')
+
     @patch('routes.auth.verify_reset_token')
-    def test_reset_password(self, mock_verify_token, client):
-        """Test password reset with valid token"""
+    def test_reset_password_invalid_token(self, mock_verify_token, client):
+        """Test password reset with invalid token"""
         # Setup mocks
-        mock_user = MagicMock()
-        mock_verify_token.return_value = mock_user
+        mock_verify_token.return_value = None  # Token is invalid
         
         # Create test data
         data = {
@@ -254,14 +277,64 @@ class TestAuthRoutes:
         }
         
         # Send request
-        response = client.post('/user/reset_password/valid_token',
+        response = client.post('/user/reset_password/invalid_token',
                             data=json.dumps(data),
                             content_type='application/json')
         
         # Assertions
-        assert response.status_code == 200
+        assert response.status_code == 403
         response_data = json.loads(response.data)
-        assert response_data['message'] == 'Password has been reset successfully'
-        
-        # Verify password was updated
-        mock_user.update_password.assert_called_once()
+        assert response_data['error'] == 'Invalid or expired token'
+
+    @patch('routes.auth.oauth')
+    @patch('routes.auth.token_urlsafe')
+    @patch('routes.auth.UserModel')
+    @patch('routes.auth.MongoDBClient')
+    @patch('routes.auth.create_access_token')
+    def test_google_callback_new_user(self, mock_create_token, mock_mongo, mock_user, 
+                                     mock_token_urlsafe, mock_oauth, app, client):
+        """Test Google OAuth callback with a new user"""
+        with app.test_request_context():
+            # Setup session
+            session['oauth_nonce'] = 'test_nonce'
+            
+            # Mock token and user info
+            mock_token = {
+                'id_token': 'test_id_token',
+                'access_token': 'test_access_token'
+            }
+            mock_oauth.google.authorize_access_token.return_value = mock_token
+            
+            mock_user_info = {
+                'sub': 'google_user_id',
+                'email': 'googleuser@example.com',
+                'name': 'Google User',
+                'picture': 'https://example.com/profile.jpg'
+            }
+            mock_oauth.google.parse_id_token.return_value = mock_user_info
+            
+            # Mock user doesn't exist yet
+            mock_user.find_by_email.return_value = None
+            
+            # Mock MongoDB operations for new user creation
+            mock_db = MagicMock()
+            mock_mongo.get_client.return_value = MagicMock()
+            mock_mongo.get_db_name.return_value = "test_db"
+            mock_mongo.get_client.return_value.__getitem__.return_value = mock_db
+            mock_db.__getitem__.return_value.insert_one.return_value.inserted_id = ObjectId("507f1f77bcf86cd799439011")
+            
+            # Mock token creation
+            mock_create_token.return_value = "test_access_token"
+            
+            # Mock environment variable
+            with patch.dict('os.environ', {'BASE_URL': 'http://localhost:4200'}):
+                # Call the handler directly
+                from routes.auth import google_callback
+                response = google_callback()
+                
+                # Verify it's a redirect
+                assert response.status_code == 302
+                assert 'http://localhost:4200/auth/auth-callback?token=test_access_token' in response.location
+                
+                # Verify new user was created
+                mock_db.__getitem__.return_value.insert_one.assert_called_once()

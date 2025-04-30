@@ -288,12 +288,35 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
 
   startListening(): void {
     if (this.isListening || this.isProcessing || this.isPlaying) return;
+    
+    // Check if running on iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
     try {
       this.recognition.start();
       this.isListening = true;
       this.userStopped = false;
+      
+      // For iOS devices, set a timeout to verify if recognition is actually working
+      if (isIOS || isSafari) {
+        setTimeout(() => {
+          if (this.isListening) {
+            // Try to restart recognition to ensure it's not stuck
+            try {
+              this.recognition.stop();
+              setTimeout(() => {
+                try {
+                  this.recognition.start();
+                } catch (e) { /* Ignore errors */ }
+              }, 300);
+            } catch (e) { /* Ignore errors */ }
+          }
+        }, 5000);
+      }
     } catch (error) {
       console.error('Failed to start recognition:', error);
+      this.isListening = false;
     }
   }
 
@@ -339,21 +362,149 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
   }
 
   unlockAudio(): void {
-    const silentAudio = new Audio();
-    silentAudio.src =
-      'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
-    silentAudio
-      .play()
-      .then(() => {
-        silentAudio.pause();
-        this.showOverlay = false;
-        this.initializeConversation();
-      })
-      .catch((error: any) => {
-        console.error('Audio Unlock Error:', error);
-      });
+    // First hide the overlay and initialize conversation
+    this.showOverlay = false;
+    
+    // Check if running on iOS/Safari
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const isIOSSafari = isIOS || isSafari;
+    
+    // For iOS, we'll use a different approach
+    if (isIOSSafari) {
+      console.log('iOS/Safari detected, using special initialization');
+      
+      // Add a notification for users about iOS limitations
+      this.addMessage('Mentor', 
+        'Welcome! Voice recognition has limited functionality on iOS devices. ' +
+        'If voice doesn\'t work after granting permission, please use text input instead.');
+      
+      // Initialize conversation right away to avoid delays
+      this.initializeConversation();
+      
+      // Try to unlock audio capabilities with user interaction
+      const silentAudio = new Audio();
+      silentAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
+      
+      silentAudio.play()
+        .then(() => {
+          silentAudio.pause();
+          console.log('Audio context unlocked successfully');
+          
+          // Initialize speech recognition with timeout protection
+          this.initializeIOSSpeechRecognition();
+        })
+        .catch((error) => {
+          console.warn('Audio initialization error:', error);
+        });
+    } else {
+      // Standard approach for non-iOS browsers
+      const silentAudio = new Audio();
+      silentAudio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=';
+      
+      silentAudio.play()
+        .then(() => {
+          silentAudio.pause();
+          this.initializeConversation();
+          setTimeout(() => this.startListening(), 1000);
+        })
+        .catch(() => {
+          this.initializeConversation();
+        });
+    }
+  }
+  
+  // New method specifically for handling iOS speech recognition
+  initializeIOSSpeechRecognition(): void {
+    // First make sure we have a clean state
+    if (this.recognition) {
+      try {
+        this.recognition.stop();
+      } catch (e) { /* Ignore errors */ }
+    }
+  
+    // Reinitialize recognition with iOS optimized settings
+    const windowObj = window as unknown as IWindow;
+    const SpeechRecognition = windowObj.SpeechRecognition || windowObj.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      console.warn('Speech recognition not supported in this browser');
+      return;
+    }
+    
+    this.recognition = new SpeechRecognition();
+    this.recognition.lang = 'en-US';
+    this.recognition.continuous = false; // iOS works better with non-continuous mode
+    this.recognition.interimResults = false;
+    
+    // Add iOS-specific error handling
+    this.recognition.onerror = (event: any) => {
+      console.error('Speech Recognition Error:', event.error);
+      this.isListening = false;
+      
+      if (event.error === 'not-allowed' || event.error === 'permission-denied') {
+        this.addMessage('Mentor', 
+          'Microphone access was denied. Please grant permission or use text input instead.');
+      } else if (event.error === 'no-speech') {
+        // Don't show errors for no-speech as they're common on iOS
+        console.log('No speech detected');
+      }
+    };
+    
+    // Try starting recognition
+    try {
+      this.recognition.start();
+      this.isListening = true;
+      this.userStopped = false;
+      
+      // Set a timeout to verify if recognition is working
+      setTimeout(() => {
+        if (this.isListening) {
+          // If still in "listening" state after timeout, it might be stuck
+          console.log('Testing if recognition is working...');
+          try {
+            this.recognition.stop(); // Stop and restart to verify connection
+            setTimeout(() => {
+              try {
+                this.recognition.start();
+              } catch (e) { 
+                console.log('Recognition restart failed, defaulting to text input');
+                this.isListening = false;
+              }
+            }, 300);
+          } catch (e) {
+            console.log('Recognition stop failed, defaulting to text input');
+            this.isListening = false;
+          }
+        }
+      }, 5000);
+    } catch (error) {
+      console.error('Failed to start iOS recognition:', error);
+      this.isListening = false;
+    }
+  }
+  
+  //Method to check if the image URL is valid
+  isValidImageUrl(url: string | undefined): boolean {
+    if (!url) return false;
+    
+    // Check if the string is actually an error message
+    if (url.startsWith('No memes') || url === 'No memes found for the given topic.') {
+      return false;
+    }
+    
+    // Simple URL validation - checks if it starts with http/https and has typical image extensions
+    try {
+      // Check if it's a valid URL structure
+      const urlObj = new URL(url);
+      // Check for common image extensions or just ensure it's a URL with http/https protocol
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch (e) {
+      return false;
+    }
   }
 
+  // Method To initialize the conversation
   initializeConversation(): void {
     this.isProcessing = true;
     const welcomeSub = this.appService.aimentorwelcome(this.userId, this.selectedRole).subscribe({
@@ -363,7 +514,9 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
         console.log('response:', response);
         const aiMessage = response.message.message;
         const audioUrl = response.message.audio_url;
-        const imageUrl = response.message.meme_url; // Assuming your backend returns image_url
+        // Only pass the image URL if it's valid
+        const imageUrl = this.isValidImageUrl(response.message.meme_url) ? response.message.meme_url : undefined;
+        
         this.addMessage('Mentor', aiMessage, audioUrl, imageUrl);
         if (audioUrl) {
           this.playAudio(audioUrl);
@@ -552,7 +705,8 @@ export class LiveConversationComponent implements OnInit, OnDestroy {
         next: (response: any) => {
           const aiMessage = response.message;
           const audioUrl = response.audio_url;
-          const imageUrl = response.meme_url;
+          // Only pass the image URL if it's valid
+          const imageUrl = this.isValidImageUrl(response.meme_url) ? response.meme_url : undefined;
 
           this.addMessage('Mentor', aiMessage, audioUrl, imageUrl);
           if (audioUrl) {

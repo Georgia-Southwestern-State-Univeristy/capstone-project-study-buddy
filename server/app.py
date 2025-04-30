@@ -34,9 +34,12 @@ def run_app():
     jwt = JWTManager(app)
     mail.init_app(app)
 
+    # Build origins list for CORS
+    origins = [url for url in [os.getenv("BASE_URL"), os.getenv("BASE_URL_1")] if url]
+    
     cors_config = {
         r"*": {
-            "origins": [os.getenv("BASE_URL")],
+            "origins": origins,
             "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
             "allow_headers": [
                 "Authorization",

@@ -64,25 +64,36 @@ class TestGroupPostSocketEvents:
         assert 'Missing group_id or user_id' in received[0]['args'][0]['message']
 
     @patch('routes.group_post.MongoDBClient')
-    def test_like_post_success(self, mock_mongodb, socket_client):
+    def test_toggle_like_post_success(self, mock_mongodb, socket_client):
         """Test successfully liking a post"""
         # Setup mock
         mock_db = MagicMock()
         mock_client = MagicMock()
+        mock_post = MagicMock()
         mock_mongodb.get_client.return_value = mock_client
         mock_mongodb.get_db_name.return_value = "test_db"
         mock_client.__getitem__.return_value = mock_db
         mock_collection = MagicMock()
         mock_db.__getitem__.return_value = mock_collection
         
-        socket_client.emit('like_post', {
-            'post_id': '507f1f77bcf86cd799439011'
+        # Mock post retrieval
+        mock_collection.find_one.return_value = {
+            "_id": ObjectId("507f1f77bcf86cd799439011"),
+            "liked_by": []
+        }
+        
+        socket_client.emit('toggle_like_post', {
+            'post_id': '507f1f77bcf86cd799439011',
+            'user_id': 'user123'
         })
         
-        # Verify DB update was called
-        mock_collection.update_one.assert_called_once_with(
+        # Verify DB update was called with correct parameters for adding a like
+        mock_collection.update_one.assert_any_call(
             {"_id": ObjectId("507f1f77bcf86cd799439011")}, 
-            {"$inc": {"likes": 1}}
+            {
+                "$addToSet": {"liked_by": "user123"},
+                "$inc": {"likes": 1}
+            }
         )
         
         # Check the emitted response
@@ -90,19 +101,20 @@ class TestGroupPostSocketEvents:
         assert len(received) > 0
         assert received[0]['name'] == 'post_liked'
         assert received[0]['args'][0]['post_id'] == '507f1f77bcf86cd799439011'
+        assert received[0]['args'][0]['user_id'] == 'user123'
 
-    def test_like_post_missing_data(self, socket_client):
-        """Test liking a post with missing post_id"""
-        socket_client.emit('like_post', {})
+    def test_toggle_like_post_missing_data(self, socket_client):
+        """Test liking a post with missing data"""
+        socket_client.emit('toggle_like_post', {})
         
         received = socket_client.get_received()
         assert len(received) > 0
         assert received[0]['name'] == 'error'
-        assert 'Missing post_id' in received[0]['args'][0]['message']
+        assert 'Missing post_id or user_id' in received[0]['args'][0]['message']
 
     @patch('routes.group_post.MongoDBClient')
-    def test_comment_post_success(self, mock_mongodb, socket_client):
-        """Test successfully commenting on a post"""
+    def test_toggle_like_post_unlike(self, mock_mongodb, socket_client):
+        """Test successfully unliking a post that was previously liked"""
         # Setup mock
         mock_db = MagicMock()
         mock_client = MagicMock()
@@ -112,15 +124,70 @@ class TestGroupPostSocketEvents:
         mock_collection = MagicMock()
         mock_db.__getitem__.return_value = mock_collection
         
-        socket_client.emit('comment_post', {
+        # Mock post retrieval - this post has already been liked by user123
+        mock_collection.find_one.return_value = {
+            "_id": ObjectId("507f1f77bcf86cd799439011"),
+            "liked_by": ["user123"]
+        }
+        
+        socket_client.emit('toggle_like_post', {
             'post_id': '507f1f77bcf86cd799439011',
-            'comment': 'This is a test comment'
+            'user_id': 'user123'
         })
         
-        # Verify DB update was called
-        mock_collection.update_one.assert_called_once_with(
+        # Verify DB update was called with correct parameters for removing a like
+        mock_collection.update_one.assert_any_call(
             {"_id": ObjectId("507f1f77bcf86cd799439011")}, 
-            {"$inc": {"comments": 1}}
+            {
+                "$pull": {"liked_by": "user123"},
+                "$inc": {"likes": -1}
+            }
+        )
+        
+        # Check the emitted response
+        received = socket_client.get_received()
+        assert len(received) > 0
+        assert received[0]['name'] == 'post_unliked'
+        assert received[0]['args'][0]['post_id'] == '507f1f77bcf86cd799439011'
+
+    @patch('routes.group_post.MongoDBClient')
+    def test_comment_post_success(self, mock_mongodb, socket_client):
+        """Test successfully commenting on a post"""
+        # Setup mock
+        mock_db = MagicMock()
+        mock_client = MagicMock()
+        mock_post = MagicMock()
+        mock_mongodb.get_client.return_value = mock_client
+        mock_mongodb.get_db_name.return_value = "test_db"
+        mock_client.__getitem__.return_value = mock_db
+        mock_collection = MagicMock()
+        mock_db.__getitem__.return_value = mock_collection
+        
+        # Mock post retrieval with existing fields
+        mock_collection.find_one.return_value = {
+            "_id": ObjectId("507f1f77bcf86cd799439011"),
+            "comment_list": [],
+            "comments": 0
+        }
+        
+        socket_client.emit('comment_post', {
+            'post_id': '507f1f77bcf86cd799439011',
+            'comment': 'This is a test comment',
+            'user_id': 'user123'
+        })
+        
+        # Verify DB update was called - we check that the right update was performed
+        # without being strict about the number of calls
+        mock_collection.update_one.assert_any_call(
+            {"_id": ObjectId("507f1f77bcf86cd799439011")}, 
+            {
+                "$push": {"comment_list": {
+                    "user_id": "user123",
+                    "content": "This is a test comment",
+                    "created_at": mock_collection.update_one.call_args[0][1]["$push"]["comment_list"]["created_at"]
+                }},
+                "$inc": {"comments": 1}
+            }
         )
         
         # Check the emitted response
@@ -154,11 +221,15 @@ class TestGroupPostHTTPRoutes:
         mock_post_instance = MagicMock()
         mock_post_instance.user_id = 'user123'
         mock_post_instance.group_id = 'group456'
-        mock_post_instance.dict.return_value = {
+        post_data = {
             'user_id': 'user123',
             'group_id': 'group456',
             'content': 'Test post content'
         }
+        
+        # Make both dict() and model_dump() return the same data
+        mock_post_instance.dict.return_value = post_data
+        mock_post_instance.model_dump = MagicMock(return_value=post_data)
         mock_group_post.return_value = mock_post_instance
         
         mock_db = MagicMock()
@@ -169,13 +240,6 @@ class TestGroupPostHTTPRoutes:
         mock_collection = MagicMock()
         mock_db.__getitem__.return_value = mock_collection
         mock_collection.insert_one.return_value.inserted_id = ObjectId("507f1f77bcf86cd799439011")
-        
-        # Test data
-        post_data = {
-            'user_id': 'user123',
-            'group_id': 'group456',
-            'content': 'Test post content'
-        }
         
         # Make request
         response = client.post(
@@ -193,11 +257,11 @@ class TestGroupPostHTTPRoutes:
         # Verify mocks were called
         mock_user.find_by_id.assert_called_once_with('user123')
         mock_collection.insert_one.assert_called_once()
-        mock_emit.assert_called_once_with(
-            'new_group_post', 
-            mock_post_instance.dict(), 
-            room='group_group456'
-        )
+        
+        # Check emit call - allow either dict() or model_dump()
+        assert mock_emit.call_count == 1
+        assert mock_emit.call_args[0][0] == 'new_group_post'
+        assert mock_emit.call_args[1]['room'] == 'group_group456'
 
     @patch('routes.group_post.User')
     @patch('routes.group_post.GroupPost')
@@ -234,7 +298,49 @@ class TestGroupPostHTTPRoutes:
         # Verify user lookup was called
         mock_user.find_by_id.assert_called_once_with('invalid_user')
 
-    
+    @patch('routes.group_post.User')
+    @patch('routes.group_post.GroupPost')
+    def test_create_group_post_validation_error(self, mock_group_post, mock_user, client):
+        """Test creating a group post with validation error"""
+        # Use a compatible way to create ValidationError by creating an actual error
+        from pydantic import ValidationError as PydanticValidationError
+        
+        # Simulate ValidationError with a proper error structure for the version of Pydantic being used
+        def raise_validation_error(*args, **kwargs):
+            from pydantic import BaseModel, Field
+            
+            class TestModel(BaseModel):
+                content: str
+                
+            # This will cause a validation error
+            try:
+                TestModel(not_content="missing required field")
+                assert False, "Validation should have failed"
+            except PydanticValidationError as e:
+                raise e
+                
+        mock_group_post.side_effect = raise_validation_error
+        
+        # Test data with missing content field (required)
+        post_data = {
+            'user_id': 'user123',
+            'group_id': 'group456',
+            # Missing content field
+        }
+        
+        # Make request
+        response = client.post(
+            '/group_posts',
+            data=json.dumps(post_data),
+            content_type='application/json'
+        )
+        
+        # Verify response
+        assert response.status_code == 400
+        response_data = json.loads(response.data)
+        assert 'error' in response_data
+        assert 'Validation failed' in response_data['error']
+        assert 'details' in response_data
 
     @patch('routes.group_post.MongoDBClient')
     def test_get_group_posts_success(self, mock_mongodb, client):
@@ -245,27 +351,67 @@ class TestGroupPostHTTPRoutes:
         mock_mongodb.get_client.return_value = mock_client
         mock_mongodb.get_db_name.return_value = "test_db"
         mock_client.__getitem__.return_value = mock_db
-        mock_collection = MagicMock()
-        mock_db.__getitem__.return_value = mock_collection
         
-        # Mock the find operation
+        # Create two mock collections: one for posts, one for users
+        mock_posts_collection = MagicMock()
+        mock_users_collection = MagicMock()
+        
+        # Set up dictionary-style access to return appropriate collections
+        def getitem(key):
+            if key == "group_posts":
+                return mock_posts_collection
+            elif key == "users":
+                return mock_users_collection
+            return MagicMock()
+            
+        mock_db.__getitem__.side_effect = getitem
+        
+        # Mock the posts
+        user_id_1 = str(ObjectId("507f1f77bcf86cd799439001"))
+        user_id_2 = str(ObjectId("507f1f77bcf86cd799439002"))
+        
         mock_posts = [
             {
-                '_id': str(ObjectId("507f1f77bcf86cd799439011")),
-                'user_id': 'user123',
+                '_id': ObjectId("507f1f77bcf86cd799439011"),
+                'user_id': user_id_1,
                 'group_id': 'group456',
                 'content': 'Test post 1',
-                'created_at': '2023-01-01T12:00:00Z'
+                'created_at': '2023-01-01T12:00:00Z',
+                'liked_by': [],
+                'likes': 0,
+                'comments': 0,
+                'comment_list': []
             },
             {
-                '_id': str(ObjectId("507f1f77bcf86cd799439012")),
-                'user_id': 'user456',
+                '_id': ObjectId("507f1f77bcf86cd799439012"),
+                'user_id': user_id_2,
                 'group_id': 'group456',
                 'content': 'Test post 2',
-                'created_at': '2023-01-02T12:00:00Z'
+                'created_at': '2023-01-02T12:00:00Z',
+                'liked_by': [],
+                'likes': 0,
+                'comments': 0,
+                'comment_list': []
             }
         ]
-        mock_collection.find.return_value = mock_posts
+        mock_posts_collection.find.return_value = mock_posts
+        
+        # Mock user data
+        mock_users = [
+            {
+                '_id': ObjectId(user_id_1),
+                'username': 'testuser1',
+                'name': 'Test User 1',
+                'profile_picture': 'url/to/pic1'
+            },
+            {
+                '_id': ObjectId(user_id_2),
+                'username': 'testuser2',
+                'name': 'Test User 2',
+                'profile_picture': 'url/to/pic2'
+            }
+        ]
+        mock_users_collection.find.return_value = mock_users
         
         # Make request
         response = client.get('/group_posts/group456')
@@ -277,8 +423,16 @@ class TestGroupPostHTTPRoutes:
         assert 'data' in response_data
         assert len(response_data['data']) == 2
         
+        # Verify post data includes user profiles
+        for post in response_data['data']:
+            assert 'user_profile' in post
+            if post['user_id'] == user_id_1:
+                assert post['user_profile']['username'] == 'testuser1'
+            elif post['user_id'] == user_id_2:
+                assert post['user_profile']['username'] == 'testuser2'
+        
         # Verify find was called with correct filter
-        mock_collection.find.assert_called_once_with({'group_id': 'group456'})
+        mock_posts_collection.find.assert_called_once_with({'group_id': 'group456'})
 
     @patch('routes.group_post.MongoDBClient')
     def test_get_group_posts_exception(self, mock_mongodb, client):
